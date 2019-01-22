@@ -197,7 +197,7 @@ ElectronAnalyzer::beginJob()
 {
 
 mfile = new TFile("ElectronInfo.root","RECREATE");
-mtree = new TTree("mtree","electron information");
+mtree = new TTree("mtree","Electron information");
 
   mytree->Branch("electron_e",&electron_e);
   mytree->Branch("electron_pt",&electron_pt);
