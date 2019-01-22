@@ -109,9 +109,9 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
 	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
-	histo = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
+	photonhisto = fs->make <TH1D>("photonhisto", "Photon histo", 100, 0, 5000);
 
-	Input = iConfig.getParameter<edm::InputTag>("InputCollection");
+	InputphotonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
 
 }
 
