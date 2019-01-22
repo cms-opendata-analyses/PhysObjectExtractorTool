@@ -51,16 +51,16 @@ class MuonAnalyzer : public edm::EDAnalyzer {
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 //declare a function to do the muon analysis
-      void analyze1(const edm::Event& iEvent, const edm::Handle<reco::MuonCollection> &objeto);
+      void analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::MuonCollection> &muons);
 
 
-//se declara el input tag de tipo GsfElectronCollection         
-      edm::InputTag Input;
+//se declara el input tag de tipo MuonCollection         
+      edm::InputTag muonInput;
 
 	  // ----------member data ---------------------------
 
-	int numobjeto; //number of objeto in the event
-	TH1D *objetohisto;
+	int nummuon; //number of muons in the event
+	TH1D *muonhisto;
 	TH1D *hist_e;
 	TH1D *hist_pt;
 	TH1D *hist_px;
@@ -109,7 +109,7 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig)
 	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
-	objetohisto = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
+	histo = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
 
 	Input = iConfig.getParameter<edm::InputTag>("InputCollection");
 
@@ -135,10 +135,10 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
 
 
-   Handle<reco::MuonCollection> myobjeto;
-   iEvent.getByLabel(Input, myobjeto);
+   Handle<reco::MuonCollection> mymuons;
+   iEvent.getByLabel(muonInput, mymuons);
 
-   analyze1(iEvent,myobjeto);
+   analyzeMuons(iEvent,mymuons);
 
    mtree->Fill();
    return;
@@ -148,9 +148,9 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //************************************************************************
 
 void 
-MuonAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::MuonCollection> &objeto)
+MuonAnalyzer::analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::MuonCollection> &muons)
 {
-	  numobjeto = 0;
+	  nummuon = 0;
 	  _e.clear();
 	  _pt.clear();
 	  _px.clear();
@@ -161,8 +161,8 @@ MuonAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::MuonCol
 	  _ch.clear();
 
   if(objeto.isValid()){
-     // get the number of electrons in the event
-     numobjeto=(*objeto).size();
+     // get the number of muons in the event
+     nummuon=(*muons).size();
      objetohisto->Fill(objeto->size());
         for (reco::MuonCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
 
