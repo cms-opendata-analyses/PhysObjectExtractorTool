@@ -160,29 +160,29 @@ JetAnalyzer::analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJet
 	  _phi.clear();
 	  _ch.clear();
 
-  if(objeto.isValid()){
+  if(jets.isValid()){
      // get the number of jets in the event
      numjet=(*jets).size();
-     objetohisto->Fill(objeto->size());
-        for (reco::PFJetCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
+     jethisto->Fill(jets->size());
+        for (reco::PFJetCollection::const_iterator itjet=jets->begin(); itjet!=jets->end(); ++itjet){
 
-	    _e.push_back(itobjeto->energy());
-	    _pt.push_back(itobjeto->pt());
-	    _px.push_back(itobjeto->px());
-	    _py.push_back(itobjeto->py());
-	    _pz.push_back(itobjeto->pz());
-	    _eta.push_back(itobjeto->eta());
-	    _phi.push_back(itobjeto->phi());
-	    _ch.push_back(itobjeto->charge());
+	    _e.push_back(itjet->energy());
+	    _pt.push_back(itjet->pt());
+	    _px.push_back(itjet->px());
+	    _py.push_back(itjet->py());
+	    _pz.push_back(itjet->pz());
+	    _eta.push_back(itjet->eta());
+	    _phi.push_back(itjet->phi());
+	    _ch.push_back(itjet->charge());
 
-	    hist_e->Fill(itobjeto->energy());
-	    hist_pt->Fill(itobjeto->pt());
-	    hist_px->Fill(itobjeto->px());
-	    hist_py->Fill(itobjeto->py());
-	    hist_pz->Fill(itobjeto->pz());
-	    hist_eta->Fill(itobjeto->eta());
-	    hist_phi->Fill(itobjeto->phi());
-	    hist_ch->Fill(itobjeto->charge());
+	    hist_e->Fill(itjet->energy());
+	    hist_pt->Fill(itjet->pt());
+	    hist_px->Fill(itjet->px());
+	    hist_py->Fill(itjet->py());
+	    hist_pz->Fill(itjet->pz());
+	    hist_eta->Fill(itjet->eta());
+	    hist_phi->Fill(itjet->phi());
+	    hist_ch->Fill(itjet->charge());
 
         }
   }
@@ -196,17 +196,17 @@ void
 JetAnalyzer::beginJob()
 {
 
-mfile = new TFile("ObjetoInfo.root","RECREATE");
-mtree = new TTree("mtree","Objeto information");
+mfile = new TFile("JetInfo.root","RECREATE");
+mtree = new TTree("mtree","Jet information");
 
-  mytree->Branch("_e",&_e);
-  mytree->Branch("_pt",&_pt);
-  mytree->Branch("_px",&_px);
-  mytree->Branch("_py",&_py);
-  mytree->Branch("_pz",&_pz);
-  mytree->Branch("_eta",&_eta);
-  mytree->Branch("_phi",&_phi);
-  mytree->Branch("_ch",&_ch);
+  mytree->Branch("jet_e",&_e);
+  mytree->Branch("jet_pt",&_pt);
+  mytree->Branch("jet_px",&_px);
+  mytree->Branch("jet_py",&_py);
+  mytree->Branch("jet_pz",&_pz);
+  mytree->Branch("jet_eta",&_eta);
+  mytree->Branch("jet_phi",&_phi);
+  mytree->Branch("jet_ch",&_ch);
 
 }
 
