@@ -160,29 +160,29 @@ MuonAnalyzer::analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::Muo
 	  _phi.clear();
 	  _ch.clear();
 
-  if(objeto.isValid()){
+  if(muons.isValid()){
      // get the number of muons in the event
      nummuon=(*muons).size();
-     objetohisto->Fill(objeto->size());
-        for (reco::MuonCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
+     muonhisto->Fill(muons->size());
+        for (reco::MuonCollection::const_iterator itmuon=muons->begin(); itmuon!=muons->end(); ++itmuon){
 
-	    _e.push_back(itobjeto->energy());
-	    _pt.push_back(itobjeto->pt());
-	    _px.push_back(itobjeto->px());
-	    _py.push_back(itobjeto->py());
-	    _pz.push_back(itobjeto->pz());
-	    _eta.push_back(itobjeto->eta());
-	    _phi.push_back(itobjeto->phi());
-	    _ch.push_back(itobjeto->charge());
+	    _e.push_back(itmuon->energy());
+	    _pt.push_back(itmuon->pt());
+	    _px.push_back(itmuon->px());
+	    _py.push_back(itmuon->py());
+	    _pz.push_back(itmuon->pz());
+	    _eta.push_back(itmuon->eta());
+	    _phi.push_back(itmuon->phi());
+	    _ch.push_back(itmuon->charge());
 
-	    hist_e->Fill(itobjeto->energy());
-	    hist_pt->Fill(itobjeto->pt());
-	    hist_px->Fill(itobjeto->px());
-	    hist_py->Fill(itobjeto->py());
-	    hist_pz->Fill(itobjeto->pz());
-	    hist_eta->Fill(itobjeto->eta());
-	    hist_phi->Fill(itobjeto->phi());
-	    hist_ch->Fill(itobjeto->charge());
+	    hist_e->Fill(itmuon->energy());
+	    hist_pt->Fill(itmuon->pt());
+	    hist_px->Fill(itmuon->px());
+	    hist_py->Fill(itmuon->py());
+	    hist_pz->Fill(itmuon->pz());
+	    hist_eta->Fill(itmuon->eta());
+	    hist_phi->Fill(itmuon->phi());
+	    hist_ch->Fill(itmuon->charge());
 
         }
   }
@@ -196,17 +196,17 @@ void
 MuonAnalyzer::beginJob()
 {
 
-mfile = new TFile("ObjetoInfo.root","RECREATE");
-mtree = new TTree("mtree","Objeto information");
+mfile = new TFile("MuonInfo.root","RECREATE");
+mtree = new TTree("mtree","Muon information");
 
-  mytree->Branch("_e",&_e);
-  mytree->Branch("_pt",&_pt);
-  mytree->Branch("_px",&_px);
-  mytree->Branch("_py",&_py);
-  mytree->Branch("_pz",&_pz);
-  mytree->Branch("_eta",&_eta);
-  mytree->Branch("_phi",&_phi);
-  mytree->Branch("_ch",&_ch);
+  mytree->Branch("muon_e",&_e);
+  mytree->Branch("muon_pt",&_pt);
+  mytree->Branch("muon_px",&_px);
+  mytree->Branch("muon_py",&_py);
+  mytree->Branch("muon_pz",&_pz);
+  mytree->Branch("muon_eta",&_eta);
+  mytree->Branch("muon_phi",&_phi);
+  mytree->Branch("muon_ch",&_ch);
 
 }
 
