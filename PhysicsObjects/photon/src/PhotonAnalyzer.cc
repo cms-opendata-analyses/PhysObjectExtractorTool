@@ -50,17 +50,17 @@ class PhotonAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-//declare a function to do the muon analysis
-      void analyze1(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &objeto);
+//declare a function to do the photon analysis
+      void analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &photons);
 
 
-//se declara el input tag de tipo GsfElectronCollection         
-      edm::InputTag Input;
+//se declara el input tag de tipo PhotonCollection         
+      edm::InputTag photonInput;
 
 	  // ----------member data ---------------------------
 
-	int numobjeto; //number of objeto in the event
-	TH1D *objetohisto;
+	int numphoton; //number of photons in the event
+	TH1D *photonhisto;
 	TH1D *hist_e;
 	TH1D *hist_pt;
 	TH1D *hist_px;
@@ -109,7 +109,7 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
 	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
-	objetohisto = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
+	histo = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
 
 	Input = iConfig.getParameter<edm::InputTag>("InputCollection");
 
@@ -135,10 +135,10 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
 
 
-   Handle<reco::PhotonCollection> myobjeto;
-   iEvent.getByLabel(Input, myobjeto);
+   Handle<reco::PhotonCollection> myphotons;
+   iEvent.getByLabel(photonInput, myphotons);
 
-   analyze1(iEvent,myobjeto);
+   analyze1Photons(iEvent,myphotons);
 
    mtree->Fill();
    return;
@@ -148,9 +148,9 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //************************************************************************
 
 void 
-PhotonAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &objeto)
+PhotonAnalyzer::analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &photons)
 {
-	  numobjeto = 0;
+	  numphoton = 0;
 	  _e.clear();
 	  _pt.clear();
 	  _px.clear();
@@ -161,8 +161,8 @@ PhotonAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::Photo
 	  _ch.clear();
 
   if(objeto.isValid()){
-     // get the number of electrons in the event
-     numobjeto=(*objeto).size();
+     // get the number of photons in the event
+     numphoton=(*photons).size();
      objetohisto->Fill(objeto->size());
         for (reco::PhotonCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
 
