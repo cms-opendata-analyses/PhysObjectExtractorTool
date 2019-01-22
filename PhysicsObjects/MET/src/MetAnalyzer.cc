@@ -50,23 +50,23 @@ class MetAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-//declare a function to do the muon analysis
-      void analyze1(const edm::Event& iEvent, const edm::Handle<reco::PFMETCollection> &mets);
+//declare a function to do the met analysis
+      void analyzeMets(const edm::Event& iEvent, const edm::Handle<reco::PFMETCollection> &mets);
 
 
 //se declara el input tag de tipo PFMETCollection         
-      edm::InputTag Input;
+      edm::InputTag metInput;
 
 	  // ----------member data ---------------------------
 
-	int numobjeto; //number of objeto in the event
+	int nummet; //number of mets in the event
 	TH1D *methisto;
 	TH1D *hist_e;
 	TH1D *hist_pt;
 	TH1D *hist_px;
 	TH1D *hist_py;
-	TH1D *hist_pz;
-	TH1D *hist_eta;
+	//TH1D *hist_pz;
+	//TH1D *hist_eta;
 	TH1D *hist_phi;
 	TH1D *hist_ch;
 	TFile *mfile;
@@ -76,8 +76,8 @@ class MetAnalyzer : public edm::EDAnalyzer {
   	std::vector<float> _pt;
   	std::vector<float> _px;
   	std::vector<float> _py;
-  	std::vector<float> _pz;
-  	std::vector<float> _eta;
+  	//std::vector<float> _pz;
+  	//std::vector<float> _eta;
   	std::vector<float> _phi;
   	std::vector<float> _ch;
 };
@@ -105,13 +105,13 @@ MetAnalyzer::MetAnalyzer(const edm::ParameterSet& iConfig)
 	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
 	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
 	hist_py = fs->make <TH1D>("hist_py", "Electron py ", 100, 0, 5000 );
-	hist_pz = fs->make <TH1D>("hist_pz", "Electron pz ", 100, 0, 5000 );
-	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
+	//hist_pz = fs->make <TH1D>("hist_pz", "Electron pz ", 100, 0, 5000 );
+	//hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
-	objetohisto = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
+	histo = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
 
-	Input = iConfig.getParameter<edm::InputTag>("InputCollection");
+	nput = iConfig.getParameter<edm::InputTag>("InputCollection");
 
 }
 
@@ -136,9 +136,9 @@ MetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
    Handle<reco::PFMETCollection> mymets;
-   iEvent.getByLabel(Input, mymets);
+   iEvent.getByLabel(metInput, mymets);
 
-   analyze1(iEvent,mymets);
+   analyzeMets(iEvent,mymets);
 
    mtree->Fill();
    return;
@@ -148,21 +148,21 @@ MetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //************************************************************************
 
 void 
-MetAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::PFMETCollection> &objeto)
+MetAnalyzer::analyzeMets(const edm::Event& iEvent, const edm::Handle<reco::PFMETCollection> &mets)
 {
-	  numobjeto = 0;
+	  nummet = 0;
 	  _e.clear();
 	  _pt.clear();
 	  _px.clear();
 	  _py.clear();
-	  _pz.clear();
-	  _eta.clear();
+	  //_pz.clear();
+	  //_eta.clear();
 	  _phi.clear();
 	  _ch.clear();
 
   if(objeto.isValid()){
-     // get the number of electrons in the event
-     numobjeto=(*objeto).size();
+     // get the number of mets in the event
+     nummet=(*objeto).size();
      objetohisto->Fill(objeto->size());
         for (reco::PFMETCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
 
