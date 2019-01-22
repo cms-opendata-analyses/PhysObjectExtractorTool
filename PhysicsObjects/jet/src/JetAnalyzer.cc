@@ -50,17 +50,17 @@ class JetAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-//declare a function to do the muon analysis
-      void analyze1(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &objeto);
+//declare a function to do the jet analysis
+      void analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets);
 
 
-//se declara el input tag de tipo GsfElectronCollection         
-      edm::InputTag Input;
+//se declara el input tag de tipo PFJetCollection         
+      edm::InputTag jetInput;
 
 	  // ----------member data ---------------------------
 
-	int numobjeto; //number of objeto in the event
-	TH1D *objetohisto;
+	int numjet; //number of jets in the event
+	TH1D *jethisto;
 	TH1D *hist_e;
 	TH1D *hist_pt;
 	TH1D *hist_px;
@@ -109,7 +109,7 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
 	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
-	objetohisto = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
+	histo = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
 
 	Input = iConfig.getParameter<edm::InputTag>("InputCollection");
 
@@ -135,10 +135,10 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
 
 
-   Handle<reco::PFJetCollection> myobjeto;
-   iEvent.getByLabel(Input, myobjeto);
+   Handle<reco::PFJetCollection> myjets;
+   iEvent.getByLabel(jetInput, myjets);
 
-   analyze1(iEvent,myobjeto);
+   analyzeJets(iEvent,myjets);
 
    mtree->Fill();
    return;
@@ -148,9 +148,9 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //************************************************************************
 
 void 
-JetAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &objeto)
+JetAnalyzer::analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets)
 {
-	  numobjeto = 0;
+	  numjet = 0;
 	  _e.clear();
 	  _pt.clear();
 	  _px.clear();
@@ -161,8 +161,8 @@ JetAnalyzer::analyze1(const edm::Event& iEvent, const edm::Handle<reco::PFJetCol
 	  _ch.clear();
 
   if(objeto.isValid()){
-     // get the number of electrons in the event
-     numobjeto=(*objeto).size();
+     // get the number of jets in the event
+     numjet=(*jets).size();
      objetohisto->Fill(objeto->size());
         for (reco::PFJetCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
 
