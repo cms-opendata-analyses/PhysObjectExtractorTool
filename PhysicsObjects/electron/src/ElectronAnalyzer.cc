@@ -50,7 +50,7 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-//declare a function to do the muon analysis
+//declare a function to do the electron analysis
       void analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons);
 
 
@@ -128,7 +128,7 @@ ElectronAnalyzer::~ElectronAnalyzer()
 //
 
 // ------------ method called for each event  ------------
-void
+void 
 ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
