@@ -109,9 +109,9 @@ MetAnalyzer::MetAnalyzer(const edm::ParameterSet& iConfig)
 	//hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
-	histo = fs->make <TH1D>("objetohisto", "objeto histo", 100, 0, 5000);
+	histo = fs->make <TH1D>("methisto", "Met histo", 100, 0, 5000);
 
-	nput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	put = iConfig.getParameter<edm::InputTag>("InputCollection");
 
 }
 
