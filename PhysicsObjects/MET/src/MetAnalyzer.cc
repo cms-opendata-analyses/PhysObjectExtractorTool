@@ -160,29 +160,29 @@ MetAnalyzer::analyzeMets(const edm::Event& iEvent, const edm::Handle<reco::PFMET
 	  _phi.clear();
 	  _ch.clear();
 
-  if(objeto.isValid()){
+  if(mets.isValid()){
      // get the number of mets in the event
-     nummet=(*objeto).size();
-     objetohisto->Fill(objeto->size());
-        for (reco::PFMETCollection::const_iterator itobjeto=objeto->begin(); itobjeto!=objeto->end(); ++itobjeto){
+     nummet=(*mets).size();
+     methisto->Fill(mets->size());
+        for (reco::PFMETCollection::const_iterator itmet=mets->begin(); itmet!=mets->end(); ++itmet){
 
-	    _e.push_back(itobjeto->energy());
-	    _pt.push_back(itobjeto->pt());
-	    _px.push_back(itobjeto->px());
-	    _py.push_back(itobjeto->py());
-	    _pz.push_back(itobjeto->pz());
-	    _eta.push_back(itobjeto->eta());
-	    _phi.push_back(itobjeto->phi());
-	    _ch.push_back(itobjeto->charge());
+	    _e.push_back(itmet->energy());
+	    _pt.push_back(itmet->pt());
+	    _px.push_back(itmet->px());
+	    _py.push_back(itmet->py());
+	    //_pz.push_back(itmet->pz());
+	    //_eta.push_back(itmet->eta());
+	    _phi.push_back(itmet->phi());
+	    _ch.push_back(itmet->charge());
 
-	    hist_e->Fill(itobjeto->energy());
-	    hist_pt->Fill(itobjeto->pt());
-	    hist_px->Fill(itobjeto->px());
-	    hist_py->Fill(itobjeto->py());
-	    hist_pz->Fill(itobjeto->pz());
-	    hist_eta->Fill(itobjeto->eta());
-	    hist_phi->Fill(itobjeto->phi());
-	    hist_ch->Fill(itobjeto->charge());
+	    hist_e->Fill(itmet->energy());
+	    hist_pt->Fill(itmet->pt());
+	    hist_px->Fill(itmet->px());
+	    hist_py->Fill(itmet->py());
+	    //hist_pz->Fill(itmet->pz());
+	    //hist_eta->Fill(itmet->eta());
+	    hist_phi->Fill(itmet->phi());
+	    hist_ch->Fill(itmet->charge());
 
         }
   }
@@ -196,17 +196,17 @@ void
 MetAnalyzer::beginJob()
 {
 
-mfile = new TFile("ObjetoInfo.root","RECREATE");
-mtree = new TTree("mtree","PFMET information");
+mfile = new TFile("MetInfo.root","RECREATE");
+mtree = new TTree("mtree","Met information");
 
-  mytree->Branch("_e",&_e);
-  mytree->Branch("_pt",&_pt);
-  mytree->Branch("_px",&_px);
-  mytree->Branch("_py",&_py);
-  mytree->Branch("_pz",&_pz);
-  mytree->Branch("_eta",&_eta);
-  mytree->Branch("_phi",&_phi);
-  mytree->Branch("_ch",&_ch);
+  mytree->Branch("met_e",&_e);
+  mytree->Branch("met_pt",&_pt);
+  mytree->Branch("met_px",&_px);
+  mytree->Branch("met_py",&_py);
+  //mytree->Branch("met_pz",&_pz);
+  //mytree->Branch("met_eta",&_eta);
+  mytree->Branch("met_phi",&_phi);
+  mytree->Branch("met_ch",&_ch);
 
 }
 
