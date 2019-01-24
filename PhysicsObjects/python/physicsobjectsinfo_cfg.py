@@ -13,7 +13,9 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-process.demo = cms.EDAnalyzer('ElectronAnalyzer',InputCollection = cms.InputTag("gsfElectrons")
+process.demo = cms.EDAnalyzer('ElectronAnalyzer'
+                              ,
+                              InputCollection = cms.InputTag("gsfElectrons")
 )
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
 process.TFileService = cms.Service("TFileService",
