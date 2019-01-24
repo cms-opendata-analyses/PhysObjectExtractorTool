@@ -316,9 +316,9 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    iEvent.getByLabel(muonInput, mymuons);
    analyzeMuons(iEvent,mymuons);
 	
-	Handle<reco::PhotonCollection> myphotons;
+Handle<reco::PhotonCollection> myphotons;
    iEvent.getByLabel(photonInput, myphotons);
-   analyzePhotons(iEvent,myphotons);
+   analyzePhotons(iEvent,myphotons);	
 
    mtree->Fill();
    return;
