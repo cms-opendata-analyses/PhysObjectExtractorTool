@@ -100,15 +100,15 @@ MetAnalyzer::MetAnalyzer(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
 	edm::Service<TFileService> fs;
 
-// se crean los histogramas
-	hist_e = fs->make <TH1D>("hist_energy", "Electron energy", 100, 0, 5000);
-	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
-	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
-	hist_py = fs->make <TH1D>("hist_py", "Electron py ", 100, 0, 5000 );
-	//hist_pz = fs->make <TH1D>("hist_pz", "Electron pz ", 100, 0, 5000 );
-	//hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
-	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
-	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
+// se crean los met histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Met energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Met pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Met px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Met py ", 100, 0, 5000 );
+	//hist_pz = fs->make <TH1D>("hist_pz", "Met pz ", 100, 0, 5000 );
+	//hist_eta = fs->make <TH1D>("hist_eta", "Met eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Met phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Met ch ", 100,0,5000 );
 	methisto = fs->make <TH1D>("methisto", "Met histo", 100, 0, 5000);
 
 	metInput = iConfig.getParameter<edm::InputTag>("InputCollection");
