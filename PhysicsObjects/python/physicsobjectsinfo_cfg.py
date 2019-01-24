@@ -4,7 +4,7 @@ process = cms.Process("Demo")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(25) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
@@ -14,9 +14,12 @@ process.source = cms.Source("PoolSource",
 )
 
 process.demo = cms.EDAnalyzer('ElectronAnalyzer'
-                              ,
-                              InputCollection = cms.InputTag("gsfElectrons")
-)
+                              ,ElectronsInputCollection = cms.InputTag("gsfElectrons")
+                              ,JetInputCollection = cms.InputTag("ak5PFJets")
+                              ,MetInputCollection = cms.InputTag("pfMet")
+                              ,MuonInputCollection = cms.InputTag("muons")
+                              ,PhotonInputCollection = cms.InputTag("photons")
+                             )
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
 process.TFileService = cms.Service("TFileService",
               fileName = cms.string('histo.root')
