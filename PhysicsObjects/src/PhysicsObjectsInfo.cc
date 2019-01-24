@@ -541,50 +541,50 @@ PhysicsObjectsInfo::beginJob()
 mfile = new TFile("ObjectsInfo.root","RECREATE");
 mtree = new TTree("mtree","Objects information");
 	
-  mytree->Branch("electron_e",&electron_e);
-  mytree->Branch("electron_pt",&electron_pt);
-  mytree->Branch("electron_px",&electron_px);
-  mytree->Branch("electron_py",&electron_py);
-  mytree->Branch("electron_pz",&electron_pz);
-  mytree->Branch("electron_eta",&electron_eta);
-  mytree->Branch("electron_phi",&electron_phi);
-  mytree->Branch("electron_ch",&electron_ch);
+  mtree->Branch("electron_e",&electron_e);
+  mtree->Branch("electron_pt",&electron_pt);
+  mtree->Branch("electron_px",&electron_px);
+  mtree->Branch("electron_py",&electron_py);
+  mtree->Branch("electron_pz",&electron_pz);
+  mtree->Branch("electron_eta",&electron_eta);
+  mtree->Branch("electron_phi",&electron_phi);
+  mtree->Branch("electron_ch",&electron_ch);
 	
-  mytree->Branch("jet_e",&jet_e);
-  mytree->Branch("jet_pt",&jet_pt);
-  mytree->Branch("jet_px",&jet_px);
-  mytree->Branch("jet_py",&jet_py);
-  mytree->Branch("jet_pz",&jet_pz);
-  mytree->Branch("jet_eta",&jet_eta);
-  mytree->Branch("jet_phi",&jet_phi);
-  mytree->Branch("jet_ch",&jet_ch);
+  mtree->Branch("jet_e",&jet_e);
+  mtree->Branch("jet_pt",&jet_pt);
+  mtree->Branch("jet_px",&jet_px);
+  mtree->Branch("jet_py",&jet_py);
+  mtree->Branch("jet_pz",&jet_pz);
+  mtree->Branch("jet_eta",&jet_eta);
+  mtree->Branch("jet_phi",&jet_phi);
+  mtree->Branch("jet_ch",&jet_ch);
 
-  mytree->Branch("met_e",&met_e);
-  mytree->Branch("met_pt",&met_pt);
-  mytree->Branch("met_px",&met_px);
-  mytree->Branch("met_py",&met_py);
-  //mytree->Branch("met_pz",&met_pz);
-  //mytree->Branch("met_eta",&met_eta);
-  mytree->Branch("met_phi",&met_phi);
-  mytree->Branch("met_ch",&met_ch);	
+  mtree->Branch("met_e",&met_e);
+  mtree->Branch("met_pt",&met_pt);
+  mtree->Branch("met_px",&met_px);
+  mtree->Branch("met_py",&met_py);
+  //mtree->Branch("met_pz",&met_pz);
+  //mtree->Branch("met_eta",&met_eta);
+  mtree->Branch("met_phi",&met_phi);
+  mtree->Branch("met_ch",&met_ch);	
 	
-  mytree->Branch("muon_e",&muon_e);
-  mytree->Branch("muon_pt",&muon_pt);
-  mytree->Branch("muon_px",&muon_px);
-  mytree->Branch("muon_py",&muon_py);
-  mytree->Branch("muon_pz",&muon_pz);
-  mytree->Branch("muon_eta",&muon_eta);
-  mytree->Branch("muon_phi",&muon_phi);
-  mytree->Branch("muon_ch",&muon_ch);	
+  mtree->Branch("muon_e",&muon_e);
+  mtree->Branch("muon_pt",&muon_pt);
+  mtree->Branch("muon_px",&muon_px);
+  mtree->Branch("muon_py",&muon_py);
+  mtree->Branch("muon_pz",&muon_pz);
+  mtree->Branch("muon_eta",&muon_eta);
+  mtree->Branch("muon_phi",&muon_phi);
+  mtree->Branch("muon_ch",&muon_ch);	
 	
-  mytree->Branch("photon_e",&photon_e);
-  mytree->Branch("photon_pt",&photon_pt);
-  mytree->Branch("photon_px",&photon_px);
-  mytree->Branch("photon_py",&photon_py);
-  mytree->Branch("photon_pz",&photon_pz);
-  mytree->Branch("photon_eta",&photon_eta);
-  mytree->Branch("photon_phi",&photon_phi);
-  mytree->Branch("photon_ch",&photon_ch);	
+  mtree->Branch("photon_e",&photon_e);
+  mtree->Branch("photon_pt",&photon_pt);
+  mtree->Branch("photon_px",&photon_px);
+  mtree->Branch("photon_py",&photon_py);
+  mtree->Branch("photon_pz",&photon_pz);
+  mtree->Branch("photon_eta",&photon_eta);
+  mtree->Branch("photon_phi",&photon_phi);
+  mtree->Branch("photon_ch",&photon_ch);	
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
