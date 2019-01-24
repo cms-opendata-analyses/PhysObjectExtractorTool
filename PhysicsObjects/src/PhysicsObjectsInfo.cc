@@ -20,7 +20,7 @@
 
 //classes to extract jet information
 #include "DataFormats/JetReco/interface/PFJet.h"
-#include "DataFormats/JetReco/interface/PFJetFwd.h"
+#include "DataFormats/JetReco/interface/PFJetfwd.h"
 
 //classes to extract met information
 #include "DataFormats/METReco/interface/PFMET.h"
