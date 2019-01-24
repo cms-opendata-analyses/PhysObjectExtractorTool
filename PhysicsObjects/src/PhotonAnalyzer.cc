@@ -100,15 +100,15 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
 	edm::Service<TFileService> fs;
 
-// se crean los histogramas
-	hist_e = fs->make <TH1D>("hist_energy", "Electron energy", 100, 0, 5000);
-	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
-	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
-	hist_py = fs->make <TH1D>("hist_py", "Electron py ", 100, 0, 5000 );
-	hist_pz = fs->make <TH1D>("hist_pz", "Electron pz ", 100, 0, 5000 );
-	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
-	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
-	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
+// se crean los photon histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Photon energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Photon pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Photon px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Photon py ", 100, 0, 5000 );
+	hist_pz = fs->make <TH1D>("hist_pz", "Photon pz ", 100, 0, 5000 );
+	hist_eta = fs->make <TH1D>("hist_eta", "Photon eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Photon phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Photon ch ", 100,0,5000 );
 	photonhisto = fs->make <TH1D>("photonhisto", "Photon histo", 100, 0, 5000);
 
 	photonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
@@ -138,7 +138,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<reco::PhotonCollection> myphotons;
    iEvent.getByLabel(photonInput, myphotons);
 
-   analyze1Photons(iEvent,myphotons);
+   analyzePhotons(iEvent,myphotons);
 
    mtree->Fill();
    return;
