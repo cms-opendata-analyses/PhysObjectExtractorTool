@@ -100,7 +100,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
 	edm::Service<TFileService> fs;
 
-// se crean los histogramas
+// se crean los electron histogramas
 	hist_e = fs->make <TH1D>("hist_energy", "Electron energy", 100, 0, 5000);
 	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
 	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
