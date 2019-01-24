@@ -66,23 +66,87 @@ class PhysicsObjectsInfo : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+	
+//declare a function to do the electron analysis
+      void analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons);	
+
 //declare a function to do the jet analysis
       void analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets);
+	
+//declare a function to do the met analysis
+      void analyzeMets(const edm::Event& iEvent, const edm::Handle<reco::PFMETCollection> &mets);	
 
+//declare a function to do the muon analysis
+      void analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::MuonCollection> &muons);
 
+//declare a function to do the photon analysis
+      void analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &photons);
+	
+//se declara el input tag de tipo GsfElectronCollection         
+      edm::InputTag electronInput;
 //se declara el input tag de tipo PFJetCollection         
       edm::InputTag jetInput;
+//se declara el input tag de tipo PFMETCollection         
+      edm::InputTag metInput;
+//se declara el input tag de tipo MuonCollection         
+      edm::InputTag muonInput;
+//se declara el input tag de tipo PhotonCollection         
+      edm::InputTag photonInput;	
 
-	  // ----------member data ---------------------------
+// ----------electron member data ---------------------------
+	int numelectron; //number of electrons in the event
+	TH1D *elechisto;
+	TH1D *electronhist_e;
+	TH1D *electronhist_pt;
+	TH1D *electronhist_px;
+	TH1D *electronhist_py;
+	TH1D *electronhist_pz;
+	TH1D *electronhist_eta;
+	TH1D *electronhist_phi;
+	TH1D *electronhist_ch;
+	TFile *mfile;
+	TTree *mtree;
+	std::vector<float> electron_e;
+  	std::vector<float> electron_pt;
+  	std::vector<float> electron_px;
+  	std::vector<float> electron_py;
+  	std::vector<float> electron_pz;
+  	std::vector<float> electron_eta;
+  	std::vector<float> electron_phi;
+  	std::vector<float> electron_ch;	
 
+// ----------jet member data ---------------------------
 	int numjet; //number of jets in the event
 	TH1D *jethisto;
+	TH1D *jethist_e;
+	TH1D *jethist_pt;
+	TH1D *jethist_px;
+	TH1D *jethist_py;
+	TH1D *jethist_pz;
+	TH1D *jethist_eta;
+	TH1D *jethist_phi;
+	TH1D *jethist_ch;
+	//TFile *mfile;
+	//TTree *mtree;
+	std::vector<float> jet_e;
+  	std::vector<float> jet_pt;
+  	std::vector<float> jet_px;
+  	std::vector<float> jet_py;
+  	std::vector<float> jet_pz;
+  	std::vector<float> jet_eta;
+  	std::vector<float> jet_phi;
+  	std::vector<float> jet_ch;
+	
+// ----------met member data ---------------------------
+
+	int nummet; //number of mets in the event
+	TH1D *methisto;
 	TH1D *hist_e;
 	TH1D *hist_pt;
 	TH1D *hist_px;
 	TH1D *hist_py;
-	TH1D *hist_pz;
-	TH1D *hist_eta;
+	//TH1D *hist_pz;
+	//TH1D *hist_eta;
 	TH1D *hist_phi;
 	TH1D *hist_ch;
 	TFile *mfile;
@@ -92,10 +156,10 @@ class PhysicsObjectsInfo : public edm::EDAnalyzer {
   	std::vector<float> _pt;
   	std::vector<float> _px;
   	std::vector<float> _py;
-  	std::vector<float> _pz;
-  	std::vector<float> _eta;
+  	//std::vector<float> _pz;
+  	//std::vector<float> _eta;
   	std::vector<float> _phi;
-  	std::vector<float> _ch;
+  	std::vector<float> _ch;	
 };
 
 //
