@@ -278,7 +278,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	jetInput = iConfig.getParameter<edm::InputTag>("JetInputCollection");
 	metInput = iConfig.getParameter<edm::InputTag>("MetInputCollection");
 	muonInput = iConfig.getParameter<edm::InputTag>("MuonInputCollection");
-	photonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	photonInput = iConfig.getParameter<edm::InputTag>("PhotonInputCollection");
 }
 
 
