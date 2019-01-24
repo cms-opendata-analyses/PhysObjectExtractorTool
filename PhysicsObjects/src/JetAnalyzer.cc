@@ -16,7 +16,7 @@
 
 //classes to extract PFJet information
 #include "DataFormats/JetReco/interface/PFJet.h"
-#include "DataFormats/JetReco/interface/PFJetFwd.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 
 //classes to save data
 #include "TTree.h"
@@ -199,14 +199,14 @@ JetAnalyzer::beginJob()
 mfile = new TFile("JetInfo.root","RECREATE");
 mtree = new TTree("mtree","Jet information");
 
-  mytree->Branch("jet_e",&_e);
-  mytree->Branch("jet_pt",&_pt);
-  mytree->Branch("jet_px",&_px);
-  mytree->Branch("jet_py",&_py);
-  mytree->Branch("jet_pz",&_pz);
-  mytree->Branch("jet_eta",&_eta);
-  mytree->Branch("jet_phi",&_phi);
-  mytree->Branch("jet_ch",&_ch);
+  mtree->Branch("jet_e",&_e);
+  mtree->Branch("jet_pt",&_pt);
+  mtree->Branch("jet_px",&_px);
+  mtree->Branch("jet_py",&_py);
+  mtree->Branch("jet_pz",&_pz);
+  mtree->Branch("jet_eta",&_eta);
+  mtree->Branch("jet_phi",&_phi);
+  mtree->Branch("jet_ch",&_ch);
 
 }
 
