@@ -199,14 +199,14 @@ MetAnalyzer::beginJob()
 mfile = new TFile("MetInfo.root","RECREATE");
 mtree = new TTree("mtree","Met information");
 
-  mytree->Branch("met_e",&_e);
-  mytree->Branch("met_pt",&_pt);
-  mytree->Branch("met_px",&_px);
-  mytree->Branch("met_py",&_py);
-  //mytree->Branch("met_pz",&_pz);
-  //mytree->Branch("met_eta",&_eta);
-  mytree->Branch("met_phi",&_phi);
-  mytree->Branch("met_ch",&_ch);
+  mtree->Branch("met_e",&_e);
+  mtree->Branch("met_pt",&_pt);
+  mtree->Branch("met_px",&_px);
+  mtree->Branch("met_py",&_py);
+  //mtree->Branch("met_pz",&_pz);
+  //mtree->Branch("met_eta",&_eta);
+  mtree->Branch("met_phi",&_phi);
+  mtree->Branch("met_ch",&_ch);
 
 }
 
