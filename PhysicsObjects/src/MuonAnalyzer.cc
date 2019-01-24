@@ -199,14 +199,14 @@ MuonAnalyzer::beginJob()
 mfile = new TFile("MuonInfo.root","RECREATE");
 mtree = new TTree("mtree","Muon information");
 
-  mytree->Branch("muon_e",&_e);
-  mytree->Branch("muon_pt",&_pt);
-  mytree->Branch("muon_px",&_px);
-  mytree->Branch("muon_py",&_py);
-  mytree->Branch("muon_pz",&_pz);
-  mytree->Branch("muon_eta",&_eta);
-  mytree->Branch("muon_phi",&_phi);
-  mytree->Branch("muon_ch",&_ch);
+  mtree->Branch("muon_e",&_e);
+  mtree->Branch("muon_pt",&_pt);
+  mtree->Branch("muon_px",&_px);
+  mtree->Branch("muon_py",&_py);
+  mtree->Branch("muon_pz",&_pz);
+  mtree->Branch("muon_eta",&_eta);
+  mtree->Branch("muon_phi",&_phi);
+  mtree->Branch("muon_ch",&_ch);
 
 }
 
