@@ -100,15 +100,15 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
 	edm::Service<TFileService> fs;
 
-// se crean los histogramas
-	hist_e = fs->make <TH1D>("hist_energy", "Electron energy", 100, 0, 5000);
-	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
-	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
-	hist_py = fs->make <TH1D>("hist_py", "Electron py ", 100, 0, 5000 );
-	hist_pz = fs->make <TH1D>("hist_pz", "Electron pz ", 100, 0, 5000 );
-	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
-	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
-	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
+// se crean los jet histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Jet energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Jet pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Jet px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Jet py ", 100, 0, 5000 );
+	hist_pz = fs->make <TH1D>("hist_pz", "Jet pz ", 100, 0, 5000 );
+	hist_eta = fs->make <TH1D>("hist_eta", "Jet eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Jet phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Jet ch ", 100,0,5000 );
 	jethisto = fs->make <TH1D>("jethisto", "Jet histo", 100, 0, 5000);
 
 	jetInput = iConfig.getParameter<edm::InputTag>("InputCollection");
