@@ -169,7 +169,7 @@ class PhysicsObjectsInfo : public edm::EDAnalyzer {
 	TH1D *muonhist_pz;
 	TH1D *muonhist_eta;
 	TH1D *muonhist_phi;
-	TH1D *hist_ch;
+	TH1D *muonhist_ch;
 	//TFile *mfile;
 	//TTree *mtree;
 	std::vector<float> muon_e;
