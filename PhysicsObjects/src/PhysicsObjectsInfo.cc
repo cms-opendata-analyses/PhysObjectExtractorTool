@@ -138,28 +138,71 @@ class PhysicsObjectsInfo : public edm::EDAnalyzer {
   	std::vector<float> jet_ch;
 	
 // ----------met member data ---------------------------
-
 	int nummet; //number of mets in the event
 	TH1D *methisto;
-	TH1D *hist_e;
-	TH1D *hist_pt;
-	TH1D *hist_px;
-	TH1D *hist_py;
-	//TH1D *hist_pz;
-	//TH1D *hist_eta;
-	TH1D *hist_phi;
-	TH1D *hist_ch;
-	TFile *mfile;
-	TTree *mtree;
+	TH1D *methist_e;
+	TH1D *methist_pt;
+	TH1D *methist_px;
+	TH1D *methist_py;
+	//TH1D *methist_pz;
+	//TH1D *methist_eta;
+	TH1D *methist_phi;
+	TH1D *methist_ch;
+	//TFile *mfile;
+	//TTree *mtree;
+	std::vector<float> met_e;
+  	std::vector<float> met_pt;
+  	std::vector<float> met_px;
+  	std::vector<float> met_py;
+  	//std::vector<float> met_pz;
+  	//std::vector<float> met_eta;
+  	std::vector<float> met_phi;
+  	std::vector<float> met_ch;	
 
-	std::vector<float> _e;
-  	std::vector<float> _pt;
-  	std::vector<float> _px;
-  	std::vector<float> _py;
-  	//std::vector<float> _pz;
-  	//std::vector<float> _eta;
-  	std::vector<float> _phi;
-  	std::vector<float> _ch;	
+// ----------muon member data ---------------------------
+	int nummuon; //number of muons in the event
+	TH1D *muonhisto;
+	TH1D *muonhist_e;
+	TH1D *muonhist_pt;
+	TH1D *muonhist_px;
+	TH1D *muonhist_py;
+	TH1D *muonhist_pz;
+	TH1D *muonhist_eta;
+	TH1D *muonhist_phi;
+	TH1D *hist_ch;
+	//TFile *mfile;
+	//TTree *mtree;
+	std::vector<float> muon_e;
+  	std::vector<float> muon_pt;
+  	std::vector<float> muon_px;
+  	std::vector<float> muon_py;
+  	std::vector<float> muon_pz;
+  	std::vector<float> muon_eta;
+  	std::vector<float> muon_phi;
+  	std::vector<float> muon_ch;	
+	
+// ----------photon member data ---------------------------
+	int numphoton; //number of photons in the event
+	TH1D *photonhisto;
+	TH1D *photonhist_e;
+	TH1D *photonhist_pt;
+	TH1D *photonhist_px;
+	TH1D *photonhist_py;
+	TH1D *photonhist_pz;
+	TH1D *photonhist_eta;
+	TH1D *photonhist_phi;
+	TH1D *photonhist_ch;
+	//TFile *mfile;
+	//TTree *mtree;
+	std::vector<float> photon_e;
+  	std::vector<float> photon_pt;
+  	std::vector<float> photon_px;
+  	std::vector<float> photon_py;
+  	std::vector<float> photon_pz;
+  	std::vector<float> photon_eta;
+  	std::vector<float> photon_phi;
+  	std::vector<float> photon_ch;
+	
 };
 
 //
@@ -180,7 +223,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
 	edm::Service<TFileService> fs;
 
-// se crean los histogramas
+// se crean los electron histogramas
 	hist_e = fs->make <TH1D>("hist_energy", "Electron energy", 100, 0, 5000);
 	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
 	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
@@ -189,10 +232,53 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
 	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
 	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
+	elechisto = fs->make <TH1D>("elechisto", "Electron histo", 100, 0, 5000);
+// se crean los jet histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Jet energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Jet pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Jet px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Jet py ", 100, 0, 5000 );
+	hist_pz = fs->make <TH1D>("hist_pz", "Jet pz ", 100, 0, 5000 );
+	hist_eta = fs->make <TH1D>("hist_eta", "Jet eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Jet phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Jet ch ", 100,0,5000 );
 	jethisto = fs->make <TH1D>("jethisto", "Jet histo", 100, 0, 5000);
+// se crean los met histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Met energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Met pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Met px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Met py ", 100, 0, 5000 );
+	//hist_pz = fs->make <TH1D>("hist_pz", "Met pz ", 100, 0, 5000 );
+	//hist_eta = fs->make <TH1D>("hist_eta", "Met eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Met phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Met ch ", 100,0,5000 );
+	methisto = fs->make <TH1D>("methisto", "Met histo", 100, 0, 5000);
+// se crean los muon histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Muon energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Muon pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Muon px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Muon py ", 100, 0, 5000 );
+	hist_pz = fs->make <TH1D>("hist_pz", "Muon pz ", 100, 0, 5000 );
+	hist_eta = fs->make <TH1D>("hist_eta", "Muon eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Muon phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Muon ch ", 100,0,5000 );
+	muonhisto = fs->make <TH1D>("muonhisto", "Muon histo", 100, 0, 5000);
+// se crean los photon histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Photon energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Photon pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Photon px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Photon py ", 100, 0, 5000 );
+	hist_pz = fs->make <TH1D>("hist_pz", "Photon pz ", 100, 0, 5000 );
+	hist_eta = fs->make <TH1D>("hist_eta", "Photon eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Photon phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Photon ch ", 100,0,5000 );
+	photonhisto = fs->make <TH1D>("photonhisto", "Photon histo", 100, 0, 5000);	
 
+	electronInput = iConfig.getParameter<edm::InputTag>("InputCollection");
 	jetInput = iConfig.getParameter<edm::InputTag>("InputCollection");
-
+	metInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	muonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	photonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
 }
 
 
@@ -214,11 +300,25 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    using namespace edm;
    using namespace std;
 
-
+   Handle<reco::GsfElectronCollection> myelectrons;
+   iEvent.getByLabel(electronInput, myelectrons);
+   analyzeElectrons(iEvent,myelectrons);
+	
    Handle<reco::PFJetCollection> myjets;
    iEvent.getByLabel(jetInput, myjets);
-
    analyzeJets(iEvent,myjets);
+
+   Handle<reco::PFMETCollection> mymets;
+   iEvent.getByLabel(metInput, mymets);
+   analyzeMets(iEvent,mymets);	
+
+   Handle<reco::MuonCollection> mymuons;
+   iEvent.getByLabel(muonInput, mymuons);
+   analyzeMuons(iEvent,mymuons);
+	        
+	Handle<reco::PhotonCollection> myphotons;
+   iEvent.getByLabel(photonInput, myphotons);
+   analyzePhotons(iEvent,myphotons);
 
    mtree->Fill();
    return;
