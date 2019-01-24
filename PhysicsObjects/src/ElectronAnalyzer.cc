@@ -199,14 +199,14 @@ ElectronAnalyzer::beginJob()
 mfile = new TFile("ElectronInfo.root","RECREATE");
 mtree = new TTree("mtree","Electron information");
 
-  mytree->Branch("electron_e",&electron_e);
-  mytree->Branch("electron_pt",&electron_pt);
-  mytree->Branch("electron_px",&electron_px);
-  mytree->Branch("electron_py",&electron_py);
-  mytree->Branch("electron_pz",&electron_pz);
-  mytree->Branch("electron_eta",&electron_eta);
-  mytree->Branch("electron_phi",&electron_phi);
-  mytree->Branch("electron_ch",&electron_ch);
+  mtree->Branch("electron_e",&electron_e);
+  mtree->Branch("electron_pt",&electron_pt);
+  mtree->Branch("electron_px",&electron_px);
+  mtree->Branch("electron_py",&electron_py);
+  mtree->Branch("electron_pz",&electron_pz);
+  mtree->Branch("electron_eta",&electron_eta);
+  mtree->Branch("electron_phi",&electron_phi);
+  mtree->Branch("electron_ch",&electron_ch);
 
 }
 
