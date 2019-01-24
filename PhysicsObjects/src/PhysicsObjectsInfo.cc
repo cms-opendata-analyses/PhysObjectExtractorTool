@@ -274,10 +274,10 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	photonhist_ch =  fs->make <TH1D>("hist_ch", "Photon ch ", 100,0,5000 );
 	photonhisto = fs->make <TH1D>("photonhisto", "Photon histo", 100, 0, 5000);	
 
-	electronInput = iConfig.getParameter<edm::InputTag>("InputCollection");
-	jetInput = iConfig.getParameter<edm::InputTag>("InputCollection");
-	metInput = iConfig.getParameter<edm::InputTag>("InputCollection");
-	muonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	electronInput = iConfig.getParameter<edm::InputTag>("ElectronInputCollection");
+	jetInput = iConfig.getParameter<edm::InputTag>("JetInputCollection");
+	metInput = iConfig.getParameter<edm::InputTag>("MetInputCollection");
+	muonInput = iConfig.getParameter<edm::InputTag>("MuonInputCollection");
 	photonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
 }
 
