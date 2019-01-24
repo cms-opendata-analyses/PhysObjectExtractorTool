@@ -199,14 +199,14 @@ PhotonAnalyzer::beginJob()
 mfile = new TFile("PhotonInfo.root","RECREATE");
 mtree = new TTree("mtree","Photon information");
 
-  mytree->Branch("photon_e",&_e);
-  mytree->Branch("photon_pt",&_pt);
-  mytree->Branch("photon_px",&_px);
-  mytree->Branch("photon_py",&_py);
-  mytree->Branch("photon_pz",&_pz);
-  mytree->Branch("photon_eta",&_eta);
-  mytree->Branch("photon_phi",&_phi);
-  mytree->Branch("photon_ch",&_ch);
+  mtree->Branch("photon_e",&_e);
+  mtree->Branch("photon_pt",&_pt);
+  mtree->Branch("photon_px",&_px);
+  mtree->Branch("photon_py",&_py);
+  mtree->Branch("photon_pz",&_pz);
+  mtree->Branch("photon_eta",&_eta);
+  mtree->Branch("photon_phi",&_phi);
+  mtree->Branch("photon_ch",&_ch);
 
 }
 
