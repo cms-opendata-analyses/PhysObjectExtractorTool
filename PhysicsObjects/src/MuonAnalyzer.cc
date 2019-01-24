@@ -100,15 +100,15 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
 	edm::Service<TFileService> fs;
 
-// se crean los histogramas
-	hist_e = fs->make <TH1D>("hist_energy", "Electron energy", 100, 0, 5000);
-	hist_pt = fs->make <TH1D>("hist_pt", "Electron pt ", 100,0,5000 );
-	hist_px = fs->make <TH1D>("hist_px", "Electron px ", 100, 0, 5000 );
-	hist_py = fs->make <TH1D>("hist_py", "Electron py ", 100, 0, 5000 );
-	hist_pz = fs->make <TH1D>("hist_pz", "Electron pz ", 100, 0, 5000 );
-	hist_eta = fs->make <TH1D>("hist_eta", "Electron eta ", 100, 0, 5000 );
-	hist_phi = fs->make <TH1D>("hist_phi", "Electron phi ", 100, 0, 5000 );
-	hist_ch =  fs->make <TH1D>("hist_ch", "Electron ch ", 100,0,5000 );
+// se crean los muon histogramas
+	hist_e = fs->make <TH1D>("hist_energy", "Muon energy", 100, 0, 5000);
+	hist_pt = fs->make <TH1D>("hist_pt", "Muon pt ", 100,0,5000 );
+	hist_px = fs->make <TH1D>("hist_px", "Muon px ", 100, 0, 5000 );
+	hist_py = fs->make <TH1D>("hist_py", "Muon py ", 100, 0, 5000 );
+	hist_pz = fs->make <TH1D>("hist_pz", "Muon pz ", 100, 0, 5000 );
+	hist_eta = fs->make <TH1D>("hist_eta", "Muon eta ", 100, 0, 5000 );
+	hist_phi = fs->make <TH1D>("hist_phi", "Muon phi ", 100, 0, 5000 );
+	hist_ch =  fs->make <TH1D>("hist_ch", "Muon ch ", 100,0,5000 );
 	muonhisto = fs->make <TH1D>("muonhisto", "Muon histo", 100, 0, 5000);
 
 	muonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
