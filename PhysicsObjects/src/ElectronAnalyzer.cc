@@ -51,7 +51,7 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 //declare a function to do the electron analysis
-      void analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons);
+      void analyzeElectrons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons);
 
 
 //se declara el input tag de tipo GsfElectronCollection         
