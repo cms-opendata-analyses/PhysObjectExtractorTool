@@ -264,7 +264,8 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	photonhist_ch =  fs->make <TH1D>("Photon ch", "Photon ch ", 100,0,5000 );
 	photonhisto = fs->make <TH1D>("Photon histogram", "Photon histo", 100, 0, 5000);	
 
-//this takes the type of object (input tag) specified in the configuration python file, corresponding to each container.	
+//this takes the type of object (input tag) specified in the configuration python file, corresponding to each container.
+//https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable	
 	electronInput = iConfig.getParameter<edm::InputTag>("ElectronInputCollection");
 	jetInput = iConfig.getParameter<edm::InputTag>("JetInputCollection");
 	metInput = iConfig.getParameter<edm::InputTag>("MetInputCollection");
@@ -290,27 +291,42 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 {
    using namespace edm;
    using namespace std;
+
 //Declare the handle (container) to store electrons.
    Handle<reco::GsfElectronCollection> myelectrons;
+//This is where the desired object is extracted from the EDM file, 
+//since it is composed of several branches with all the resulting objects of each event. 
+//Then, objects of the input tag type placed in the configuration file, in this case "electrons", 
+//are stored in the variable "myelectrons". It must be ensured that the input tag goes with its 
+//corresponding container (handle). In addition, a container can accept different types of input tag, 
+//for this reason, this tool is structured in this way, since it allows changing the input tag 
+//from the python file (configuration file) without the need to recompile the code.	
    iEvent.getByLabel(electronInput, myelectrons);
+//Here, pass de object collection and their event to new function, in order to get some information about them.	
    analyzeElectrons(iEvent,myelectrons);
+
+	//The following functions follow the same process:
 //Declare the handle (container) to store jets.	
    Handle<reco::PFJetCollection> myjets;
    iEvent.getByLabel(jetInput, myjets);
    analyzeJets(iEvent,myjets);
+
 //Declare the handle (container) to store mets.
    Handle<reco::PFMETCollection> mymets;
    iEvent.getByLabel(metInput, mymets);
    analyzeMets(iEvent,mymets);	
+
 //Declare the handle (container) to store muons.
    Handle<reco::MuonCollection> mymuons;
    iEvent.getByLabel(muonInput, mymuons);
    analyzeMuons(iEvent,mymuons);
+
 //Declare the handle (container) to store photons.	
    Handle<reco::PhotonCollection> myphotons;
    iEvent.getByLabel(photonInput, myphotons);
    analyzePhotons(iEvent,myphotons);	
 
+//Now, the information is stored.
    mtree->Fill();
    return;
 
@@ -320,6 +336,7 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 void 
 PhysicsObjectsInfo::analyzeElectrons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons)
 {
+	//Since there are several events, each variable is cleaned at the beginning of the analysis.
 	  numelectron = 0;
 	  electron_e.clear();
 	  electron_pt.clear();
@@ -329,13 +346,14 @@ PhysicsObjectsInfo::analyzeElectrons(const edm::Event& iEvent, const edm::Handle
 	  electron_eta.clear();
 	  electron_phi.clear();
 	  electron_ch.clear();
-
+// Check if the object collection is valid.
   if(electrons.isValid()){
      // get the number of electrons in the event
      numelectron=(*electrons).size();
      elechisto->Fill(electrons->size());
+	  //A cycle is created that sweep over all the electrons of the event.
         for (reco::GsfElectronCollection::const_iterator itElec=electrons->begin(); itElec!=electrons->end(); ++itElec){
-
+            //get general information
 	    electron_e.push_back(itElec->energy());
 	    electron_pt.push_back(itElec->pt());
 	    electron_px.push_back(itElec->px());
@@ -344,7 +362,7 @@ PhysicsObjectsInfo::analyzeElectrons(const edm::Event& iEvent, const edm::Handle
 	    electron_eta.push_back(itElec->eta());
 	    electron_phi.push_back(itElec->phi());
 	    electron_ch.push_back(itElec->charge());
-
+            //fill each histogram
 	    electronhist_e->Fill(itElec->energy());
 	    electronhist_pt->Fill(itElec->pt());
 	    electronhist_px->Fill(itElec->px());
@@ -353,7 +371,7 @@ PhysicsObjectsInfo::analyzeElectrons(const edm::Event& iEvent, const edm::Handle
 	    electronhist_eta->Fill(itElec->eta());
 	    electronhist_phi->Fill(itElec->phi());
 	    electronhist_ch->Fill(itElec->charge());
-
+            //Here we can choose electron with specific cuts and get more specific information.
         }
   }
 }
