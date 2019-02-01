@@ -302,7 +302,7 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 //for this reason, this tool is structured in this way, since it allows changing the input tag 
 //from the python file (configuration file) without the need to recompile the code.	
    iEvent.getByLabel(electronInput, myelectrons);
-//Here, pass de object collection and their event to new function, in order to get some information about them.	
+//Here, pass the object collection and their event to new function, in order to get some information about them.	
    analyzeElectrons(iEvent,myelectrons);
 
 	//The following functions follow the same process:
@@ -592,6 +592,7 @@ mtree = new TTree("mtree","Objects information");
 void
 PhysicsObjectsInfo::endJob()
 {
+  //In order to save the file:	
   mfile->Write();
 }
 
