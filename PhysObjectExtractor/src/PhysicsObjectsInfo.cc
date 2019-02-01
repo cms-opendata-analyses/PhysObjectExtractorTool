@@ -82,17 +82,22 @@ class PhysicsObjectsInfo : public edm::EDAnalyzer {
 //declare a function to do the photon analysis
       void analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &photons);
 	
-//se declara el input tag de tipo GsfElectronCollection         
+//declare the input tag for the electron collection        
       edm::InputTag electronInput;
-//se declara el input tag de tipo PFJetCollection         
+//declare the input tag for the jet collection         
       edm::InputTag jetInput;
-//se declara el input tag de tipo PFMETCollection         
+//declare the input tag for the met collection        
       edm::InputTag metInput;
-//se declara el input tag de tipo MuonCollection         
+//declare the input tag for the muon collection        
       edm::InputTag muonInput;
-//se declara el input tag de tipo PhotonCollection         
-      edm::InputTag photonInput;	
-
+//declare the input tag for the photon collection        
+      edm::InputTag photonInput;
+	
+	//declare the variables for save data
+	TFile *mfile;
+	TTree *mtree;
+	
+//declare histograms and variables that will go into the root files
 // ----------electron member data ---------------------------
 	int numelectron; //number of electrons in the event
 	TH1D *electronhisto;
@@ -104,8 +109,6 @@ class PhysicsObjectsInfo : public edm::EDAnalyzer {
 	TH1D *electronhist_eta;
 	TH1D *electronhist_phi;
 	TH1D *electronhist_ch;
-	TFile *mfile;
-	TTree *mtree;
 	std::vector<float> electron_e;
   	std::vector<float> electron_pt;
   	std::vector<float> electron_px;
@@ -209,9 +212,10 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 
 {
 //now do what ever initialization is needed
+	//to access the TFileService object in a framework module
 	edm::Service<TFileService> fs;
 
-// se crean los electron histogramas
+//create electron histograms using the function template "make"	
 	electronhist_e = fs->make <TH1D>("Electron energy", "Electron energy", 100, 0, 5000);
 	electronhist_pt = fs->make <TH1D>("Electron pt", "Electron pt ", 100,0,5000 );
 	electronhist_px = fs->make <TH1D>("Electron px", "Electron px ", 100, 0, 5000 );
@@ -221,7 +225,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	electronhist_phi = fs->make <TH1D>("Electron phi", "Electron phi ", 100, 0, 5000 );
 	electronhist_ch =  fs->make <TH1D>("Electron ch", "Electron ch ", 100,0,5000 );
 	electronhisto = fs->make <TH1D>("Electron histogram", "Electron histo", 100, 0, 5000);
-// se crean los jet histogramas
+//create jet histograms
 	jethist_e = fs->make <TH1D>("Jet energy", "Jet energy", 100, 0, 5000);
 	jethist_pt = fs->make <TH1D>("Jet pt", "Jet pt ", 100,0,5000 );
 	jethist_px = fs->make <TH1D>("Jet px", "Jet px ", 100, 0, 5000 );
@@ -231,7 +235,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	jethist_phi = fs->make <TH1D>("Jet phi", "Jet phi ", 100, 0, 5000 );
 	jethist_ch =  fs->make <TH1D>("Jet ch", "Jet ch ", 100,0,5000 );
 	jethisto = fs->make <TH1D>("Jet histogram", "Jet histo", 100, 0, 5000);
-// se crean los met histogramas
+//create met histograms
 	methist_e = fs->make <TH1D>("Met energy", "Met energy", 100, 0, 5000);
 	methist_pt = fs->make <TH1D>("Met pt", "Met pt ", 100,0,5000 );
 	methist_px = fs->make <TH1D>("Met px", "Met px ", 100, 0, 5000 );
@@ -239,7 +243,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	methist_phi = fs->make <TH1D>("Met phi", "Met phi ", 100, 0, 5000 );
 	methist_ch =  fs->make <TH1D>("Met ch", "Met ch ", 100,0,5000 );
 	methisto = fs->make <TH1D>("Met histogram", "Met histo", 100, 0, 5000);
-// se crean los muon histogramas
+//create muon histograms
 	muonhist_e = fs->make <TH1D>("Muon energy", "Muon energy", 100, 0, 5000);
 	muonhist_pt = fs->make <TH1D>("Muon pt", "Muon pt ", 100,0,5000 );
 	muonhist_px = fs->make <TH1D>("Muon px", "Muon px ", 100, 0, 5000 );
@@ -249,7 +253,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	muonhist_phi = fs->make <TH1D>("Muon phi", "Muon phi ", 100, 0, 5000 );
 	muonhist_ch =  fs->make <TH1D>("Muon ch", "Muon ch ", 100,0,5000 );
 	muonhisto = fs->make <TH1D>("Muon histogram", "Muon histo", 100, 0, 5000);
-// se crean los photon histogramas
+//create photon histograms
 	photonhist_e = fs->make <TH1D>("Photon energy", "Photon energy", 100, 0, 5000);
 	photonhist_pt = fs->make <TH1D>("Photon pt", "Photon pt ", 100,0,5000 );
 	photonhist_px = fs->make <TH1D>("Photon px", "Photon px ", 100, 0, 5000 );
@@ -260,6 +264,7 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	photonhist_ch =  fs->make <TH1D>("Photon ch", "Photon ch ", 100,0,5000 );
 	photonhisto = fs->make <TH1D>("Photon histogram", "Photon histo", 100, 0, 5000);	
 
+//this takes the type of object (input tag) specified in the configuration python file, corresponding to each container.	
 	electronInput = iConfig.getParameter<edm::InputTag>("ElectronInputCollection");
 	jetInput = iConfig.getParameter<edm::InputTag>("JetInputCollection");
 	metInput = iConfig.getParameter<edm::InputTag>("MetInputCollection");
@@ -285,23 +290,23 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 {
    using namespace edm;
    using namespace std;
-
+//Declare the handle (container) to store electrons.
    Handle<reco::GsfElectronCollection> myelectrons;
    iEvent.getByLabel(electronInput, myelectrons);
    analyzeElectrons(iEvent,myelectrons);
-	
+//Declare the handle (container) to store jets.	
    Handle<reco::PFJetCollection> myjets;
    iEvent.getByLabel(jetInput, myjets);
    analyzeJets(iEvent,myjets);
-
+//Declare the handle (container) to store mets.
    Handle<reco::PFMETCollection> mymets;
    iEvent.getByLabel(metInput, mymets);
    analyzeMets(iEvent,mymets);	
-
+//Declare the handle (container) to store muons.
    Handle<reco::MuonCollection> mymuons;
    iEvent.getByLabel(muonInput, mymuons);
    analyzeMuons(iEvent,mymuons);
-	
+//Declare the handle (container) to store photons.	
    Handle<reco::PhotonCollection> myphotons;
    iEvent.getByLabel(photonInput, myphotons);
    analyzePhotons(iEvent,myphotons);	
