@@ -13,6 +13,7 @@ process.source = cms.Source("PoolSource",
     )
 )
 
+#Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers. 
 process.demo = cms.EDAnalyzer('PhysicsObjectsInfo'
                               ,ElectronInputCollection = cms.InputTag("gsfElectrons")
                               ,JetInputCollection = cms.InputTag("ak5PFJets")
@@ -21,6 +22,8 @@ process.demo = cms.EDAnalyzer('PhysicsObjectsInfo'
                               ,PhotonInputCollection = cms.InputTag("photons")
                              )
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
+
+#configure the TFileservice, in order to save histograms.
 process.TFileService = cms.Service("TFileService",
               fileName = cms.string('histo.root')
                                    )
