@@ -232,13 +232,13 @@ PhysicsObjectsInfo::PhysicsObjectsInfo(const edm::ParameterSet& iConfig)
 	jethist_ch =  fs->make <TH1D>("Jet ch", "Jet ch ", 100,0,5000 );
 	jethisto = fs->make <TH1D>("Jet histogram", "Jet histo", 100, 0, 5000);
 // se crean los met histogramas
-	methist_e = fs->make <TH1D>("hist_energy", "Met energy", 100, 0, 5000);
-	methist_pt = fs->make <TH1D>("hist_pt", "Met pt ", 100,0,5000 );
-	methist_px = fs->make <TH1D>("hist_px", "Met px ", 100, 0, 5000 );
-	methist_py = fs->make <TH1D>("hist_py", "Met py ", 100, 0, 5000 );
-	methist_phi = fs->make <TH1D>("hist_phi", "Met phi ", 100, 0, 5000 );
-	methist_ch =  fs->make <TH1D>("hist_ch", "Met ch ", 100,0,5000 );
-	methisto = fs->make <TH1D>("methisto", "Met histo", 100, 0, 5000);
+	methist_e = fs->make <TH1D>("Met energy", "Met energy", 100, 0, 5000);
+	methist_pt = fs->make <TH1D>("Met pt", "Met pt ", 100,0,5000 );
+	methist_px = fs->make <TH1D>("Met px", "Met px ", 100, 0, 5000 );
+	methist_py = fs->make <TH1D>("Met py", "Met py ", 100, 0, 5000 );
+	methist_phi = fs->make <TH1D>("Met phi", "Met phi ", 100, 0, 5000 );
+	methist_ch =  fs->make <TH1D>("Met ch", "Met ch ", 100,0,5000 );
+	methisto = fs->make <TH1D>("Met histogram", "Met histo", 100, 0, 5000);
 // se crean los muon histogramas
 	muonhist_e = fs->make <TH1D>("Muon energy", "Muon energy", 100, 0, 5000);
 	muonhist_pt = fs->make <TH1D>("Muon pt", "Muon pt ", 100,0,5000 );
