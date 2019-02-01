@@ -296,7 +296,7 @@ PhysicsObjectsInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    Handle<reco::GsfElectronCollection> myelectrons;
 //This is where the desired object is extracted from the EDM file, 
 //since it is composed of several branches with all the resulting objects of each event. 
-//Then, objects of the input tag type placed in the configuration file, in this case "electrons", 
+//Then, objects of the input tag type placed in the configuration file, in this case "gsfElectrons", 
 //are stored in the variable "myelectrons". It must be ensured that the input tag goes with its 
 //corresponding container (handle). In addition, a container can accept different types of input tag, 
 //for this reason, this tool is structured in this way, since it allows changing the input tag 
