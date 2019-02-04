@@ -43,13 +43,7 @@ ln -s python/physicsobjectsinfo_cfg.py .
 ```
 6. Run the CMSSW executable in the background
 ```
-cmsRun physicsobjectsinfo_cfg.py > objects.log 2>&1 &
-```
-
-7. Check the development of the job:
-
-```
-tailf objects.log
+cmsRun physicsobjectsinfo_cfg.py
 ```
 
 ##### As a result you will get a ObjectInfoNtuple.root and histo.root file with simple variables and histograms.
