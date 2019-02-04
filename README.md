@@ -29,7 +29,7 @@ cmsenv
 ```
 3. Obtain the code from git:
 ```
-git clone --no-checkout git://github.com/asdru30/PhysObjectExtractorTool.git
+git clone git://github.com/asdru30/PhysObjectExtractorTool.git
 cd PhysObjectExtractorTool
 ```
 4. Compile everything:
