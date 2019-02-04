@@ -41,7 +41,7 @@ scram b
 ```
 ln -s python/physicsobjectsinfo_cfg.py .
 ```
-6. Run the CMSSW executable in the background
+6. Run the CMSSW configuration file
 ```
 cmsRun physicsobjectsinfo_cfg.py
 ```
