@@ -5,4 +5,8 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
 <flags EDM_PLUGIN="1"/>
-
+<use name="HLTrigger/HLTcore"/>
+<flags EDM_PLUGIN="1"/>
+<export>
+   <lib name="1"/>
+</export>
