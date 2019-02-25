@@ -1,3 +1,4 @@
+
 <use name="FWCore/Framework"/>
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ParameterSet"/>
@@ -5,8 +6,3 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
 <flags EDM_PLUGIN="1"/>
-<use name="HLTrigger/HLTcore"/>
-<flags EDM_PLUGIN="1"/>
-<export>
-   <lib name="1"/>
-</export>
