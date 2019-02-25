@@ -350,7 +350,7 @@ PhysicsObjectsInfo::analyzeElectrons(const edm::Event& iEvent, const edm::Handle
   if(electrons.isValid()){
      // get the number of electrons in the event
      numelectron=(*electrons).size();
-     elechisto->Fill(electrons->size());
+     electronhisto->Fill(electrons->size());
 	  //A cycle is created that sweep over all the electrons of the event.
         for (reco::GsfElectronCollection::const_iterator itElec=electrons->begin(); itElec!=electrons->end(); ++itElec){
             //get general information
