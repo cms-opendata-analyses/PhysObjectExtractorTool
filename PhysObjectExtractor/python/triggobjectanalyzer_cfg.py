@@ -17,7 +17,6 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
 process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 
-#Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers. 
 process.demo = cms.EDAnalyzer('TriggObjectAnalyzer',
                  filterName = cms.string("hltSingleJet190Regional"),
                              )
