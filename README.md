@@ -41,12 +41,21 @@ scram b
 ```
 ln -s python/physicsobjectsinfo_cfg.py .
 ```
-6. Run the CMSSW configuration file
+6. Make symbolic links to the conditions database: (trigger analizer)
+```
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA FT_53_LV5_AN1
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RUNA.db
+```
+7. Run the CMSSW configuration file:
 ```
 cmsRun physicsobjectsinfo_cfg.py
 ```
 
 ##### As a result you will get a ObjectInfoNtuple.root and histo.root file with simple variables and histograms.
+
+
+
+
 
 
 
