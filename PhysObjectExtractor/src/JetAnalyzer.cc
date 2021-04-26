@@ -13,10 +13,25 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Common/interface/Ref.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "math.h"
 
 //classes to extract PFJet information
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/SimpleJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/SimpleJetCorrectionUncertainty.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 //classes to save data
 #include "TTree.h"
@@ -28,44 +43,56 @@
 //
 
 class JetAnalyzer : public edm::EDAnalyzer {
-   public:
-      explicit JetAnalyzer(const edm::ParameterSet&);
-      ~JetAnalyzer();
+public:
+  explicit JetAnalyzer(const edm::ParameterSet&);
+  ~JetAnalyzer();
+  
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-   private:
-      virtual void beginJob() ;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
-
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+private:
+  virtual void beginJob() ;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void endJob() ;
+  
+  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+  
+  virtual void endRun(edm::Run const&, edm::EventSetup const&);
+  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  std::vector<std::string> jecPayloadNames_;
+  std::string              jecL1_;
+  std::string              jecL2_;
+  std::string              jecL3_;
+  std::string              jecUncName_;
+  boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
+  boost::shared_ptr<FactorizedJetCorrector> jec_;
 //declare a function to do the jet analysis
-      void analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets);
+  void analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets);
 
 
 //declare the input tag for PFJetCollection
-      edm::InputTag jetInput;
+  edm::InputTag jetInput;
 
-	  // ----------member data ---------------------------
+  // ----------member data ---------------------------
 
-	int numjet; //number of jets in the event
+  int numjet; //number of jets in the event
 
-	TFile *mfile;
-	TTree *mtree;
-
-	  std::vector<float> jet_e;
-  	std::vector<float> jet_pt;
-  	std::vector<float> jet_px;
-  	std::vector<float> jet_py;
-  	std::vector<float> jet_pz;
-  	std::vector<float> jet_eta;
-  	std::vector<float> jet_phi;
-  	std::vector<float> jet_ch;
+  TFile *mfile;
+  TTree *mtree;
+  
+  std::vector<float> jet_e;
+  std::vector<float> jet_pt;
+  std::vector<float> jet_px;
+  std::vector<float> jet_py;
+  std::vector<float> jet_pz;
+  std::vector<float> jet_eta;
+  std::vector<float> jet_phi;
+  std::vector<float> jet_ch;
+  std::vector<float> jet_mass;
+  std::vector<float> jet_btag;
+  std::vector<float> corr_jet_pt;
+  std::vector<float> corr_jet_ptUp;
+  std::vector<float> corr_jet_ptDown;
 };
 
 //
@@ -84,6 +111,25 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
 {
 //now do what ever initialization is needed
 	jetInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	jecL1_ = iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath(); // JEC level payloads                     
+	jecL2_ = iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath(); // JEC level payloads                     
+	jecL3_ = iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath(); // JEC level payloads                     
+	jecUncName_ = iConfig.getParameter<edm::FileInPath>("jecUncName").fullPath();      // JEC uncertainties                               
+
+	//Get the factorized jet corrector parameters.
+	jecPayloadNames_.push_back(jecL1_);
+	jecPayloadNames_.push_back(jecL2_);
+	jecPayloadNames_.push_back(jecL3_);
+	std::vector<JetCorrectorParameters> vPar;
+	for ( std::vector<std::string>::const_iterator payloadBegin = jecPayloadNames_.begin(),
+		payloadEnd = jecPayloadNames_.end(), ipayload = payloadBegin; ipayload != payloadEnd; ++ipayload ) {
+	  JetCorrectorParameters pars(*ipayload);
+	  vPar.push_back(pars);
+	}
+
+	// Make the FactorizedJetCorrector and Uncertainty                                                                                              
+	jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
+	jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
 }
 
 JetAnalyzer::~JetAnalyzer()
@@ -116,29 +162,64 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void
 JetAnalyzer::analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets)
 {
-	  numjet = 0;
-	  jet_e.clear();
-	  jet_pt.clear();
-	  jet_px.clear();
-	  jet_py.clear();
-	  jet_pz.clear();
-	  jet_eta.clear();
-	  jet_phi.clear();
-	  jet_ch.clear();
+  using namespace edm;
+  using namespace std;
+  Handle<reco::JetTagCollection> btags;
+  iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
+  Handle<double> rhoHandle;
+  iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
+  Handle<reco::VertexCollection> vertices;
+  iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
+  numjet = 0;
+  jet_e.clear();
+  jet_pt.clear();
+  jet_px.clear();
+  jet_py.clear();
+  jet_pz.clear();
+  jet_eta.clear();
+  jet_phi.clear();
+  jet_ch.clear();
+  jet_mass.clear();
+  jet_btag.clear();
+  corr_jet_pt.clear();
+  corr_jet_ptUp.clear();
+  corr_jet_ptDown.clear();
 
   if(jets.isValid()){
      // get the number of jets in the event
      numjet=(*jets).size();
         for (reco::PFJetCollection::const_iterator itjet=jets->begin(); itjet!=jets->end(); ++itjet){
+	  reco::Candidate::LorentzVector uncorrJet = itjet->p4();
+	  jec_->setJetEta( uncorrJet.eta() );
+	  jec_->setJetPt ( uncorrJet.pt() );
+	  jec_->setJetE  ( uncorrJet.energy() );
+	  jec_->setJetA  ( itjet->jetArea() );
+	  jec_->setRho   ( *(rhoHandle.product()) );
+	  jec_->setNPV   ( vertices->size() );
+	  double corr = jec_->getCorrection();
 
-        	    jet_e.push_back(itjet->energy());
-        	    jet_pt.push_back(itjet->pt());
-        	    jet_px.push_back(itjet->px());
-        	    jet_py.push_back(itjet->py());
-        	    jet_pz.push_back(itjet->pz());
-        	    jet_eta.push_back(itjet->eta());
-        	    jet_phi.push_back(itjet->phi());
-        	    jet_ch.push_back(itjet->charge());
+	  double corrUp = 1.0;
+	  double corrDown = 1.0;
+	  jecUnc_->setJetEta( uncorrJet.eta() );
+	  jecUnc_->setJetPt( corr * uncorrJet.pt() );
+	  corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
+	  jecUnc_->setJetEta( uncorrJet.eta() );
+	  jecUnc_->setJetPt( corr * uncorrJet.pt() );
+	  corrDown = corr * (1 - fabs(jecUnc_->getUncertainty(-1)));
+
+	  jet_e.push_back(itjet->energy());
+	  jet_pt.push_back(itjet->pt());
+	  jet_px.push_back(itjet->px());
+	  jet_py.push_back(itjet->py());
+	  jet_pz.push_back(itjet->pz());
+	  jet_eta.push_back(itjet->eta());
+	  jet_phi.push_back(itjet->phi());
+	  jet_ch.push_back(itjet->charge());
+	  jet_mass.push_back(itjet->mass());
+	  jet_btag.push_back(btags->operator[](itjet - jets->begin()).second);
+	  corr_jet_pt.push_back(corr*uncorrJet.pt());
+	  corr_jet_ptUp.push_back(corrUp*uncorrJet.pt());
+	  corr_jet_ptDown.push_back(corrDown*uncorrJet.pt());
         }
   }
 }
@@ -160,6 +241,11 @@ mtree = new TTree("mtree","Jet information");
   mtree->Branch("jet_eta",&jet_eta);
   mtree->Branch("jet_phi",&jet_phi);
   mtree->Branch("jet_ch",&jet_ch);
+  mtree->Branch("jet_mass",&jet_mass);
+  mtree->Branch("jet_btag",&jet_btag);
+  mtree->Branch("corr_jet_pt",&corr_jet_pt);
+  mtree->Branch("corr_jet_ptUp",&corr_jet_ptUp);
+  mtree->Branch("corr_jet_ptDown",&corr_jet_ptDown);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
