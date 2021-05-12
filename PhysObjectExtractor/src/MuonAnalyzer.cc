@@ -17,6 +17,10 @@
 //classes to extract Muon information
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 //classes to save data
 #include "TTree.h"
@@ -50,6 +54,7 @@ class MuonAnalyzer : public edm::EDAnalyzer {
 
 //declare the input tag for MuonCollection
       edm::InputTag muonInput;
+      edm::InputTag offlinePrimaryVerticesInput;
 
 	  // ----------member data ---------------------------
 
@@ -58,7 +63,7 @@ class MuonAnalyzer : public edm::EDAnalyzer {
 	TFile *mfile;
 	TTree *mtree;
 
-	  std::vector<float> muon_e;
+	std::vector<float> muon_e;
   	std::vector<float> muon_pt;
   	std::vector<float> muon_px;
   	std::vector<float> muon_py;
@@ -66,6 +71,18 @@ class MuonAnalyzer : public edm::EDAnalyzer {
   	std::vector<float> muon_eta;
   	std::vector<float> muon_phi;
   	std::vector<float> muon_ch;
+  	std::vector<float> muon_mass;
+  	std::vector<float> muon_pfreliso03all;
+  	std::vector<float> muon_pfreliso04all;
+  	std::vector<float> muon_tightid;
+  	std::vector<float> muon_softid;
+  	std::vector<float> muon_dxy;
+  	std::vector<float> muon_dxyErr;
+  	std::vector<float> muon_dz;
+  	std::vector<float> muon_dzErr;
+  	std::vector<float> muon_genpartidx;
+  	std::vector<float> muon_jetidx;
+
 };
 
 //
@@ -108,8 +125,6 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<reco::MuonCollection> mymuons;
    iEvent.getByLabel(muonInput, mymuons);
 
-   analyzeMuons(iEvent,mymuons);
-
    mtree->Fill();
    return;
 }
@@ -117,6 +132,10 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void
 MuonAnalyzer::analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::MuonCollection> &muons)
 {
+   using namespace edm;
+   using namespace std;
+
+
 	  nummuon = 0;
 	  muon_e.clear();
 	  muon_pt.clear();
@@ -126,12 +145,30 @@ MuonAnalyzer::analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::Muo
 	  muon_eta.clear();
 	  muon_phi.clear();
 	  muon_ch.clear();
+	  muon_mass.clear();
+	  muon_pfreliso03all.clear();
+	  muon_pfreliso04all.clear();
+	  muon_tightid.clear();
+	  muon_softid.clear();
+	  muon_dxy.clear();
+	  muon_dxyErr.clear();
+	  muon_dz.clear();
+	  muon_dzErr.clear();
+	  muon_jetidx.clear();
+	  muon_genpartidx.clear();
+
+
+  Handle<reco::VertexCollection> vertices;
+  iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
 
   if(muons.isValid()){
      // get the number of muons in the event
      nummuon=(*muons).size();
-        for (reco::MuonCollection::const_iterator itmuon=muons->begin(); itmuon!=muons->end(); ++itmuon){
+     const float mu_min_pt = 3;
+     math::XYZPoint pv(vertices->begin()->position());
 
+        for (reco::MuonCollection::const_iterator itmuon=muons->begin(); itmuon!=muons->end(); ++itmuon){
+          if (itmuon->pt() > mu_min_pt) {
         	    muon_e.push_back(itmuon->energy());
         	    muon_pt.push_back(itmuon->pt());
         	    muon_px.push_back(itmuon->px());
@@ -140,6 +177,35 @@ MuonAnalyzer::analyzeMuons(const edm::Event& iEvent, const edm::Handle<reco::Muo
         	    muon_eta.push_back(itmuon->eta());
         	    muon_phi.push_back(itmuon->phi());
         	    muon_ch.push_back(itmuon->charge());
+        	    muon_mass.push_back(itmuon->mass());
+        	    if (itmuon->isPFMuon() && itmuon->isPFIsolationValid()) {
+        	      auto iso03 = itmuon->pfIsolationR03();
+        	      muon_pfreliso03all.push_back((iso03.sumChargedHadronPt + iso03.sumNeutralHadronEt + iso03.sumPhotonEt)/itmuon->pt());
+        	      auto iso04 = itmuon->pfIsolationR04();
+        	      muon_pfreliso04all.push_back((iso04.sumChargedHadronPt + iso04.sumNeutralHadronEt + iso04.sumPhotonEt)/itmuon->pt());
+        	    } else {
+        	      muon_pfreliso03all.push_back(-999);
+        	      muon_pfreliso04all.push_back(-999);
+        	    }
+
+                    muon_tightid.push_back(muon::isTightMuon(*itmuon, *vertices->begin()));
+        	    muon_softid.push_back(muon::isSoftMuon(*itmuon, *vertices->begin()));
+        	    auto trk = itmuon->globalTrack();
+        	    if (trk.isNonnull()) {
+        	      muon_dxy.push_back(trk->dxy(pv));
+        	      muon_dz.push_back(trk->dz(pv));
+        	      muon_dxyErr.push_back(trk->d0Error());
+        	      muon_dzErr.push_back(trk->dzError());
+        	    } else {
+        	      muon_dxy.push_back(-999);
+        	      muon_dxyErr.push_back(-999);
+        	      muon_dz.push_back(-999);
+        	      muon_dzErr.push_back(-999);
+        	    }
+        	    muon_genpartidx.push_back(-1);
+        	    muon_jetidx.push_back(-1);
+          }           
+
         }
   }
 }
@@ -161,6 +227,18 @@ mtree = new TTree("mtree","Muon information");
   mtree->Branch("muon_eta",&muon_eta);
   mtree->Branch("muon_phi",&muon_phi);
   mtree->Branch("muon_ch",&muon_ch);
+  mtree->Branch("muon_mass",&muon_mass);
+  mtree->Branch("muon_pfreliso03all",&muon_pfreliso03all);
+  mtree->Branch("muon_pfreliso04all",&muon_pfreliso04all);
+  mtree->Branch("muon_tightid",&muon_tightid);
+  mtree->Branch("muon_softid",&muon_softid);
+  mtree->Branch("muon_dxy",&muon_dxy);
+  mtree->Branch("muon_dxyErr",&muon_dxyErr);
+  mtree->Branch("muon_dz",&muon_dz);
+  mtree->Branch("muon_dzErr",&muon_dzErr);
+  mtree->Branch("muon_jetidx",&muon_jetidx);
+  mtree->Branch("muon_genpartidx",&muon_genpartidx);
+
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

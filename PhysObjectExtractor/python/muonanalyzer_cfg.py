@@ -14,6 +14,7 @@ process.source = cms.Source("PoolSource",
 )
 
 process.demo = cms.EDAnalyzer('MuonAnalyzer',InputCollection = cms.InputTag("muons")
+ 
 )
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
 
