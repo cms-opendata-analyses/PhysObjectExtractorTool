@@ -5,11 +5,6 @@ on: push
 #    - master
     
 jobs:
-  test_job:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo hello
-      - uses: actions/checkout@v2
   test_workflow:
     runs-on: ubuntu-latest
     name: PhysObjectExtractor test - plain docker
