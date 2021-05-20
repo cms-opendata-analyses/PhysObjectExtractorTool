@@ -15,6 +15,6 @@ ln -s python/physicsobjectsinfo_cfg.py .
 sed -i "s/process.GlobalTag.connect/#process.GlobalTag.connect/g" physicsobjectsinfo_cfg.py
 cmsRun physicsobjectsinfo_cfg.py
 
-cp */*.root /mnt/vol/
+cp *.root /mnt/vol/
 echo ls -l /mnt/vol
 ls -l /mnt/vol
