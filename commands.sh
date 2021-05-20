@@ -2,8 +2,6 @@
 # Parameters: $1 number of events (default: x), $2 configuration file (default: physicsobjectsinfo_cfg.py)
 sudo chown $USER /mnt/vol
 
-mkdir workspace
-cd workspace
 # For the plain github action with docker, the area would be available in /mnt/vol
 cp -r /mnt/vol PhysObjectExtractorTool
 cd PhysObjectExtractorTool
