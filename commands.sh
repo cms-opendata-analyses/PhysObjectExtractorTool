@@ -11,7 +11,6 @@ cd PhysObjectExtractor
 scram b
 
 sed -i "s/process.GlobalTag.connect/#process.GlobalTag.connect/g" python/physicsobjectsinfo_cfg.py
-cat python/physicsobjectsinfo_cfg.py
 cmsRun python/physicsobjectsinfo_cfg.py
 
 cp *.root /mnt/vol/
