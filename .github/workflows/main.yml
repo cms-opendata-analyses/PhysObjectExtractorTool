@@ -18,7 +18,7 @@ jobs:
       - name: Going to a container
         id: container
         run: |
-          docker run -v $(pwd):/mnt/vol -w /home/cmsusr gitlab-registry.cern.ch/cms-cloud/cmssw-docker/cmssw_5_3_32-slc6_amd64_gcc472:2020-07-30-b26f0eeb /bin/bash /mnt/vol/commands.sh 1000 physicsobjectsinfo_cfg.py
+          docker run -v $(pwd):/mnt/vol -w /home/cmsusr cmsopendata/cmssw_5_3_32 /bin/bash /mnt/vol/commands.sh 1000 physicsobjectsinfo_cfg.py
           echo ls -l  `ls -l `
           cp *.root outputs
       # upload output file
