@@ -10,10 +10,6 @@ scram b
 sed -i "s/process.GlobalTag.connect/#process.GlobalTag.connect/g" python/physicsobjectsinfo_cfg.py
 cmsRun python/physicsobjectsinfo_cfg.py
 
-pwd
-echo ls -l
-ls -l
-
 cp *.root /mnt/vol/
 echo ls -l /mnt/vol
 ls -l /mnt/vol
