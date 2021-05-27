@@ -51,7 +51,7 @@ ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RU
 cmsRun physicsobjectsinfo_cfg.py
 ```
 
-##### As a result you will get a ObjectInfoNtuple.root and histo.root file with simple variables and histograms.
+##### As a result you will get a ObjectInfoNtuple.root file (or alike) with simple variables.
 
 
 
