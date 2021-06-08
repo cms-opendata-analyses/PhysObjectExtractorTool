@@ -14,7 +14,7 @@ The code can be compiled with
 Since the `myoutput.root` files may contain different directories for different 
 kind of physics objects, the `AddFriend` method (`TFriendElement`) from the `TTree` ROOT class is used.  This allows for keeping things simple and modular.
 
-##Usage
+## Usage
 
 1. Compile with: 
 `g++ -g -O3 -Wall -Wextra -Wpedantic -o PoetAnalysis PoetAnalysisTemplate.cxx $(root-config --cflags --libs)`
