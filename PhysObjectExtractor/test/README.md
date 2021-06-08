@@ -8,7 +8,7 @@ This template needs ROOT version greater than 6.18.
 
 The code can be compiled with
 
-`/g++ -g -O3 -Wall -Wextra -Wpedantic -o PoetAnalysis PoetAnalysisTemplate.cxx $(root-config --cflags --libs)`
+`g++ -g -O3 -Wall -Wextra -Wpedantic -o PoetAnalysis PoetAnalysisTemplate.cxx $(root-config --cflags --libs)`
 
 
 Since the `myoutput.root` files may contain different directories for different 
@@ -17,7 +17,7 @@ kind of physics objects, the `AddFriend` method (`TFriendElement`) from the `TTr
 ##Usage
 
 1. Compile with: 
-`/g++ -g -O3 -Wall -Wextra -Wpedantic -o PoetAnalysis PoetAnalysisTemplate.cxx $(root-config --cflags --libs)`
+`g++ -g -O3 -Wall -Wextra -Wpedantic -o PoetAnalysis PoetAnalysisTemplate.cxx $(root-config --cflags --libs)`
 
 1. Run like:
 ./PoetAnalysis
