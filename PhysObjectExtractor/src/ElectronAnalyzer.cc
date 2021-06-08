@@ -13,6 +13,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 //classes to extract electron information
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
@@ -38,33 +40,27 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
       virtual void beginJob() ;
       virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
-
       virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-//declare a function to do the electron analysis
-      void analyzeElectrons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons);
 
-//declare the input tag for GsfElectronCollection
+      //declare the input tag for GsfElectronCollection
       edm::InputTag electronInput;
+	
+      // ----------member data ---------------------------
 
-	  // ----------member data ---------------------------
 
-	int numelectron; //number of electrons in the event
-
-	TFile *mfile;
-	TTree *mtree;
-
-	  std::vector<float> electron_e;
-  	std::vector<float> electron_pt;
-  	std::vector<float> electron_px;
-  	std::vector<float> electron_py;
-  	std::vector<float> electron_pz;
-  	std::vector<float> electron_eta;
-  	std::vector<float> electron_phi;
-  	std::vector<float> electron_ch;
+      TTree *mtree;
+      int numelectron; //number of electrons in the event
+      std::vector<float> electron_e;
+      std::vector<float> electron_pt;
+      std::vector<float> electron_px;
+      std::vector<float> electron_py;
+      std::vector<float> electron_pz;
+      std::vector<float> electron_eta;
+      std::vector<float> electron_phi;
+      std::vector<float> electron_ch;
 };
 
 //
@@ -83,6 +79,20 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 {
 //now do what ever initialization is needed
 	electronInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	edm::Service<TFileService> fs;
+	mtree = fs->make<TTree>("Events", "Events");
+
+
+	mtree->Branch("numberelectron",&numelectron);
+	mtree->Branch("electron_e",&electron_e);
+	mtree->Branch("electron_pt",&electron_pt);
+ 	mtree->Branch("electron_px",&electron_px);
+ 	mtree->Branch("electron_py",&electron_py);
+	mtree->Branch("electron_pz",&electron_pz);
+ 	mtree->Branch("electron_eta",&electron_eta);
+	mtree->Branch("electron_phi",&electron_phi);
+	mtree->Branch("electron_ch",&electron_ch);
+	
 }
 
 ElectronAnalyzer::~ElectronAnalyzer()
@@ -105,29 +115,20 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    Handle<reco::GsfElectronCollection> myelectrons;
    iEvent.getByLabel(electronInput, myelectrons);
 
-   analyzeElectrons(iEvent,myelectrons);
+   numelectron = 0;
+   electron_e.clear();
+   electron_pt.clear();
+   electron_px.clear();
+   electron_py.clear();
+   electron_pz.clear();
+   electron_eta.clear();
+   electron_phi.clear();
+   electron_ch.clear();
 
-   mtree->Fill();
-   return;
-}
-
-void
-ElectronAnalyzer::analyzeElectrons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons)
-{
-	  numelectron = 0;
-	  electron_e.clear();
-	  electron_pt.clear();
-	  electron_px.clear();
-	  electron_py.clear();
-	  electron_pz.clear();
-	  electron_eta.clear();
-	  electron_phi.clear();
-	  electron_ch.clear();
-
-  if(electrons.isValid()){
+   if(myelectrons.isValid()){
      // get the number of electrons in the event
-     numelectron=electrons->size();
-        for (reco::GsfElectronCollection::const_iterator itElec=electrons->begin(); itElec!=electrons->end(); ++itElec){
+     numelectron=myelectrons->size();
+        for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
 
     	        electron_e.push_back(itElec->energy());
     	        electron_pt.push_back(itElec->pt());
@@ -139,50 +140,35 @@ ElectronAnalyzer::analyzeElectrons(const edm::Event& iEvent, const edm::Handle<r
     	        electron_ch.push_back(itElec->charge());
         }
   }
+
+  mtree->Fill();
+  return;
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
 void
 ElectronAnalyzer::beginJob()
-{
-
-mfile = new TFile("ElectronInfo.root","RECREATE");
-mtree = new TTree("mtree","Electron information");
-
-  mtree->Branch("numberelectron",&numelectron);
-  mtree->Branch("electron_e",&electron_e);
-  mtree->Branch("electron_pt",&electron_pt);
-  mtree->Branch("electron_px",&electron_px);
-  mtree->Branch("electron_py",&electron_py);
-  mtree->Branch("electron_pz",&electron_pz);
-  mtree->Branch("electron_eta",&electron_eta);
-  mtree->Branch("electron_phi",&electron_phi);
-  mtree->Branch("electron_ch",&electron_ch);
-}
+{}
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 ElectronAnalyzer::endJob()
-{
-  mfile->Write();
-}
+{}
 
 // ------------ method called when starting to processes a run  ------------
 void
 ElectronAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a run  ------------
 void
 ElectronAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 // ------------ method called when starting to processes a luminosity block  ------------
 void
 ElectronAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void
