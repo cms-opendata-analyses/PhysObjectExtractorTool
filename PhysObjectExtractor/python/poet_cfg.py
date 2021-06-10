@@ -17,8 +17,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
-	'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
+#	'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
     )
 )
 
