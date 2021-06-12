@@ -4,5 +4,6 @@
 <use name="FWCore/ParameterSet"/>
 <use name="DataFormats/EgammaCandidates"/>
 <use name="CommonTools/UtilAlgos"/>
+<use name="DataFormats/VertexReco"/>
 <use name="FWCore/ServiceRegistry"/>
 <flags EDM_PLUGIN="1"/>
