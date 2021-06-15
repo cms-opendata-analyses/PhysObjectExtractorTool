@@ -141,8 +141,13 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      PV_x.push_back(vite->x());
      PV_y.push_back(vite->y());
      PV_z.push_back(vite->z());
-     for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)                                                                                                        {                                                                                                                                                                                                                      const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>();  float trackpt = trackRef->pt();                                                                                                                 score += trackpt*trackpt; }                          
-  PV_score.push_back(score);
+     for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)
+	{    
+	const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>(); 
+        float trackpt = trackRef->pt();
+        score += trackpt*trackpt; 
+	}                         
+     PV_score.push_back(score);
  
  if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.) 
         ++PV_npvsGood;
