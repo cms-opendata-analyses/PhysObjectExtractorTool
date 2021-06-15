@@ -33,6 +33,11 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
+
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include <vector>
 //
@@ -61,12 +66,13 @@ class VertexAnalyzer : public edm::EDAnalyzer {
      
     std::vector<float> PV_chi2;
     std::vector<float> PV_ndof;
-    //std::vector<float> PV_npvs;
-    //std::vector<float> PV_npvsGood;
-    //std::vector<float> PV_score;
+    int PV_npvs;
+    int PV_npvsGood;
+    std::vector<float> PV_score;
     std::vector<float> PV_x;
     std::vector<float> PV_y; 
     std::vector<float> PV_z;
+    Float_t Bsp_z;
 };
 
 //
@@ -109,9 +115,7 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    PV_chi2.clear();
    PV_ndof.clear();
-   //PV_npvs.clear();
-   //PV_npvsGood.clear();
-   //PV_score.clear();
+   PV_score.clear();
    PV_x.clear();
    PV_y.clear();
    PV_z.clear();
@@ -119,21 +123,36 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<reco::VertexCollection> Primvertex;
    iEvent.getByLabel("offlinePrimaryVertices",Primvertex);
    
-   for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); 
-       vite != Primvertex->end(); ++vite)
-   {
+   Handle<reco::TrackCollection> tracks;
+   iEvent.getByLabel("generalTracks", tracks);
+   
+   PV_npvsGood=0;
+  
+   edm::Handle<reco::BeamSpot> beamSpotHandle;
+   iEvent.getByLabel("offlineBeamSpot", beamSpotHandle); 
+   reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
+   Bsp_z = vertexBeamSpot.z0();
+
+   for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
+   { 
+     float score=0;
      PV_chi2.push_back(vite->chi2());
      PV_ndof.push_back(vite->ndof());
-     //PV_npvs.push_back(vite->npvs());
-     //PV_npvsGood.push_back(vite->npvsGood());
-     //PV_score.push_back(vite->score());
      PV_x.push_back(vite->x());
      PV_y.push_back(vite->y());
      PV_z.push_back(vite->z());
-   }
-   for(unsigned int i=0; i < PV_ndof.size(); i++){
-    std::cout <<"PV_ndof # "<<i<<"="<<PV_ndof.at(i)<<std::endl;
-   }
+     for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)                                                                                                        {                                                                                                                                                                                                                      const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>();  float trackpt = trackRef->pt();                                                                                                                 score += trackpt*trackpt; }                          
+  PV_score.push_back(score);
+ 
+ if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.) 
+        ++PV_npvsGood;
+
+  }
+  for(unsigned int i=0; i < PV_score.size(); i++){
+    std::cout <<"PV_score # "<<i<<"="<<PV_score.at(i)<<std::endl; }
+  PV_npvs=Primvertex->size();
+  std::cout<<PV_npvs<<std::endl;
+  std::cout<<PV_npvsGood<<std::endl;
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
    Handle<ExampleData> pIn;
