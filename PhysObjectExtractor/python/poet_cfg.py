@@ -29,8 +29,7 @@ process.source = cms.Source("PoolSource",
 
 #Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers.
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
-process.myevents = cms.EDAnalyzer('EventAnalyzer')
-process.Primvertex = cms.EDAnalyzer('VertexAnalyzer')	                             
+process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 				     InputCollection = cms.InputTag("gsfElectrons")
 				    )
@@ -42,4 +41,4 @@ process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
 
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.Primvertex)
+process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons)
