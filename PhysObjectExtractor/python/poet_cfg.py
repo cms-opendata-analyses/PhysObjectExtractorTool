@@ -18,17 +18,19 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
-	 #'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
+#	 'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
     )
 )
 
-#needed to get the actual prescale values used from the global tag
-#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
+
+#Uncomment this line if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
 #process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
-#process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 
 #Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers.
-#https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
+#More information about InputCollections at https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
 process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 				     InputCollection = cms.InputTag("gsfElectrons")

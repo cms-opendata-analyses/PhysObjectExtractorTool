@@ -85,7 +85,6 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 
 	mtree->Branch("numberelectron",&numelectron);
 	mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
-	std::cout<<"the title is "<<mtree->GetBranch("numberelectron")->GetTitle()<<std::endl;
 	mtree->Branch("electron_e",&electron_e);
 	mtree->GetBranch("electron_e")->SetTitle("electron energy");
 	mtree->Branch("electron_pt",&electron_pt);
