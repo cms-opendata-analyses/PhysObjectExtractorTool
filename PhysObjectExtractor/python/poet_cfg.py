@@ -13,12 +13,12 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
-#	'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
+	 #'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
     )
 )
 
@@ -34,11 +34,26 @@ process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 				     InputCollection = cms.InputTag("gsfElectrons")
 				    )
 process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
-				InputCollection = cms.InputTag("muons")
-				)
+				 InputCollection = cms.InputTag("muons")
+				 )
+process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
+                             InputCollection = cms.InputTag("photons")
+                             )
+process.myjets= cms.EDAnalyzer('JetAnalyzer',
+                             InputCollection = cms.InputTag("ak5PFJets")
+                             )
+process.mymets= cms.EDAnalyzer('MetAnalyzer',
+                              InputCollection = cms.InputTag("pfMet")
+                              )
+process.mytaus = cms.EDAnalyzer('TauAnalyzer',
+                               InputCollection = cms.InputTag("hpsPFTauProducer")
+                               )
+process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
+                             filterName = cms.string("hltSingleJet190Regional"),
+                             )
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
 
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons)
+process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
