@@ -84,14 +84,24 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 
 
 	mtree->Branch("numberelectron",&numelectron);
+	mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
+	std::cout<<"the title is "<<mtree->GetBranch("numberelectron")->GetTitle()<<std::endl;
 	mtree->Branch("electron_e",&electron_e);
+	mtree->GetBranch("electron_e")->SetTitle("electron energy");
 	mtree->Branch("electron_pt",&electron_pt);
+	mtree->GetBranch("electron_pt")->SetTitle("electron transverse momentum");
  	mtree->Branch("electron_px",&electron_px);
+	mtree->GetBranch("electron_px")->SetTitle("electron momentum x-component");
  	mtree->Branch("electron_py",&electron_py);
+	mtree->GetBranch("electron_py")->SetTitle("electron momentum y-component");
 	mtree->Branch("electron_pz",&electron_pz);
+	mtree->GetBranch("electron_pz")->SetTitle("electron momentum z-component");
  	mtree->Branch("electron_eta",&electron_eta);
+	mtree->GetBranch("electron_eta")->SetTitle("electron pseudorapidity");
 	mtree->Branch("electron_phi",&electron_phi);
+	mtree->GetBranch("electron_phi")->SetTitle("electron polar angle");
 	mtree->Branch("electron_ch",&electron_ch);
+	mtree->GetBranch("electron_ch")->SetTitle("electron charge");
 	
 }
 
