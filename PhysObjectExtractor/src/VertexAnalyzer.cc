@@ -30,6 +30,9 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
@@ -39,6 +42,8 @@
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
+#include "TTree.h"
+#include "TFile.h"
 #include <vector>
 //
 // class declaration
@@ -63,7 +68,8 @@ class VertexAnalyzer : public edm::EDAnalyzer {
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
       // ----------member data ---------------------------
-     
+    
+    TTree *mtree; 
     std::vector<float> PV_chi2;
     std::vector<float> PV_ndof;
     int PV_npvs;
@@ -90,7 +96,25 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
 
 {
    //now do what ever initialization is needed
-
+  
+   edm::Service<TFileService> fs;
+   mtree = fs->make<TTree>("Events", "Events");
+   mtree->Branch("PV_chi2",&PV_chi2);
+   mtree->GetBranch("PV_chi2")->SetTitle("main primary vertex reduced chi2");
+   mtree->Branch("PV_ndof",&PV_ndof);
+   mtree->GetBranch("PV_ndof")->SetTitle("main primary vertex number of degree of freedom");
+   mtree->Branch("PV_npvs",&PV_npvs);
+   mtree->GetBranch("PV_npvs")->SetTitle("total number of reconstructed primary vertices");
+   mtree->Branch("PV_npvsGood",&PV_npvsGood);
+   mtree->GetBranch("PV_npvsGood")->SetTitle("number of good reconstructed primary vertices. selection:!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2");
+   mtree->Branch("PV_score",&PV_score);
+   mtree->GetBranch("PV_score")->SetTitle("main primary vertex score, i.e. sum pt2 of clustered objects");
+   mtree->Branch("PV_x",&PV_x);
+   mtree->GetBranch("PV_x")->SetTitle("main primary vertex x coordinate");
+   mtree->Branch("PV_y",&PV_y);
+   mtree->GetBranch("PV_y")->SetTitle("main primary vertex y coordinate");
+   mtree->Branch("PV_z",&PV_z);
+   mtree->GetBranch("PV_z")->SetTitle("main primary vertex z coordinate");
 }
 
 
@@ -119,6 +143,8 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    PV_x.clear();
    PV_y.clear();
    PV_z.clear();
+   PV_npvs=0;
+   PV_npvsGood=0;
 
    edm::Handle<reco::VertexCollection> Primvertex;
    iEvent.getByLabel("offlinePrimaryVertices",Primvertex);
@@ -126,12 +152,12 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<reco::TrackCollection> tracks;
    iEvent.getByLabel("generalTracks", tracks);
    
-   PV_npvsGood=0;
-  
    edm::Handle<reco::BeamSpot> beamSpotHandle;
    iEvent.getByLabel("offlineBeamSpot", beamSpotHandle); 
    reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
    Bsp_z = vertexBeamSpot.z0();
+   
+   PV_npvs=Primvertex->size();
 
    for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
    { 
@@ -148,26 +174,12 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         score += trackpt*trackpt; 
 	}                         
      PV_score.push_back(score);
- 
- if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.) 
+     if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.) 
         ++PV_npvsGood;
-
   }
-  for(unsigned int i=0; i < PV_score.size(); i++){
-    std::cout <<"PV_score # "<<i<<"="<<PV_score.at(i)<<std::endl; }
-  PV_npvs=Primvertex->size();
-  std::cout<<PV_npvs<<std::endl;
-  std::cout<<PV_npvsGood<<std::endl;
-
-#ifdef THIS_IS_AN_EVENT_EXAMPLE
-   Handle<ExampleData> pIn;
-   iEvent.getByLabel("example",pIn);
-#endif
-   
-#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
-   ESHandle<SetupData> pSetup;
-   iSetup.get<SetupRecord>().get(pSetup);
-#endif
+ 
+ mtree->Fill();
+ 
 }
 
 
