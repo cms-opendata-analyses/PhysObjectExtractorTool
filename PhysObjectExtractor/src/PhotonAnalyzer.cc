@@ -13,6 +13,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 //classes to extract Photon information
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
@@ -38,34 +40,26 @@ class PhotonAnalyzer : public edm::EDAnalyzer {
       virtual void beginJob() ;
       virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
-
       virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-//declare a function to do the photon analysis
-      void analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &photons);
 
-
-//declare the input tag for PhotonCollection
+      //declare the input tag for PhotonCollection
       edm::InputTag photonInput;
 
-	  // ----------member data ---------------------------
+      // ----------member data ---------------------------
 
-	int numphoton; //number of photons in the event
-
-	TFile *mfile;
-	TTree *mtree;
-
-	  std::vector<float> photon_e;
-  	std::vector<float> photon_pt;
-  	std::vector<float> photon_px;
-  	std::vector<float> photon_py;
-  	std::vector<float> photon_pz;
-  	std::vector<float> photon_eta;
-  	std::vector<float> photon_phi;
-  	std::vector<float> photon_ch;
+      TTree *mtree;
+      int numphoton; //number of photons in the event
+      std::vector<float> photon_e;
+      std::vector<float> photon_pt;
+      std::vector<float> photon_px;
+      std::vector<float> photon_py;
+      std::vector<float> photon_pz;
+      std::vector<float> photon_eta;
+      std::vector<float> photon_phi;
+      std::vector<float> photon_ch;
 };
 
 //
@@ -85,6 +79,19 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
 {
 //now do what ever initialization is needed
 	photonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	edm::Service<TFileService> fs;
+	mtree = fs->make<TTree>("Events", "Events");
+
+
+       mtree->Branch("numberphoton",&numphoton);
+       mtree->Branch("photon_e",&photon_e);
+       mtree->Branch("photon_pt",&photon_pt);
+       mtree->Branch("photon_px",&photon_px);
+       mtree->Branch("photon_py",&photon_py);
+       mtree->Branch("photon_pz",&photon_pz);
+       mtree->Branch("photon_eta",&photon_eta);
+       mtree->Branch("photon_phi",&photon_phi);
+       mtree->Branch("photon_ch",&photon_ch);
 }
 
 
@@ -107,30 +114,21 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    Handle<reco::PhotonCollection> myphotons;
    iEvent.getByLabel(photonInput, myphotons);
+   
+   numphoton = 0;
+   photon_e.clear();
+   photon_pt.clear();
+   photon_px.clear();
+   photon_py.clear();
+   photon_pz.clear();
+   photon_eta.clear();
+   photon_phi.clear();
+   photon_ch.clear();
 
-   analyzePhotons(iEvent,myphotons);
-
-   mtree->Fill();
-   return;
-}
-
-void
-PhotonAnalyzer::analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco::PhotonCollection> &photons)
-{
-	  numphoton = 0;
-	  photon_e.clear();
-	  photon_pt.clear();
-	  photon_px.clear();
-	  photon_py.clear();
-	  photon_pz.clear();
-	  photon_eta.clear();
-	  photon_phi.clear();
-	  photon_ch.clear();
-
-  if(photons.isValid()){
+   if(myphotons.isValid()){
      // get the number of photons in the event
-     numphoton=(*photons).size();
-        for (reco::PhotonCollection::const_iterator itphoton=photons->begin(); itphoton!=photons->end(); ++itphoton){
+     numphoton=myphotons->size();
+        for (reco::PhotonCollection::const_iterator itphoton=myphotons->begin(); itphoton!=myphotons->end(); ++itphoton){
 
         	    photon_e.push_back(itphoton->energy());
         	    photon_pt.push_back(itphoton->pt());
@@ -142,50 +140,35 @@ PhotonAnalyzer::analyzePhotons(const edm::Event& iEvent, const edm::Handle<reco:
         	    photon_ch.push_back(itphoton->charge());
         }
   }
+  
+  mtree->Fill();
+  return;
+  
 }
 
 // ------------ method called once each job just before starting event loop  ------------
 void
 PhotonAnalyzer::beginJob()
-{
-
-mfile = new TFile("PhotonInfo.root","RECREATE");
-mtree = new TTree("mtree","Photon information");
-
-  mtree->Branch("numberphoton",&numphoton);
-  mtree->Branch("photon_e",&photon_e);
-  mtree->Branch("photon_pt",&photon_pt);
-  mtree->Branch("photon_px",&photon_px);
-  mtree->Branch("photon_py",&photon_py);
-  mtree->Branch("photon_pz",&photon_pz);
-  mtree->Branch("photon_eta",&photon_eta);
-  mtree->Branch("photon_phi",&photon_phi);
-  mtree->Branch("photon_ch",&photon_ch);
-}
+{}
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 PhotonAnalyzer::endJob()
-{
-  mfile->Write();
-}
+{}
 
 // ------------ method called when starting to processes a run  ------------
 void
 PhotonAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a run  ------------
 void
 PhotonAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 // ------------ method called when starting to processes a luminosity block  ------------
 void
 PhotonAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void

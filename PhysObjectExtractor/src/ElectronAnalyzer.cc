@@ -13,6 +13,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 //classes to extract electron information
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
@@ -32,46 +34,37 @@
 //
 
 class ElectronAnalyzer : public edm::EDAnalyzer {
-public:
-  explicit ElectronAnalyzer(const edm::ParameterSet&);
-  ~ElectronAnalyzer();
+   public:
+      explicit ElectronAnalyzer(const edm::ParameterSet&);
+      ~ElectronAnalyzer();
 
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-private:
-  virtual void beginJob() ;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-  
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+   private:
+      virtual void beginJob() ;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&);
+      virtual void endJob() ;
+      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+      virtual void endRun(edm::Run const&, edm::EventSetup const&);
+      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-  //declare a function to do the electron analysis
-  void analyzeElectrons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons);
+      //declare the input tag for GsfElectronCollection
+      edm::InputTag electronInput;
+	
+      // ----------member data ---------------------------
 
-  //declare the input tag for GsfElectronCollection
-  edm::InputTag electronInput;
 
-  // ----------member data ---------------------------
-
-  int numelectron; //number of electrons in the event
-
-  TFile *mfile;
-  TTree *mtree;
-  
-  std::vector<float> electron_e;
-  std::vector<float> electron_pt;
-  std::vector<float> electron_px;
-  std::vector<float> electron_py;
-  std::vector<float> electron_pz;
-  std::vector<float> electron_eta;
-  std::vector<float> electron_phi;
-  std::vector<float> electron_ch;
-  std::vector<bool> electron_isLoose;
-  std::vector<bool> electron_isMedium;
-  std::vector<bool> electron_isTight;
+      TTree *mtree;
+      int numelectron; //number of electrons in the event
+      std::vector<float> electron_e;
+      std::vector<float> electron_pt;
+      std::vector<float> electron_px;
+      std::vector<float> electron_py;
+      std::vector<float> electron_pz;
+      std::vector<float> electron_eta;
+      std::vector<float> electron_phi;
+      std::vector<float> electron_ch;
 };
 
 //
@@ -90,6 +83,29 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 {
 //now do what ever initialization is needed
 	electronInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+	edm::Service<TFileService> fs;
+	mtree = fs->make<TTree>("Events", "Events");
+
+
+	mtree->Branch("numberelectron",&numelectron);
+	mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
+	mtree->Branch("electron_e",&electron_e);
+	mtree->GetBranch("electron_e")->SetTitle("electron energy");
+	mtree->Branch("electron_pt",&electron_pt);
+	mtree->GetBranch("electron_pt")->SetTitle("electron transverse momentum");
+ 	mtree->Branch("electron_px",&electron_px);
+	mtree->GetBranch("electron_px")->SetTitle("electron momentum x-component");
+ 	mtree->Branch("electron_py",&electron_py);
+	mtree->GetBranch("electron_py")->SetTitle("electron momentum y-component");
+	mtree->Branch("electron_pz",&electron_pz);
+	mtree->GetBranch("electron_pz")->SetTitle("electron momentum z-component");
+ 	mtree->Branch("electron_eta",&electron_eta);
+	mtree->GetBranch("electron_eta")->SetTitle("electron pseudorapidity");
+	mtree->Branch("electron_phi",&electron_phi);
+	mtree->GetBranch("electron_phi")->SetTitle("electron polar angle");
+	mtree->Branch("electron_ch",&electron_ch);
+	mtree->GetBranch("electron_ch")->SetTitle("electron charge");
+	
 }
 
 ElectronAnalyzer::~ElectronAnalyzer()
@@ -112,88 +128,29 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    Handle<reco::GsfElectronCollection> myelectrons;
    iEvent.getByLabel(electronInput, myelectrons);
 
-   analyzeElectrons(iEvent,myelectrons);
+   numelectron = 0;
+   electron_e.clear();
+   electron_pt.clear();
+   electron_px.clear();
+   electron_py.clear();
+   electron_pz.clear();
+   electron_eta.clear();
+   electron_phi.clear();
+   electron_ch.clear();
 
-   mtree->Fill();
-   return;
-}
-
-void
-ElectronAnalyzer::analyzeElectrons(const edm::Event& iEvent, const edm::Handle<reco::GsfElectronCollection> &electrons)
-{
-  using namespace edm;
-  using namespace std;
-  edm::Handle<reco::ConversionCollection> hConversions;
-  iEvent.getByLabel("allConversions", hConversions);
-  edm::Handle<reco::BeamSpot> bsHandle;
-  iEvent.getByLabel("offlineBeamSpot", bsHandle);
-  const reco::BeamSpot &beamspot = *bsHandle.product();
-  Handle<reco::VertexCollection> vertices;
-  iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
-  math::XYZPoint pv(vertices->begin()->position());
-
-  numelectron = 0;
-  electron_e.clear();
-  electron_pt.clear();
-  electron_px.clear();
-  electron_py.clear();
-  electron_pz.clear();
-  electron_eta.clear();
-  electron_phi.clear();
-  electron_ch.clear();
-  electron_isLoose.clear();
-  electron_isMedium.clear();
-  electron_isTight.clear();
-  
-  if(electrons.isValid()){
+   if(myelectrons.isValid()){
      // get the number of electrons in the event
-    numelectron=electrons->size();
-    float pfIso = -999;
-    for (reco::GsfElectronCollection::const_iterator itElec=electrons->begin(); itElec!=electrons->end(); ++itElec){
-      int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
-      bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
-      if (itElec->passingPflowPreselection()) {
-        auto iso03 = itElec->pfIsolationVariables();
-        float pfIso = (iso03.chargedHadronIso + iso03.neutralHadronIso + iso03.photonIso)/itElec->pt();
-      } 
-      auto trk = itElec->gsfTrack();
-      bool el_isLoose = false;
-      bool el_isMedium = false;
-      bool el_isTight = false;
-      if ( abs(itElec->eta()) <= 1.479 ) {   
-	if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.15 && 
-	     itElec->sigmaIetaIeta()<.01 && itElec->hadronicOverEm()<.12 && 
-	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-	          missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
-	     abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05 ){
-	    
-          el_isLoose = true;
-	    
-	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
-	    el_isMedium = true;
-	        
-	    if (abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && pfIso<.10 ){
-	      el_isTight = true;
-	    }
-	  }
-	}
-      }
-      else if ( abs(itElec->eta()) > 1.479 && abs(itElec->eta()) < 2.5 ) {
-        if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.1 && 
-	     itElec->sigmaIetaIeta()<.03 && itElec->hadronicOverEm()<.1 && 
-	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-	          missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
-             abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05) {
-	    
-          el_isLoose = true;
-	    
-	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
-	    el_isMedium = true;
-	        
-	    if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && pfIso<.10 ){
-	      el_isTight = true;
-	    }
-	  }
+     numelectron=myelectrons->size();
+        for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+
+    	        electron_e.push_back(itElec->energy());
+    	        electron_pt.push_back(itElec->pt());
+    	        electron_px.push_back(itElec->px());
+    	        electron_py.push_back(itElec->py());
+    	        electron_pz.push_back(itElec->pz());
+    	        electron_eta.push_back(itElec->eta());
+    	        electron_phi.push_back(itElec->phi());
+    	        electron_ch.push_back(itElec->charge());
         }
       }
 
@@ -210,50 +167,35 @@ ElectronAnalyzer::analyzeElectrons(const edm::Event& iEvent, const edm::Handle<r
       electron_isTight.push_back(el_isTight);
     }
   }
+
+  mtree->Fill();
+  return;
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
 void
 ElectronAnalyzer::beginJob()
-{
-
-mfile = new TFile("ElectronInfo.root","RECREATE");
-mtree = new TTree("mtree","Electron information");
-
-  mtree->Branch("numberelectron",&numelectron);
-  mtree->Branch("electron_e",&electron_e);
-  mtree->Branch("electron_pt",&electron_pt);
-  mtree->Branch("electron_px",&electron_px);
-  mtree->Branch("electron_py",&electron_py);
-  mtree->Branch("electron_pz",&electron_pz);
-  mtree->Branch("electron_eta",&electron_eta);
-  mtree->Branch("electron_phi",&electron_phi);
-  mtree->Branch("electron_ch",&electron_ch);
-}
+{}
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 ElectronAnalyzer::endJob()
-{
-  mfile->Write();
-}
+{}
 
 // ------------ method called when starting to processes a run  ------------
 void
 ElectronAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a run  ------------
 void
 ElectronAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 // ------------ method called when starting to processes a luminosity block  ------------
 void
 ElectronAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void
