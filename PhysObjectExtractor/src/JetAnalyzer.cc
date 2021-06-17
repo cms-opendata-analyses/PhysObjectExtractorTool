@@ -43,56 +43,37 @@
 //
 
 class JetAnalyzer : public edm::EDAnalyzer {
-public:
-  explicit JetAnalyzer(const edm::ParameterSet&);
-  ~JetAnalyzer();
-  
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  public:
+      explicit JetAnalyzer(const edm::ParameterSet&);
+      ~JetAnalyzer();
 
-private:
-  virtual void beginJob() ;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-  
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-  std::vector<std::string> jecPayloadNames_;
-  std::string              jecL1_;
-  std::string              jecL2_;
-  std::string              jecL3_;
-  std::string              jecUncName_;
-  boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
-  boost::shared_ptr<FactorizedJetCorrector> jec_;
-//declare a function to do the jet analysis
-  void analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets);
+      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
+   private:
+      virtual void beginJob() ;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&);
+      virtual void endJob() ;
+      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+      virtual void endRun(edm::Run const&, edm::EventSetup const&);
+      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+      
+      //declare the input tag for PFJetCollection
+      edm::InputTag jetInput;
 
-//declare the input tag for PFJetCollection
-  edm::InputTag jetInput;
-
-  // ----------member data ---------------------------
-
-  int numjet; //number of jets in the event
-
-  TFile *mfile;
-  TTree *mtree;
-  
-  std::vector<float> jet_e;
-  std::vector<float> jet_pt;
-  std::vector<float> jet_px;
-  std::vector<float> jet_py;
-  std::vector<float> jet_pz;
-  std::vector<float> jet_eta;
-  std::vector<float> jet_phi;
-  std::vector<float> jet_ch;
-  std::vector<float> jet_mass;
-  std::vector<float> jet_btag;
-  std::vector<float> corr_jet_pt;
-  std::vector<float> corr_jet_ptUp;
-  std::vector<float> corr_jet_ptDown;
+      // ----------member data ---------------------------
+      
+      
+      int numjet; //number of jets in the event
+      TTree *mtree;
+      std::vector<float> jet_e;
+      std::vector<float> jet_pt;
+      std::vector<float> jet_px;
+      std::vector<float> jet_py;
+      std::vector<float> jet_pz;
+      std::vector<float> jet_eta;
+      std::vector<float> jet_phi;
+      std::vector<float> jet_ch;
 };
 
 //
@@ -130,6 +111,19 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
 	// Make the FactorizedJetCorrector and Uncertainty                                                                                              
 	jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
 	jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
+	edm::Service<TFileService> fs;
+	mtree = fs->make<TTree>("Events", "Events");
+	
+	
+	mtree->Branch("numberjet",&numjet);
+	mtree->Branch("jet_e",&jet_e);
+	mtree->Branch("jet_pt",&jet_pt);
+	mtree->Branch("jet_px",&jet_px);
+	mtree->Branch("jet_py",&jet_py); 
+	mtree->Branch("jet_pz",&jet_pz);
+	mtree->Branch("jet_eta",&jet_eta);
+	mtree->Branch("jet_phi",&jet_phi);
+	mtree->Branch("jet_ch",&jet_ch);
 }
 
 JetAnalyzer::~JetAnalyzer()
@@ -137,7 +131,6 @@ JetAnalyzer::~JetAnalyzer()
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 }
-
 
 //
 // member functions
@@ -152,125 +145,62 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    Handle<reco::PFJetCollection> myjets;
    iEvent.getByLabel(jetInput, myjets);
+   
+   numjet = 0;
+   jet_e.clear();
+   jet_pt.clear();
+   jet_px.clear();
+   jet_py.clear();
+   jet_pz.clear();
+   jet_eta.clear();
+   jet_phi.clear();
+   jet_ch.clear();
 
-   analyzeJets(iEvent,myjets);
-
-   mtree->Fill();
-   return;
-}
-
-void
-JetAnalyzer::analyzeJets(const edm::Event& iEvent, const edm::Handle<reco::PFJetCollection> &jets)
-{
-  using namespace edm;
-  using namespace std;
-  Handle<reco::JetTagCollection> btags;
-  iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
-  Handle<double> rhoHandle;
-  iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
-  Handle<reco::VertexCollection> vertices;
-  iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
-  numjet = 0;
-  jet_e.clear();
-  jet_pt.clear();
-  jet_px.clear();
-  jet_py.clear();
-  jet_pz.clear();
-  jet_eta.clear();
-  jet_phi.clear();
-  jet_ch.clear();
-  jet_mass.clear();
-  jet_btag.clear();
-  corr_jet_pt.clear();
-  corr_jet_ptUp.clear();
-  corr_jet_ptDown.clear();
-
-  if(jets.isValid()){
+  if(myjets.isValid()){
      // get the number of jets in the event
-     numjet=(*jets).size();
-        for (reco::PFJetCollection::const_iterator itjet=jets->begin(); itjet!=jets->end(); ++itjet){
-	  reco::Candidate::LorentzVector uncorrJet = itjet->p4();
-	  jec_->setJetEta( uncorrJet.eta() );
-	  jec_->setJetPt ( uncorrJet.pt() );
-	  jec_->setJetE  ( uncorrJet.energy() );
-	  jec_->setJetA  ( itjet->jetArea() );
-	  jec_->setRho   ( *(rhoHandle.product()) );
-	  jec_->setNPV   ( vertices->size() );
-	  double corr = jec_->getCorrection();
+     numjet=myjets->size();
+        for (reco::PFJetCollection::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
 
-	  double corrUp = 1.0;
-	  double corrDown = 1.0;
-	  jecUnc_->setJetEta( uncorrJet.eta() );
-	  jecUnc_->setJetPt( corr * uncorrJet.pt() );
-	  corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
-	  jecUnc_->setJetEta( uncorrJet.eta() );
-	  jecUnc_->setJetPt( corr * uncorrJet.pt() );
-	  corrDown = corr * (1 - fabs(jecUnc_->getUncertainty(-1)));
-
-	  jet_e.push_back(itjet->energy());
-	  jet_pt.push_back(itjet->pt());
-	  jet_px.push_back(itjet->px());
-	  jet_py.push_back(itjet->py());
-	  jet_pz.push_back(itjet->pz());
-	  jet_eta.push_back(itjet->eta());
-	  jet_phi.push_back(itjet->phi());
-	  jet_ch.push_back(itjet->charge());
-	  jet_mass.push_back(itjet->mass());
-	  jet_btag.push_back(btags->operator[](itjet - jets->begin()).second);
-	  corr_jet_pt.push_back(corr*uncorrJet.pt());
-	  corr_jet_ptUp.push_back(corrUp*uncorrJet.pt());
-	  corr_jet_ptDown.push_back(corrDown*uncorrJet.pt());
+        	    jet_e.push_back(itjet->energy());
+        	    jet_pt.push_back(itjet->pt());
+        	    jet_px.push_back(itjet->px());
+        	    jet_py.push_back(itjet->py());
+        	    jet_pz.push_back(itjet->pz());
+        	    jet_eta.push_back(itjet->eta());
+        	    jet_phi.push_back(itjet->phi());
+        	    jet_ch.push_back(itjet->charge());
         }
   }
+  
+  mtree->Fill();
+  return;
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
 void
 JetAnalyzer::beginJob()
-{
-
-mfile = new TFile("JetInfo.root","RECREATE");
-mtree = new TTree("mtree","Jet information");
-
-  mtree->Branch("numberjet",&numjet);
-  mtree->Branch("jet_e",&jet_e);
-  mtree->Branch("jet_pt",&jet_pt);
-  mtree->Branch("jet_px",&jet_px);
-  mtree->Branch("jet_py",&jet_py);
-  mtree->Branch("jet_pz",&jet_pz);
-  mtree->Branch("jet_eta",&jet_eta);
-  mtree->Branch("jet_phi",&jet_phi);
-  mtree->Branch("jet_ch",&jet_ch);
-  mtree->Branch("jet_mass",&jet_mass);
-  mtree->Branch("jet_btag",&jet_btag);
-  mtree->Branch("corr_jet_pt",&corr_jet_pt);
-  mtree->Branch("corr_jet_ptUp",&corr_jet_ptUp);
-  mtree->Branch("corr_jet_ptDown",&corr_jet_ptDown);
-}
+{}
+>>>>>>> upstream/modular
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 JetAnalyzer::endJob()
-{
-  mfile->Write();
-}
+{}
 
 // ------------ method called when starting to processes a run  ------------
 void
 JetAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a run  ------------
 void
 JetAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
+{}
 // ------------ method called when starting to processes a luminosity block  ------------
 void
 JetAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
+{}
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void

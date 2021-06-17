@@ -39,7 +39,7 @@ scram b
 ```
 5. Make a soft link to the python configuration file
 ```
-ln -s python/physicsobjectsinfo_cfg.py .
+ln -s python/poet_cfg.py .
 ```
 6. Make symbolic links to the conditions database: (trigger analizer)
 ```
@@ -48,10 +48,10 @@ ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RU
 ```
 7. Run the CMSSW configuration file:
 ```
-cmsRun physicsobjectsinfo_cfg.py
+cmsRun poet_cfg.py
 ```
 
-##### As a result you will get a ObjectInfoNtuple.root and histo.root file with simple variables and histograms.
+##### As a result you will get a myoutput.root file with simple variables.
 
 
 
