@@ -21,6 +21,7 @@
 #include "DataFormats/TauReco/interface/PFTauFwd.h"
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
 
+
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
@@ -79,6 +80,7 @@ class TauAnalyzer : public edm::EDAnalyzer {
       std::vector<float> tau_idantimuloose;
       std::vector<float> tau_idantimumedium;
       std::vector<float> tau_idantimutight;
+
 };
 
 //
@@ -206,10 +208,10 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if(mytaus.isValid()){
      // get the number of taus in the event
      numtau=mytaus->size();
+
      const float tau_min_pt = 15;
         for (reco::PFTauCollection::const_iterator itTau=mytaus->begin(); itTau!=mytaus->end(); ++itTau){
            if (itTau->pt() > tau_min_pt) {
-
     	        tau_e.push_back(itTau->energy());
     	        tau_pt.push_back(itTau->pt());
     	        tau_px.push_back(itTau->px());
@@ -274,20 +276,19 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        	const auto idx = itTau - mytaus->begin();
 		tau_iddecaymode.push_back(tausDecayMode->operator[](idx).second);
       	     	tau_idisoraw.push_back(tausRawIso->operator[](idx).second);
-       	     	tau_idisovloose.push_back(tausVLooseIso->operator[](idx).second);
-       	     	tau_idisoloose.push_back(tausLooseIso->operator[](idx).second);
-       	     	tau_idisomedium.push_back(tausMediumIso->operator[](idx).second);
-       	     	tau_idisotight.push_back(tausTightIso->operator[](idx).second);
-       	     	tau_idantieleloose.push_back(tausLooseEleRej->operator[](idx).second);
-       	     	tau_idantielemedium.push_back(tausMediumEleRej->operator[](idx).second);
-       	     	tau_idantieletight.push_back(tausTightEleRej->operator[](idx).second);
-       	     	tau_idantimuloose.push_back(tausLooseMuonRej->operator[](idx).second);
-       	     	tau_idantimumedium.push_back(tausMediumMuonRej->operator[](idx).second);
-       	     	tau_idantimutight.push_back(tausTightMuonRej->operator[](idx).second);
-
-                tau_reliso_all.push_back((itTau->isolationPFChargedHadrCandsPtSum() + itTau->isolationPFGammaCandsEtSum()) / itTau->pt());
-                tau_jetidx.push_back(-1);
-                tau_genpartidx.push_back(-1);
+       	tau_idisovloose.push_back(tausVLooseIso->operator[](idx).second);
+       	tau_idisoloose.push_back(tausLooseIso->operator[](idx).second);
+       	tau_idisomedium.push_back(tausMediumIso->operator[](idx).second);
+       	tau_idisotight.push_back(tausTightIso->operator[](idx).second);
+       	tau_idantieleloose.push_back(tausLooseEleRej->operator[](idx).second);
+       	tau_idantielemedium.push_back(tausMediumEleRej->operator[](idx).second);
+       	tau_idantieletight.push_back(tausTightEleRej->operator[](idx).second);
+       	tau_idantimuloose.push_back(tausLooseMuonRej->operator[](idx).second);
+       	tau_idantimumedium.push_back(tausMediumMuonRej->operator[](idx).second);
+       	tau_idantimutight.push_back(tausTightMuonRej->operator[](idx).second);
+       	tau_reliso_all.push_back((itTau->isolationPFChargedHadrCandsPtSum() + itTau->isolationPFGammaCandsEtSum()) / itTau->pt());
+       	tau_jetidx.push_back(-1);
+       	tau_genpartidx.push_back(-1);
  
           }   	
         }
