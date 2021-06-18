@@ -5,4 +5,9 @@
 <use name="DataFormats/EgammaCandidates"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
+<use name="DataFormats/TrackReco"/>
+<use name="RecoMuon/TrackingTools"/>
+<use name="RecoEgamma/EgammaTools"/>
+<use name="CondFormats/JetMETObjects"/>
+<use name="DataFormats/PatCandidates"/>
 <flags EDM_PLUGIN="1"/>
