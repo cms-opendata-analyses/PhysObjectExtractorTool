@@ -3,6 +3,8 @@ import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 
+isData = True
+
 process = cms.Process("POET")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -23,14 +25,15 @@ process.source = cms.Source("PoolSource",
 )
 
 #These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 
 #Uncomment this line if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
 #process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
 
 #Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers.
 #More information about InputCollections at https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
+
 process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 				     InputCollection = cms.InputTag("gsfElectrons")
@@ -41,9 +44,6 @@ process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
 process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
                              InputCollection = cms.InputTag("photons")
                              )
-process.myjets= cms.EDAnalyzer('JetAnalyzer',
-                             InputCollection = cms.InputTag("ak5PFJets")
-                             )
 process.mymets= cms.EDAnalyzer('MetAnalyzer',
                               InputCollection = cms.InputTag("pfMet")
                               )
@@ -53,9 +53,12 @@ process.mytaus = cms.EDAnalyzer('TauAnalyzer',
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
                              filterName = cms.string("hltSingleJet190Regional"),
                              )
+process.myjets= cms.EDAnalyzer('JetAnalyzer',
+                             InputCollection = cms.InputTag("ak5PFJets")
+                             )
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
 
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent) 

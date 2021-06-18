@@ -48,7 +48,7 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-
+  
       //declare the input tag for GsfElectronCollection
       edm::InputTag electronInput;
 	
@@ -112,7 +112,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 	mtree->GetBranch("electron_isLoose")->SetTitle("electron is Loose");
 	mtree->Branch("electron_isMedium",&electron_isMedium);
 	mtree->GetBranch("electron_isMedium")->SetTitle("electron is Medium");
-	mtree->Branch("electron_isTight",&electron_isTight;
+	mtree->Branch("electron_isTight",&electron_isTight);
 	mtree->GetBranch("electron_isTight")->SetTitle("electron_isTight");
 	
 }
