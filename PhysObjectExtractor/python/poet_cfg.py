@@ -3,6 +3,8 @@ import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 
+isData = True
+
 process = cms.Process("POET")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -39,19 +41,36 @@ process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
 				 InputCollection = cms.InputTag("muons")
 				 )
 process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
-                             InputCollection = cms.InputTag("photons")
+                                   InputCollection = cms.InputTag("photons")
                              )
-process.myjets= cms.EDAnalyzer('JetAnalyzer',
-                             InputCollection = cms.InputTag("ak5PFJets")
-                             )
+if isData:
+    process.myjets= cms.EDAnalyzer('JetAnalyzer',
+                                   InputCollection = cms.InputTag("ak5PFJets"),
+                                   isData = cms.bool(True),
+                                   jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/FT53_V21A_AN6_L1FastJet_AK5PF.txt'),
+                                   jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/FT53_V21A_AN6_L2Relative_AK5PF.txt'),
+                                   jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/FT53_V21A_AN6_L3Absolute_AK5PF.txt'),
+                                   jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/FT53_V21A_AN6_L2L3Residual_AK5PF.txt'),
+                                   jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/FT53_V21A_AN6_Uncertainty_AK5PF.txt'),
+                               )
+else:
+    process.myjets= cms.EDAnalyzer('JetAnalyzer',
+                                   InputCollection = cms.InputTag("ak5PFJets"),
+                                   isData = cms.bool(False),
+                                   jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_L1FastJet_AK5PF.txt'),
+                                   jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_L2Relative_AK5PF.txt'),
+                                   jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_L3Absolute_AK5PF.txt'),
+                                   jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_L2L3Residual_AK5PF.txt'),
+                                   jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_Uncertainty_AK5PF.txt'),
+                               )
 process.mymets= cms.EDAnalyzer('MetAnalyzer',
-                              InputCollection = cms.InputTag("pfMet")
+                               InputCollection = cms.InputTag("pfMet")
                               )
 process.mytaus = cms.EDAnalyzer('TauAnalyzer',
-                               InputCollection = cms.InputTag("hpsPFTauProducer")
+                                InputCollection = cms.InputTag("hpsPFTauProducer")
                                )
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
-                             filterName = cms.string("hltSingleJet190Regional"),
+                                     filterName = cms.string("hltSingleJet190Regional"),
                              )
 
 process.TFileService = cms.Service(
