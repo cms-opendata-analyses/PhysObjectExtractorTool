@@ -19,6 +19,10 @@
 //classes to extract electron information
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 //classes to save data
 #include "TTree.h"
@@ -61,6 +65,9 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
       std::vector<float> electron_eta;
       std::vector<float> electron_phi;
       std::vector<float> electron_ch;
+      std::vector<bool> electron_isLoose;
+      std::vector<bool> electron_isMedium;
+      std::vector<bool> electron_isTight;
 };
 
 //
@@ -101,6 +108,12 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 	mtree->GetBranch("electron_phi")->SetTitle("electron polar angle");
 	mtree->Branch("electron_ch",&electron_ch);
 	mtree->GetBranch("electron_ch")->SetTitle("electron charge");
+	mtree->Branch("electron_isLoose",&electron_isLoose);
+	mtree->GetBranch("electron_isLoose")->SetTitle("electron is Loose");
+	mtree->Branch("electron_isMedium",&electron_isMedium);
+	mtree->GetBranch("electron_isMedium")->SetTitle("electron is Medium");
+	mtree->Branch("electron_isTight",&electron_isTight;
+	mtree->GetBranch("electron_isTight")->SetTitle("electron_isTight");
 	
 }
 
@@ -123,6 +136,14 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
    Handle<reco::GsfElectronCollection> myelectrons;
    iEvent.getByLabel(electronInput, myelectrons);
+   edm::Handle<reco::ConversionCollection> hConversions;
+   iEvent.getByLabel("allConversions", hConversions);
+   edm::Handle<reco::BeamSpot> bsHandle;
+   iEvent.getByLabel("offlineBeamSpot", bsHandle);
+   const reco::BeamSpot &beamspot = *bsHandle.product();
+   Handle<reco::VertexCollection> vertices;
+   iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
+   math::XYZPoint pv(vertices->begin()->position());
 
    numelectron = 0;
    electron_e.clear();
@@ -133,11 +154,64 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    electron_eta.clear();
    electron_phi.clear();
    electron_ch.clear();
+   electron_isLoose.clear();
+   electron_isMedium.clear();
+   electron_isTight.clear();
 
    if(myelectrons.isValid()){
+   
      // get the number of electrons in the event
      numelectron=myelectrons->size();
-        for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+     float pfIso = -999;
+     
+     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+        
+      int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
+      bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
+      if (itElec->passingPflowPreselection()) {
+        auto iso03 = itElec->pfIsolationVariables();
+        pfIso = (iso03.chargedHadronIso + iso03.neutralHadronIso + iso03.photonIso)/itElec->pt();
+      } 
+      auto trk = itElec->gsfTrack();
+      bool el_isLoose = false;
+      bool el_isMedium = false;
+      bool el_isTight = false;
+      if ( abs(itElec->eta()) <= 1.479 ) {   
+	if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.15 && 
+	     itElec->sigmaIetaIeta()<.01 && itElec->hadronicOverEm()<.12 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	          missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
+	     abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05 ){
+	    
+          el_isLoose = true;
+	    
+	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
+	    el_isMedium = true;
+	        
+	    if (abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && pfIso<.10 ){
+	      el_isTight = true;
+	    }
+	  }
+	}
+      }
+      else if ( abs(itElec->eta()) > 1.479 && abs(itElec->eta()) < 2.5 ) {
+        if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.1 && 
+	     itElec->sigmaIetaIeta()<.03 && itElec->hadronicOverEm()<.1 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	          missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
+             abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05) {
+	    
+          el_isLoose = true;
+	    
+	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
+	    el_isMedium = true;
+	        
+	    if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && pfIso<.10 ){
+	      el_isTight = true;
+	    }
+	  }
+        }
+      }
 
     	        electron_e.push_back(itElec->energy());
     	        electron_pt.push_back(itElec->pt());
@@ -147,6 +221,9 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     	        electron_eta.push_back(itElec->eta());
     	        electron_phi.push_back(itElec->phi());
     	        electron_ch.push_back(itElec->charge());
+    	        electron_isLoose.push_back(el_isLoose);
+    	        electron_isMedium.push_back(el_isMedium);
+    	        electron_isTight.push_back(el_isTight);
         }
   }
 
