@@ -128,9 +128,9 @@ TauAnalyzer::TauAnalyzer(const edm::ParameterSet& iConfig)
 	mtree->Branch("tau_reliso_all",&tau_reliso_all);
 	mtree->GetBranch("tau_reliso_all")->SetTitle("tau reliso all");
 	mtree->Branch("tau_genpartidx",&tau_genpartidx);
-	mtree->GetBranch("tau_genpartidx")->SetTitle("tau genpartidx");
+	mtree->GetBranch("tau_genpartidx")->SetTitle("Index into genParticle list for MC matching to status==2 taus");
 	mtree->Branch("tau_jetidx",&tau_jetidx);
-	mtree->GetBranch("tau_jetidx")->SetTitle("tau jetidx");
+	mtree->GetBranch("tau_jetidx")->SetTitle("index of the associated jet");
 	mtree->Branch("tau_iddecaymode",&tau_iddecaymode);
 	mtree->GetBranch("tau_iddecaymode")->SetTitle("tau id decay mode");
 	mtree->Branch("tau_idisoraw",&tau_idisoraw);

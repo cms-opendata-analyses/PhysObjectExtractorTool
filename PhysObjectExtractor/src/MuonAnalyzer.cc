@@ -118,25 +118,25 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig)
 	mtree->Branch("muon_mass",&muon_mass);
 	mtree->GetBranch("muon_mass")->SetTitle("muon mass");
 	mtree->Branch("muon_pfreliso03all",&muon_pfreliso03all);
-	mtree->GetBranch("muon_pfreliso03all")->SetTitle("muon pfreliso03all");
+	mtree->GetBranch("muon_pfreliso03all")->SetTitle("muon particle flow relative isolation cone 03");
 	mtree->Branch("muon_pfreliso04all",&muon_pfreliso04all);
-	mtree->GetBranch("muon_pfreliso04all")->SetTitle("muon pfreliso04all");
+	mtree->GetBranch("muon_pfreliso04all")->SetTitle("muon particle flow relative isolation cone 04");
 	mtree->Branch("muon_tightid",&muon_tightid);
-	mtree->GetBranch("muon_tightid")->SetTitle("muon tight id");
+	mtree->GetBranch("muon_tightid")->SetTitle("tight cut-based ID");
 	mtree->Branch("muon_softid",&muon_softid);
-	mtree->GetBranch("muon_softid")->SetTitle("muon soft id");
+	mtree->GetBranch("muon_softid")->SetTitle("soft cut-based ID");
 	mtree->Branch("muon_dxy",&muon_dxy);
 	mtree->GetBranch("muon_dxy")->SetTitle("muon dxy");
 	mtree->Branch("muon_dxyErr",&muon_dxyErr);
-	mtree->GetBranch("muon_dxyErr")->SetTitle("muon dxyErr");
+	mtree->GetBranch("muon_dxyErr")->SetTitle("muon dxy uncertainty");
 	mtree->Branch("muon_dz",&muon_dz);
 	mtree->GetBranch("muon_dz")->SetTitle("muon dz");
 	mtree->Branch("muon_dzErr",&muon_dzErr);
-	mtree->GetBranch("muon_dzErr")->SetTitle("muon dzErr");
+	mtree->GetBranch("muon_dzErr")->SetTitle("muon dz uncertainty");
 	mtree->Branch("muon_jetidx",&muon_jetidx);
-	mtree->GetBranch("muon_jetidx")->SetTitle("muon jetidx");
+	mtree->GetBranch("muon_jetidx")->SetTitle("index of the associated jet");
 	mtree->Branch("muon_genpartidx",&muon_genpartidx);
-	mtree->GetBranch("muon_genpartidx")->SetTitle("muon genpartidx");
+	mtree->GetBranch("muon_genpartidx")->SetTitle("index into genParticle list for MC matching to status==1 muons");
 }
 
 MuonAnalyzer::~MuonAnalyzer()
