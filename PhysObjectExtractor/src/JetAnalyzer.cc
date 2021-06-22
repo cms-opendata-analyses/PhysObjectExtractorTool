@@ -149,11 +149,11 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->Branch("jet_phi",&jet_phi);
   mtree->GetBranch("jet_phi")->SetTitle("jet polar angle");
   mtree->Branch("jet_ch",&jet_ch);
-  tree->GetBranch("jet_ch")->SetTitle("jet charge");
+  mtree->GetBranch("jet_ch")->SetTitle("jet charge");
   mtree->Branch("jet_mass",&jet_mass);
-  tree->GetBranch("jet_mass")->SetTitle("jet mass");
+  mtree->GetBranch("jet_mass")->SetTitle("jet mass");
   mtree->Branch("jet_btag",&jet_btag);
-  tree->GetBranch("jet_btag")->SetTitle("jet btag discriminator");
+  mtree->GetBranch("jet_btag")->SetTitle("jet btag discriminator");
   mtree->Branch("corr_jet_pt",&corr_jet_pt);
   mtree->GetBranch("corr_jet_pt")->SetTitle("corrected jet transverse momentum");
   mtree->Branch("corr_jet_ptUp",&corr_jet_ptUp);
