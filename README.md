@@ -53,7 +53,7 @@ cmsRun poet_cfg.py
 ```
 
 
-**As a result you will get a `myoutput.root` file with simple variables.**  This file has been divided by subdirectories, corresponding to each type of physics object (or kind of information).  If needed, in the `PhysObjectExtractor/test` directory of a `ROOT` analysis example code can be found.  It runs over the families of ROOT trees in the the `myoutput.root` file.
+**As a result you will get a `myoutput.root` file with simple variables.**  This file has been divided by subdirectories, corresponding to each type of physics object (or kind of information).  If needed, in the `PhysObjectExtractor/test` directory, a `ROOT` analysis example code can be found.  It runs over the families of ROOT trees in the the `myoutput.root` file.
 
 
 
