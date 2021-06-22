@@ -10,7 +10,8 @@ In the code there are several comments explaining the logic that follows, also, 
 
 ## Usage instrucctions
 
-1. Install CERN [virtual machine](http://opendata.cern.ch/docs/cms-virtual-machine-2011) from the CMS open data website.
+1. Install CERN [virtual machine](http://opendata.cern.ch/docs/cms-virtual-machine-2011) or [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) from the CMS open data website.
+
 2. Set up your enviroment
 
 * Create a project area:
@@ -39,19 +40,20 @@ scram b
 ```
 5. Make a soft link to the python configuration file
 ```
-ln -s python/physicsobjectsinfo_cfg.py .
+ln -s python/poet_cfg.py .
 ```
-6. Make symbolic links to the conditions database: (trigger analizer)
+6. **Only if your are using the VM** and not the Docker container, make symbolic links to the conditions database.  In fact if you are not extracting information about corrections (e.g., jet corrections) or the trigger, you could actually comment out all the lines that have to do with the *global tag* (conditions database).
 ```
 ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA FT_53_LV5_AN1
 ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RUNA.db
 ```
 7. Run the CMSSW configuration file:
 ```
-cmsRun physicsobjectsinfo_cfg.py
+cmsRun poet_cfg.py
 ```
 
-##### As a result you will get a ObjectInfoNtuple.root file (or alike) with simple variables.
+
+**As a result you will get a `myoutput.root` file with simple variables.**  This file has been divided by subdirectories, corresponding to each type of physics object (or kind of information).  If needed, in the `PhysObjectExtractor/test` directory, a `ROOT` analysis example code can be found.  It runs over the families of ROOT trees in the the `myoutput.root` file.
 
 
 
