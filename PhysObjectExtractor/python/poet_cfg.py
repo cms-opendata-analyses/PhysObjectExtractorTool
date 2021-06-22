@@ -41,11 +41,9 @@ process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
 				 InputCollection = cms.InputTag("muons")
 				 )
-process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
 
-                             InputCollection = cms.InputTag("photons")
-                             )
-                                   InputCollection = cms.InputTag("photons")
+process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
+                                 InputCollection = cms.InputTag("photons")
                              )
 if isData:
     process.myjets= cms.EDAnalyzer('JetAnalyzer',
