@@ -53,10 +53,11 @@ process.mytaus = cms.EDAnalyzer('TauAnalyzer',
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
                              filterName = cms.string("hltSingleJet190Regional"),
                              )
-process.Primvertex = cms.EDAnalyzer('VertexAnalyzer')
+process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
+process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
 
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.Primvertex)
+process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks)

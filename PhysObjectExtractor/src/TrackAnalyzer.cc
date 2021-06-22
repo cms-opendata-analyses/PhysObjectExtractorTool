@@ -103,21 +103,37 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
    mtree->Branch("track_pt",&track_pt);
+   mtree->GetBranch("track_pt")->SetTitle("track transverse momentum");
    mtree->Branch("track_ptError",&track_ptError);
-   mtree->Branch("track_charge",&track_charge); 
+   mtree->GetBranch("track_ptError")->SetTitle("error on track transverse momentum");
+   mtree->Branch("track_charge",&track_charge);
+   mtree->GetBranch("track_charge")->SetTitle("track charge"); 
    mtree->Branch("track_chi2",&track_chi2);
-   mtree->Branch("track_eta",&track_eta);  
-   mtree->Branch("track_etaError",&track_etaError); 
+   mtree->GetBranch("track_chi2")->SetTitle("track chi2");
+   mtree->Branch("track_eta",&track_eta);
+   mtree->GetBranch("track_eta")->SetTitle("track pseudorapidity of momentum vector");  
+   mtree->Branch("track_etaError",&track_etaError);
+   mtree->GetBranch("track_etaError")->SetTitle("track error on pseudorapidity of momentum vector"); 
    mtree->Branch("track_lambda",&track_lambda);
+   mtree->GetBranch("track_lambda")->SetTitle("track lambda");
    mtree->Branch("track_lambdaError",&track_lambdaError);
+   mtree->GetBranch("track_lambdaError")->SetTitle("error on track lambda");
    mtree->Branch("track_ndof",&track_ndof);
+   mtree->GetBranch("track_ndof")->SetTitle("track number of degrees of freedom");
    mtree->Branch("track_phi",&track_phi);
-   mtree->Branch("track_phiError",&track_phiError); 
+   mtree->GetBranch("track_phi")->SetTitle("track azimuthal angle of momentum vector");
+   mtree->Branch("track_phiError",&track_phiError);
+   mtree->GetBranch("track_phiError")->SetTitle("error on track azimuthal angle of momentum vector"); 
    mtree->Branch("track_px",&track_px);
-   mtree->Branch("track_py",&track_py); 
+   mtree->GetBranch("track_px")->SetTitle("track x coordinate of momentum vector");
+   mtree->Branch("track_py",&track_py);
+   mtree->GetBranch("track_py")->SetTitle("track y coordinate of momentum vector"); 
    mtree->Branch("track_pz",&track_pz);
+   mtree->GetBranch("track_pz")->SetTitle("track z coordinate of momentum vector");
    mtree->Branch("track_theta",&track_theta);
+   mtree->GetBranch("track_theta")->SetTitle("track polar angle");
    mtree->Branch("track_thetaError",&track_thetaError);
+   mtree->GetBranch("track_thetaError")->SetTitle("error on track polar angle");
 }
 
 

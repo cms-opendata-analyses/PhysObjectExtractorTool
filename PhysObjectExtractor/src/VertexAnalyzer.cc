@@ -100,7 +100,7 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
    mtree->Branch("PV_chi2",&PV_chi2);
-   mtree->GetBranch("PV_chi2")->SetTitle("main primary vertex reduced chi2");
+   mtree->GetBranch("PV_chi2")->SetTitle("main primary vertex chi2");
    mtree->Branch("PV_ndof",&PV_ndof);
    mtree->GetBranch("PV_ndof")->SetTitle("main primary vertex number of degree of freedom");
    mtree->Branch("PV_npvs",&PV_npvs);
@@ -156,7 +156,7 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByLabel("offlineBeamSpot", beamSpotHandle);
    reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
    Bsp_z = vertexBeamSpot.z0();
-
+   
    PV_npvs=Primvertex->size();
 
    for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
