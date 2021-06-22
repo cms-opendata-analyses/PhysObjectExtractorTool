@@ -33,6 +33,7 @@ process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 
 #Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers.
 #More information about InputCollections at https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
+
 process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 				     InputCollection = cms.InputTag("gsfElectrons")
@@ -41,6 +42,9 @@ process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
 				 InputCollection = cms.InputTag("muons")
 				 )
 process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
+
+                             InputCollection = cms.InputTag("photons")
+                             )
                                    InputCollection = cms.InputTag("photons")
                              )
 if isData:
@@ -63,6 +67,7 @@ else:
                                    jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_L2L3Residual_AK5PF.txt'),
                                    jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/START53_V27_Uncertainty_AK5PF.txt'),
                                )
+
 process.mymets= cms.EDAnalyzer('MetAnalyzer',
                                InputCollection = cms.InputTag("pfMet")
                               )
@@ -72,11 +77,12 @@ process.mytaus = cms.EDAnalyzer('TauAnalyzer',
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
                                      filterName = cms.string("hltSingleJet190Regional"),
                              )
+
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
-
 process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks)
+
