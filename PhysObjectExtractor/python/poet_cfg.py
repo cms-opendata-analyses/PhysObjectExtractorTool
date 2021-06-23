@@ -78,9 +78,10 @@ process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
+process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer')
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks)
+process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
 
