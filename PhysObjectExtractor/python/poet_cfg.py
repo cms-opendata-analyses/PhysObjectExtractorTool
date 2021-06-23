@@ -23,8 +23,8 @@ process.source = cms.Source("PoolSource",
 )
 
 #These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 
 #Uncomment this line if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
 #process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
@@ -55,9 +55,10 @@ process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
                              )
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
+process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer')
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
 
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks)
+process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
