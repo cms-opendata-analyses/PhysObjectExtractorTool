@@ -21,7 +21,6 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
       #'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
@@ -33,7 +32,7 @@ process.source = cms.Source("PoolSource",
 #These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
-if isData: process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
+if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
 else: process.GlobalTag.globaltag = "START53_V27::All"
 
 #Uncomment this line if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
@@ -50,7 +49,7 @@ process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
 process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
                                    InputCollection = cms.InputTag("photons")
                              )
-#Path Strings
+#Path Strings: These correspond to the Global Tag. Run jec_cfg.py first to get .txt files
 JecString = 'START53_V27_'
 if isData: JecString = 'FT53_V21A_AN6_'
 
@@ -88,16 +87,16 @@ if doPat:
  process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
 				   InputCollection = cms.InputTag("selectedPatJetsAK5PFCorr"),
                                    isData = cms.bool(isData),
-                                   jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'),
-                                   jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')
+                                   jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'), 
+                                   jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')         
                                )
 else:
     process.myjets= cms.EDAnalyzer('JetAnalyzer',
                                    InputCollection = cms.InputTag("ak5PFJets"),
                                    isData = cms.bool(isData),
-                                   jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L1FastJet_AK5PF.txt'),
-                                   jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2Relative_AK5PF.txt'),
-                                   jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L3Absolute_AK5PF.txt'),
+                                   jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L1FastJet_AK5PF.txt'), 
+                                   jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2Relative_AK5PF.txt'),     #Don't forget to run jec_cfg.py
+                                   jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L3Absolute_AK5PF.txt'),     #to get these .txt files :)
                                    jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2L3Residual_AK5PF.txt'),
                                    jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'),
                                    jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')
