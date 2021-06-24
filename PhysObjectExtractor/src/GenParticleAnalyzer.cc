@@ -82,7 +82,7 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
 	edm::Service<TFileService> fs;
 	mtree = fs->make<TTree>("Events", "Events");
     
-	 mtree->Branch("GenPart_pt",&GenPart_pt);
+    mtree->Branch("GenPart_pt",&GenPart_pt);
     mtree->GetBranch("GenPart_pt")->SetTitle("generator particle transverse momentum");
     mtree->Branch("GenPart_eta",&GenPart_eta);
     mtree->GetBranch("GenPart_eta")->SetTitle("generator particle pseudorapidity");
@@ -124,34 +124,30 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    Handle<reco::GenParticleCollection> gens;
    iEvent.getByLabel("genParticles", gens);
    
-  int a1,b1,a2,b2,a3,b3,a4,b4; 
+   unsigned int i;
+   string s1,s2;
+   std::vector<int> status_parsed;
+   std::vector<int> pdgId_parsed;
+   std::string delimiter = ":";
 
-  if(std::find(particle.begin(), particle.end(), "electron") != particle.end())
-  {
-     a1=11;
-     b1=1;
-  }
-  if(std::find(particle.begin(), particle.end(), "muon") != particle.end())
-  {
-     a2=13;
-     b2=1;
-  }
-  if(std::find(particle.begin(), particle.end(), "photon") != particle.end())
-  {
-     a3=22;
-     b3=1;
-  }
-  if(std::find(particle.begin(), particle.end(), "tau") != particle.end())
-  {
-     a4=15;
-     b4=2;
-  }
-
+   for(i=0;i<particle.size();i++)
+   {
+       //get status and pgdId from configuration
+       s1=particle[i].substr(0,particle[i].find(delimiter));
+       s2=particle[i].substr(particle[i].find(delimiter)+1,particle[i].size());
+       //parse string to int
+       status_parsed.push_back(stoi(s1));
+       pdgId_parsed.push_back(stoi(s2));
+   }
+  
   if(gens.isValid())
   {
         for (reco::GenParticleCollection::const_iterator itGenPart=gens->begin(); itGenPart!=gens->end(); ++itGenPart)
         {
-                if ((a1==itGenPart->pdgId() && b1==itGenPart->status())||(a2==itGenPart->pdgId() && b2==itGenPart->status())||(a3==itGenPart->pdgId() && b3==itGenPart->status())||(a4==itGenPart->pdgId() && b4==itGenPart->status()))
+               //loop trough all particles selected in configuration
+               for(i=0;i<particle.size();i++)
+               {
+                  if(status_parsed[i]==itGenPart->status() && pdgId_parsed[i]==itGenPart->pdgId())
                 {
                   GenPart_pt.push_back(itGenPart->pt());
                   GenPart_eta.push_back(itGenPart->eta());
@@ -162,7 +158,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_px.push_back(itGenPart->px());
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
-                }               
+                }
+               }               
         }
   }
 	
