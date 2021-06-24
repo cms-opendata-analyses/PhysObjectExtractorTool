@@ -61,13 +61,13 @@ cmsRun poet_cfg.py
 
 Muons
 
-*https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
-*https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMuonAnalysis
+* [Muon IDs and Isolation] (https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId)
+* [Muon Analysis] (https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMuonAnalysis)
 
 Taus
 
-*https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPFTauTagging#Legacy_Tau_ID_Run_I
-*https://twiki.cern.ch/twiki/bin/view/CMSPublic/NutShellRecipeFor5312AndNewer
+* [Tau IDs] (https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPFTauTagging#Legacy_Tau_ID_Run_I)
+* [Tau Discriminators](https://twiki.cern.ch/twiki/bin/view/CMSPublic/NutShellRecipeFor5312AndNewer)
 
 
 
