@@ -19,8 +19,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
+       'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
 #	 'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
+  
     )
 )
 
@@ -78,7 +79,7 @@ process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
-process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer')
+process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',input_particle = cms.vstring("electron","muon","photon","tau"))
 
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
