@@ -130,26 +130,21 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   {
      a1=11;
      b1=1;
-     std::cout<<"e"<<std::endl;
   }
-
   if(std::find(particle.begin(), particle.end(), "muon") != particle.end())
   {
      a2=13;
      b2=1;
-     std::cout<<"m"<<std::endl;
   }
   if(std::find(particle.begin(), particle.end(), "photon") != particle.end())
   {
      a3=22;
      b3=1;
-     std::cout<<"p"<<std::endl;
   }
   if(std::find(particle.begin(), particle.end(), "tau") != particle.end())
   {
      a4=15;
      b4=2;
-     std::cout<<"t"<<std::endl;
   }
 
   if(gens.isValid())
