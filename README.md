@@ -57,17 +57,17 @@ cmsRun poet_cfg.py
 
 
 
-References:
+##References:
 
 Muons
 
-https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
-https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMuonAnalysis
+*https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
+*https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMuonAnalysis
 
 Taus
 
-https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPFTauTagging#Legacy_Tau_ID_Run_I
-https://twiki.cern.ch/twiki/bin/view/CMSPublic/NutShellRecipeFor5312AndNewer
+*https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPFTauTagging#Legacy_Tau_ID_Run_I
+*https://twiki.cern.ch/twiki/bin/view/CMSPublic/NutShellRecipeFor5312AndNewer
 
 
 
