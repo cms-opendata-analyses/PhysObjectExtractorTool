@@ -51,7 +51,7 @@ public:
   ~JetAnalyzer();
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  
+  std::vector<float> factorLookup(float eta);
 private:
   virtual void beginJob() ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
@@ -59,8 +59,8 @@ private:
   virtual void beginRun(edm::Run const&, edm::EventSetup const&);
   virtual void endRun(edm::Run const&, edm::EventSetup const&);
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-        
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;  
+       
   //declare the input tag for PFJetCollection
   edm::InputTag jetInput;
   
@@ -72,8 +72,10 @@ private:
   std::string              jecL3_;
   std::string              jecRes_;
   std::string              jecUncName_;
+  std::string              jerResName_;
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
   boost::shared_ptr<FactorizedJetCorrector> jec_;
+  boost::shared_ptr<SimpleJetCorrector> ak5PFCorrector;
   bool isData;
 
   int numjet; //number of jets in the event
@@ -91,6 +93,8 @@ private:
   std::vector<float> corr_jet_pt;
   std::vector<float> corr_jet_ptUp;
   std::vector<float> corr_jet_ptDown;
+  std::vector<float> corr_jet_ptSmearUp;
+  std::vector<float> corr_jet_ptSmearDown;
 };
 
 //
@@ -117,7 +121,8 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   jecL2_ = iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath(); // JEC level payloads                     
   jecL3_ = iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath(); // JEC level payloads                     
   jecRes_= iConfig.getParameter<edm::FileInPath>("jecResName").fullPath();
-  jecUncName_ = iConfig.getParameter<edm::FileInPath>("jecUncName").fullPath();      // JEC uncertainties                               
+  jecUncName_ = iConfig.getParameter<edm::FileInPath>("jecUncName").fullPath(); // JEC uncertainties
+  jerResName_ = iConfig.getParameter<edm::FileInPath>("jerResName").fullPath(); // JER Resolutions                               
 
   //Get the factorized jet corrector parameters.
   jecPayloadNames_.push_back(jecL1_);
@@ -134,36 +139,43 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   // Make the FactorizedJetCorrector and Uncertainty                                                                                              
   jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
+  JetCorrectorParameters *ak5PFPar = new JetCorrectorParameters(jerResName_);
+  ak5PFCorrector = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*ak5PFPar) );  
+
 	
   mtree->Branch("numberjet",&numjet);
-  mtree->GetBranch("numberjet")->SetTitle("number of jets");
+  mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
   mtree->Branch("jet_e",&jet_e);
-  mtree->GetBranch("jet_e")->SetTitle("jet energy");
+  mtree->GetBranch("jet_e")->SetTitle("Uncorrected Jet Energy");
   mtree->Branch("jet_pt",&jet_pt);
-  mtree->GetBranch("jet_pt")->SetTitle("jet transverse momentum");
+  mtree->GetBranch("jet_pt")->SetTitle("Uncorrected Transverse Jet Momentum");
   mtree->Branch("jet_px",&jet_px);
-  mtree->GetBranch("jet_px")->SetTitle("jet momentum x-component");
+  mtree->GetBranch("jet_px")->SetTitle("X-Component of Jet Momentum");
   mtree->Branch("jet_py",&jet_py); 
-  mtree->GetBranch("jet_py")->SetTitle("jet momentum y-component");
+  mtree->GetBranch("jet_py")->SetTitle("Y-Component of Jet Momentum");
   mtree->Branch("jet_pz",&jet_pz);
-  mtree->GetBranch("jet_pz")->SetTitle("jet momentum z-component");
+  mtree->GetBranch("jet_pz")->SetTitle("Z-Component of Jet Momentum");
   mtree->Branch("jet_eta",&jet_eta);
-  mtree->GetBranch("jet_eta")->SetTitle("jet pseudorapidity");
+  mtree->GetBranch("jet_eta")->SetTitle("Jet Eta");
   mtree->Branch("jet_phi",&jet_phi);
-  mtree->GetBranch("jet_phi")->SetTitle("jet polar angle");
+  mtree->GetBranch("jet_phi")->SetTitle("Jet Phi");
   mtree->Branch("jet_ch",&jet_ch);
-  mtree->GetBranch("jet_ch")->SetTitle("jet charge");
+  mtree->GetBranch("jet_ch")->SetTitle("Jet Charge");
   mtree->Branch("jet_mass",&jet_mass);
-  mtree->GetBranch("jet_mass")->SetTitle("jet mass");
+  mtree->GetBranch("jet_mass")->SetTitle("Jet Mass");
   mtree->Branch("jet_btag",&jet_btag);
-  mtree->GetBranch("jet_btag")->SetTitle("jet btag discriminator");
+  mtree->GetBranch("jet_btag")->SetTitle("Jet Btagging Discriminant (CSV)");
   mtree->Branch("corr_jet_pt",&corr_jet_pt);
-  mtree->GetBranch("corr_jet_pt")->SetTitle("corrected jet transverse momentum");
+  mtree->GetBranch("corr_jet_pt")->SetTitle("Corrected Transverse Jet Momentum");
   mtree->Branch("corr_jet_ptUp",&corr_jet_ptUp);
-  mtree->GetBranch("corr_jet_ptUp")->SetTitle("corrected jet transverse momentum uncertainty shifted up");
+  mtree->GetBranch("corr_jet_ptUp")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Up)");
   mtree->Branch("corr_jet_ptDown",&corr_jet_ptDown);
-  mtree->GetBranch("corr_jet_ptDown")->SetTitle("corrected jet transverse momentum uncertainty shifted down");
-	
+  mtree->GetBranch("corr_jet_ptDown")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Down)");
+  mtree->Branch("corr_jet_ptSmearUp",&corr_jet_ptSmearUp);
+  mtree->GetBranch("corr_jet_ptSmearUp")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Up)");
+  mtree->Branch("corr_jet_ptSmearDown",&corr_jet_ptSmearDown);	
+  mtree->GetBranch("corr_jet_ptSmearDown")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Down)");
+
 }
 
 JetAnalyzer::~JetAnalyzer()
@@ -228,6 +240,35 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        jecUnc_->setJetPt( corr * uncorrJet.pt() );
        corrDown = corr * (1 - fabs(jecUnc_->getUncertainty(-1)));
        
+       float ptscale, ptscale_down, ptscale_up;
+   
+       if(isData) {
+         ptscale = 1;
+         ptscale_down = 1;
+         ptscale_up = 1;
+       } 
+       else {
+         std::vector<float> factors = factorLookup(fabs(itjet->eta())); // returns in order {factor, factor_down, factor_up}
+         std::vector<float> feta;
+         std::vector<float> PTNPU;
+	 feta.push_back( fabs(itjet->eta()) );
+         PTNPU.push_back( itjet->pt() );
+         PTNPU.push_back( vertices->size() );
+
+         float res = ak5PFCorrector->correction(feta, PTNPU);
+
+         TRandom3 JERrand;
+
+         JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
+         ptscale = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[0]*(factors[0]+2))*res*itjet->pt())/itjet->pt());
+
+         JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
+         ptscale_down = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[1]*(factors[1]+2))*res*itjet->pt())/itjet->pt());
+
+         JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
+         ptscale_up = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[2]*(factors[2]+2))*res*itjet->pt())/itjet->pt());
+       }
+
        jet_e.push_back(itjet->energy());
        jet_pt.push_back(itjet->pt());
        jet_px.push_back(itjet->px());
@@ -238,9 +279,11 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        jet_ch.push_back(itjet->charge());
        jet_mass.push_back(itjet->mass());
        jet_btag.push_back(btags->operator[](itjet - myjets->begin()).second);
-       corr_jet_pt.push_back(corr*uncorrJet.pt());
+       corr_jet_pt.push_back(ptscale*corr*uncorrJet.pt());
        corr_jet_ptUp.push_back(corrUp*uncorrJet.pt());
        corr_jet_ptDown.push_back(corrDown*uncorrJet.pt());
+       corr_jet_ptSmearUp.push_back(ptscale_up*corrUp*uncorrJet.pt());
+       corr_jet_ptSmearDown.push_back(ptscale_down*corrUp*uncorrJet.pt());
      }
    }
    
