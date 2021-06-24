@@ -50,17 +50,13 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       // ----------member data ---------------------------
 
       TTree *mtree;
-      int nElectron;
-      int nMuon;
-      int nPhoton;
-      int nTau;
+
       std::vector<int> GenPart_status;
       std::vector<float> GenPart_pt;
       std::vector<float> GenPart_eta;
       std::vector<float> GenPart_mass;
       std::vector<int> GenPart_pdgId;
       std::vector<float> GenPart_phi;
-      std::vector<std::string>  GenPart_name;
       std::vector<float> GenPart_px;
       std::vector<float> GenPart_py;
       std::vector<float> GenPart_pz;
@@ -86,14 +82,6 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
 	edm::Service<TFileService> fs;
 	mtree = fs->make<TTree>("Events", "Events");
     
-    mtree->Branch("nElectron",&nElectron);
-    mtree->GetBranch("nElectron")->SetTitle("number of electrons");
-    mtree->Branch("nMuon",&nMuon);
-    mtree->GetBranch("nMuon")->SetTitle("number of muons");
-    mtree->Branch("nPhoton",&nPhoton);
-    mtree->GetBranch("nPhoton")->SetTitle("number of photons");
-    mtree->Branch("nTau",&nTau);
-    mtree->GetBranch("nTau")->SetTitle("number of taus");
 	 mtree->Branch("GenPart_pt",&GenPart_pt);
     mtree->GetBranch("GenPart_pt")->SetTitle("generator particle transverse momentum");
     mtree->Branch("GenPart_eta",&GenPart_eta);
@@ -104,8 +92,6 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_pdgId")->SetTitle("generator particle PDG id");
     mtree->Branch("GenPart_phi",&GenPart_phi);
     mtree->GetBranch("GenPart_phi")->SetTitle("generator particle azimuthal angle of momentum vector");
-    mtree->Branch("GenPart_name",&GenPart_name);
-    mtree->GetBranch("GenPart_name")->SetTitle("generator particle name");
     mtree->Branch("GenPart_px",&GenPart_px);
     mtree->GetBranch("GenPart_px")->SetTitle("generator particle x coordinate of momentum vector");
     mtree->Branch("GenPart_py",&GenPart_py);
@@ -138,80 +124,50 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    Handle<reco::GenParticleCollection> gens;
    iEvent.getByLabel("genParticles", gens);
    
-  nElectron=nMuon=nPhoton=nTau=0;
-  
+  int a1,b1,a2,b2,a3,b3,a4,b4; 
+
+  if(std::find(particle.begin(), particle.end(), "electron") != particle.end())
+  {
+     a1=11;
+     b1=1;
+     std::cout<<"e"<<std::endl;
+  }
+
+  if(std::find(particle.begin(), particle.end(), "muon") != particle.end())
+  {
+     a2=13;
+     b2=1;
+     std::cout<<"m"<<std::endl;
+  }
+  if(std::find(particle.begin(), particle.end(), "photon") != particle.end())
+  {
+     a3=22;
+     b3=1;
+     std::cout<<"p"<<std::endl;
+  }
+  if(std::find(particle.begin(), particle.end(), "tau") != particle.end())
+  {
+     a4=15;
+     b4=2;
+     std::cout<<"t"<<std::endl;
+  }
+
   if(gens.isValid())
   {
         for (reco::GenParticleCollection::const_iterator itGenPart=gens->begin(); itGenPart!=gens->end(); ++itGenPart)
         {
-           //electron
-                if (std::find(particle.begin(), particle.end(), "electron") != particle.end() && itGenPart->pdgId()==11 && itGenPart->status()==1 )
+                if ((a1==itGenPart->pdgId() && b1==itGenPart->status())||(a2==itGenPart->pdgId() && b2==itGenPart->status())||(a3==itGenPart->pdgId() && b3==itGenPart->status())||(a4==itGenPart->pdgId() && b4==itGenPart->status()))
                 {
-                  nElectron++;
                   GenPart_pt.push_back(itGenPart->pt());
                   GenPart_eta.push_back(itGenPart->eta());
                   GenPart_mass.push_back(itGenPart->mass());
                   GenPart_pdgId.push_back(itGenPart->pdgId());
                   GenPart_phi.push_back(itGenPart->phi());
                   GenPart_status.push_back(itGenPart->status());
-                  GenPart_name.push_back("electron");
                   GenPart_px.push_back(itGenPart->px());
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                }
-           //muon
-                if (std::find(particle.begin(), particle.end(), "muon") != particle.end() && itGenPart->pdgId()==13 && itGenPart->status()==1 )
-                {
-                   nMuon++;
-                  GenPart_pt.push_back(itGenPart->pt());
-                  GenPart_eta.push_back(itGenPart->eta());
-                  GenPart_mass.push_back(itGenPart->mass());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                  GenPart_phi.push_back(itGenPart->phi());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_name.push_back("muon");
-                  GenPart_px.push_back(itGenPart->px());
-                  GenPart_py.push_back(itGenPart->py());
-                  GenPart_pz.push_back(itGenPart->pz());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                }
-           //photon   
-                if (std::find(particle.begin(), particle.end(), "photon") != particle.end() && itGenPart->pdgId()==22 && itGenPart->status()==1 )
-                {
-                  nPhoton++;
-                  GenPart_pt.push_back(itGenPart->pt());
-                  GenPart_eta.push_back(itGenPart->eta());
-                  GenPart_mass.push_back(itGenPart->mass());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                  GenPart_phi.push_back(itGenPart->phi());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_name.push_back("photon");
-                  GenPart_px.push_back(itGenPart->px());
-                  GenPart_py.push_back(itGenPart->py());
-                  GenPart_pz.push_back(itGenPart->pz());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                }
-           //tau
-                if (std::find(particle.begin(), particle.end(), "tau") != particle.end() && itGenPart->pdgId()==15 && itGenPart->status()==2 )
-                {
-                  nTau++;
-                  GenPart_pt.push_back(itGenPart->pt());
-                  GenPart_eta.push_back(itGenPart->eta());
-                  GenPart_mass.push_back(itGenPart->mass());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                  GenPart_phi.push_back(itGenPart->phi());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_name.push_back("tau");
-                  GenPart_px.push_back(itGenPart->px());
-                  GenPart_py.push_back(itGenPart->py());
-                  GenPart_pz.push_back(itGenPart->pz());
-                  GenPart_status.push_back(itGenPart->status());
-                  GenPart_pdgId.push_back(itGenPart->pdgId());
-                }
+                }               
         }
   }
 	
