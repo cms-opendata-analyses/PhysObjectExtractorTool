@@ -91,18 +91,31 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
   
   
   mtree->Branch("numberphoton",&numphoton);
+  mtree->GetBranch("numberphoton")->SetTitle("number of photons");
   mtree->Branch("photon_e",&photon_e);
+  mtree->GetBranch("photon_e")->SetTitle("photon energy");
   mtree->Branch("photon_pt",&photon_pt);
+  mtree->GetBranch("photon_pt")->SetTitle("photon transverse momentum");
   mtree->Branch("photon_px",&photon_px);
+  mtree->GetBranch("photon_px")->SetTitle("photon momentum x-component");
   mtree->Branch("photon_py",&photon_py);
+  mtree->GetBranch("photon_py")->SetTitle("photon momentum y-component");
   mtree->Branch("photon_pz",&photon_pz);
+  mtree->GetBranch("photon_pz")->SetTitle("photon momentum z-component");
   mtree->Branch("photon_eta",&photon_eta);
+  mtree->GetBranch("photon_eta")->SetTitle("photon pseudorapidity");
   mtree->Branch("photon_phi",&photon_phi);
+  mtree->GetBranch("photon_phi")->SetTitle("photon polar angle");
   mtree->Branch("photon_ch",&photon_ch);
+  mtree->GetBranch("photon_ch")->SetTitle("photon charge");
   mtree->Branch("photon_iso",&photon_iso);
+  mtree->GetBranch("photon_iso")->SetTitle("photon isolation");
   mtree->Branch("photon_isLoose",&photon_isLoose);
+  mtree->GetBranch("photon_isLoose")->SetTitle("photon tagged loose");
   mtree->Branch("photon_isMedium",&photon_isMedium);
+  mtree->GetBranch("photon_isMedium")->SetTitle("photon tagged medium");
   mtree->Branch("photon_isTight",&photon_isTight);
+  mtree->GetBranch("photon_isTight")->SetTitle("photon tagged tight");
 }
 
 
