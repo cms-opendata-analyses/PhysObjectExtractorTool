@@ -1,9 +1,9 @@
 
+<buildfile>
 <use name="FWCore/Framework"/>
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ParameterSet"/>
 <use name="DataFormats/EgammaCandidates"/>
-<use name="DataFormats/TrackReco"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
 <use name="DataFormats/MuonReco"/>
@@ -13,3 +13,4 @@
 <use name="CondFormats/JetMETObjects"/>
 <use name="DataFormats/PatCandidates"/>
 <flags EDM_PLUGIN="1"/>
+</buildfile>
