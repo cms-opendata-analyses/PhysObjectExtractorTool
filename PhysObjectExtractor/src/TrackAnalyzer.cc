@@ -65,7 +65,8 @@ class TrackAnalyzer : public edm::EDAnalyzer {
 
       // ----------member data ---------------------------
     
-    TTree *mtree; 
+    TTree *mtree;
+    int numtracks; 
     std::vector<float> track_pt;
     std::vector<float> track_ptError;
     std::vector<float> track_charge;
@@ -102,6 +103,8 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
   
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
+   mtree->Branch("numtracks",&numtracks);
+   mtree->GetBranch("numtracks")->SetTitle("number of tracks");
    mtree->Branch("track_pt",&track_pt);
    mtree->GetBranch("track_pt")->SetTitle("track transverse momentum");
    mtree->Branch("track_ptError",&track_ptError);
@@ -156,6 +159,7 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
 
+   numtracks=0;
    track_pt.clear();
    track_charge.clear();
    track_ptError.clear();
@@ -176,6 +180,9 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<reco::TrackCollection> tracks;
    iEvent.getByLabel("generalTracks", tracks);
 
+   if(tracks.isValid())
+   {
+      numtracks=tracks->size();
    for (reco::TrackCollection::const_iterator iTrack = tracks->begin(); iTrack != tracks->end(); ++iTrack)
       {
         track_pt.push_back(iTrack->pt());
@@ -195,6 +202,7 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         track_theta.push_back(iTrack->theta());
         track_thetaError.push_back(iTrack->thetaError());
       }
+   }
 
 
  mtree->Fill();
