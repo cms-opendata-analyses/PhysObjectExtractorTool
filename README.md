@@ -71,6 +71,6 @@ Taus
 
 Jets
 
-* [JEC+JER main documentation, includes jet pt resolution functions and scale factors (Fig 41) applied for JER](https://arxiv.org/abs/1607.03663)
+* [JEC+JER main documentation](https://arxiv.org/abs/1607.03663): Includes jet pt resolution functions and scale factors (Fig 41) applied for JER
 * [JER Scale Factor Instructions](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideJetResolution)
 * [JER Scale Factor Lookup Table](https://github.com/adrager/cmssw/blob/JetResolution53/CondFormats/JetMETObjects/data/JetResolutionInputAK5PF.txt)
