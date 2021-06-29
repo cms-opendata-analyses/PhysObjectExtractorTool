@@ -147,7 +147,7 @@ process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
 process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 			#collect particles with specific pdgid:status
-			#if -1:-1, collect them all	
+			#if 0:0, collect them all	
 			input_particle = cms.vstring("1:11","1:13","1:22","2:15")
 			)
 
