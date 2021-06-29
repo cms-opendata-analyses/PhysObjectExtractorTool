@@ -50,7 +50,8 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       // ----------member data ---------------------------
 
       TTree *mtree;
-
+      
+      int numGenPart;
       std::vector<int> GenPart_status;
       std::vector<float> GenPart_pt;
       std::vector<float> GenPart_eta;
@@ -82,6 +83,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
 	edm::Service<TFileService> fs;
 	mtree = fs->make<TTree>("Events", "Events");
     
+    mtree->Branch("numGenPart",&numGenPart);
+    mtree->GetBranch("numGenPart")->SetTitle("number of generator particles");
     mtree->Branch("GenPart_pt",&GenPart_pt);
     mtree->GetBranch("GenPart_pt")->SetTitle("generator particle transverse momentum");
     mtree->Branch("GenPart_eta",&GenPart_eta);
@@ -120,7 +123,18 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 {
    using namespace edm;
    using namespace std;
-    
+   
+   numGenPart=0;
+   GenPart_pt.clear();
+   GenPart_eta.clear();
+   GenPart_mass.clear();
+   GenPart_pdgId.clear();
+   GenPart_phi.clear();
+   GenPart_px.clear();
+   GenPart_py.clear();
+   GenPart_pz.clear();
+   GenPart_status.clear();
+
    Handle<reco::GenParticleCollection> gens;
    iEvent.getByLabel("genParticles", gens);
    
@@ -142,12 +156,13 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   
   if(gens.isValid())
   {
+     numGenPart=gens->size();
         for (reco::GenParticleCollection::const_iterator itGenPart=gens->begin(); itGenPart!=gens->end(); ++itGenPart)
         {
                //loop trough all particles selected in configuration
                for(i=0;i<particle.size();i++)
                {
-                  if(status_parsed[i]==itGenPart->status() && pdgId_parsed[i]==itGenPart->pdgId())
+                  if((status_parsed[i]==itGenPart->status() && pdgId_parsed[i]==itGenPart->pdgId())||(status_parsed[i]==0 && pdgId_parsed[i]==0))
                 {
                   GenPart_pt.push_back(itGenPart->pt());
                   GenPart_eta.push_back(itGenPart->eta());

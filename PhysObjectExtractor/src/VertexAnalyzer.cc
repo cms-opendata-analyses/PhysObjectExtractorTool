@@ -155,29 +155,30 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<reco::BeamSpot> beamSpotHandle;
    iEvent.getByLabel("offlineBeamSpot", beamSpotHandle);
    reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
-   Bsp_z = vertexBeamSpot.z0();
    
-   PV_npvs=Primvertex->size();
-
-   for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
+   if(Primvertex.isValid())
    {
-     float score=0;
-     PV_chi2.push_back(vite->chi2());
-     PV_ndof.push_back(vite->ndof());
-     PV_x.push_back(vite->x());
-     PV_y.push_back(vite->y());
-     PV_z.push_back(vite->z());
-     for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)
-	{
-	const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>();
+     PV_npvs=Primvertex->size();
+     Bsp_z = vertexBeamSpot.z0();
+     for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
+     {
+       float score=0;
+       PV_chi2.push_back(vite->chi2());
+       PV_ndof.push_back(vite->ndof());
+       PV_x.push_back(vite->x());
+       PV_y.push_back(vite->y());
+       PV_z.push_back(vite->z());
+       for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)
+	    {
+	     const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>();
         float trackpt = trackRef->pt();
         score += trackpt*trackpt;
-	}
-     PV_score.push_back(score);
-     if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.)
-        ++PV_npvsGood;
+	    }
+      PV_score.push_back(score);
+      if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.)
+      ++PV_npvsGood;
+      }
   }
-
  mtree->Fill();
 
 }
