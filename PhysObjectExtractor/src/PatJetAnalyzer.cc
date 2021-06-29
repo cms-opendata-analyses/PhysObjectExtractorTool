@@ -261,6 +261,7 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             ptscale_up = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[2]*(factors[2]+2))*res*itjet->pt())/itjet->pt());
          }
        }
+       jet_pt.push_back(uncorrJet.pt());
        jet_eta.push_back(itjet->eta());
        jet_phi.push_back(itjet->phi());
        jet_ch.push_back(itjet->charge());
