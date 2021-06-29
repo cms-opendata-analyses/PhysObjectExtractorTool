@@ -7,7 +7,7 @@ cd PhysObjectExtractorTool
 cd PhysObjectExtractor
 scram b
 
-sed -i "s/process.GlobalTag.connect/#process.GlobalTag.connect/g" python/poet_cfg.py
+# sed -i "s/process.GlobalTag.connect/#process.GlobalTag.connect/g" python/poet_cfg.py
 cmsRun python/poet_cfg.py
 
 cp *.root /mnt/vol/
