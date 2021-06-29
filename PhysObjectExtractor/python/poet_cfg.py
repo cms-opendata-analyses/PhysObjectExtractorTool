@@ -98,7 +98,10 @@ if doPat:
  from PhysicsTools.PatAlgos.tools.coreTools import *
  from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
- runOnData(process, ['All'], "", None, [])
+ jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
+ if isData: 
+	runOnData(process, ['All'], "", None, [])
+	jetcorrlabels.append('L2L3Residual')
 
  # Set up the new jet collection
  process.ak5PFJets.doAreaFastjet = True
@@ -108,7 +111,7 @@ if doPat:
  		 'AK5', 'PFCorr',
 		 doJTA        = True,
 		 doBTagging   = True,
-		 jetCorrLabel = ('AK5PF', cms.vstring(['L1FastJet','L2Relative','L3Absolute'])),
+		 jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
 		 doType1MET   = True,
 		 doL1Cleaning = True,
 		 doL1Counters = False,
