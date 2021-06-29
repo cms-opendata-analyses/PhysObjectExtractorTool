@@ -98,7 +98,8 @@ if doPat:
  from PhysicsTools.PatAlgos.tools.coreTools import *
  from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
- runOnData(process, ['All'], "", None, [])
+ if isData:
+   runOnData(process, ['All'], "", None, [])
 
  # Set up the new jet collection
  process.ak5PFJets.doAreaFastjet = True
