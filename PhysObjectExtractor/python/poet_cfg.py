@@ -64,7 +64,7 @@ else: process.GlobalTag.globaltag = "START53_V27::All"
 
 if isData:
 	# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
-	goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
+	goodJSON = "PhysObjectExtractor/data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
 	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
 	process.source.lumisToProcess = CfgTypes.untracked(
 	    	CfgTypes.VLuminosityBlockRange())
