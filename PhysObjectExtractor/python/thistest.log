@@ -1,0 +1,27 @@
+
+The btaginfo below will be written to the jet collection in the PATtuple (default is all, see PatAlgos/PhysicsTools/python/tools/jetTools.py)
+impactParameterTagInfos
+secondaryVertexTagInfos
+
+The bdiscriminators below will be written to the jet collection in the PATtuple (default is all, see PatAlgos/PhysicsTools/python/tools/jetTools.py)
+jetBProbabilityBJetTags
+jetProbabilityBJetTags
+trackCountingHighPurBJetTags
+trackCountingHighEffBJetTags
+simpleSecondaryVertexHighEffBJetTags
+simpleSecondaryVertexHighPurBJetTags
+combinedSecondaryVertexBJetTags
+210629 18:57:46 5009 Xrd: XrdClientConn: Error resolving this host's domain name.
+29-Jun-2021 18:57:47 CEST  Initiating request to open file root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root
+29-Jun-2021 18:57:49 CEST  Successfully opened file root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root
+%MSG-e FatalSystemSignal:  PatJetAnalyzer:myjets@ctor 29-Jun-2021 18:57:57 CEST  pre-events
+A fatal system signal has occurred: segmentation violation
+%MSG
+
+
+A fatal system signal has occurred: segmentation violation
+The following is the call stack containing the origin of the signal.
+NOTE:The first few functions on the stack are artifacts of processing the signal and can be ignored
+
+
+A fatal system signal has occurred: segmentation violation

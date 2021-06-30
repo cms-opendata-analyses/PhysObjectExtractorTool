@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Types as CfgTypes
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 isData = False
-doPat = True
+doPat = False
 
 process = cms.Process("POET")
 
@@ -91,6 +91,10 @@ if doPat:
                                    jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')         
                                )
 else:
+    from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+    process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone()
+    from PhysicsTools.JetMCAlgos.AK5PFJetsMCFlavourInfos_cfi import ak5JetFlavourInfos
+    process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
     process.myjets= cms.EDAnalyzer('JetAnalyzer',
                                    InputCollection = cms.InputTag("ak5PFJets"),
                                    isData = cms.bool(isData),
@@ -101,6 +105,7 @@ else:
                                    jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'),
                                    jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')
                                )
+
 process.mymets= cms.EDAnalyzer('MetAnalyzer',
                                InputCollection = cms.InputTag("pfMet")
                               )
@@ -116,4 +121,4 @@ process.TFileService = cms.Service(
 
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
-else: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+else: process.p = cms.Path(process.selectedHadronsAndPartons *  process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
