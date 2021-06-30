@@ -57,8 +57,20 @@ cmsRun poet_cfg.py
 
 
 
+## References:
 
+Muons
 
+* [Muon IDs and Isolation](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId)
+* [Muon Analysis](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMuonAnalysis)
 
+Taus
 
+* [Tau IDs](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPFTauTagging#Legacy_Tau_ID_Run_I)
+* [Tau Discriminators](https://twiki.cern.ch/twiki/bin/view/CMSPublic/NutShellRecipeFor5312AndNewer)
 
+Jets
+
+* [JEC+JER main documentation](https://arxiv.org/abs/1607.03663): Includes jet pt resolution functions and scale factors (Fig 41) applied for JER
+* [JER Scale Factor Instructions](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideJetResolution)
+* [JER Scale Factor Lookup Table](https://github.com/adrager/cmssw/blob/JetResolution53/CondFormats/JetMETObjects/data/JetResolutionInputAK5PF.txt)

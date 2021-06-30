@@ -456,11 +456,12 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             ptscale_up = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[2]*(factors[2]+2))*res*itjet->pt())/itjet->pt());
          }
        }
+       jet_pt.push_back(uncorrJet.pt());
        jet_eta.push_back(itjet->eta());
        jet_phi.push_back(itjet->phi());
        jet_ch.push_back(itjet->charge());
        jet_mass.push_back(uncorrJet.mass());
-       jet_btag.push_back(itjet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+       jet_btag.push_back(itjet->bDiscriminator("combinedSecondaryVertexBJetTags"));
        corr_jet_pt.push_back(ptscale*itjet->pt());
        corr_jet_ptUp.push_back(ptscale*corrUp*itjet->pt());
        corr_jet_ptDown.push_back(ptscale*corrDown*itjet->pt());
