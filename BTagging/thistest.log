@@ -1,0 +1,17 @@
+
+The btaginfo below will be written to the jet collection in the PATtuple (default is all, see PatAlgos/PhysicsTools/python/tools/jetTools.py)
+impactParameterTagInfos
+secondaryVertexTagInfos
+
+The bdiscriminators below will be written to the jet collection in the PATtuple (default is all, see PatAlgos/PhysicsTools/python/tools/jetTools.py)
+jetBProbabilityBJetTags
+jetProbabilityBJetTags
+trackCountingHighPurBJetTags
+trackCountingHighEffBJetTags
+simpleSecondaryVertexHighEffBJetTags
+simpleSecondaryVertexHighPurBJetTags
+combinedSecondaryVertexBJetTags
+210630 21:52:18 090 Xrd: XrdClientConn: Error resolving this host's domain name.
+30-Jun-2021 21:52:21 CEST  Initiating request to open file root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/0448AB4F-364D-E311-B1E7-001E67397CBA.root
+30-Jun-2021 21:52:24 CEST  Successfully opened file root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/0448AB4F-364D-E311-B1E7-001E67397CBA.root
+210630 21:57:26 103 Xrd: XrdClientMessage::ReadRaw: Failed to read header (8 bytes).
