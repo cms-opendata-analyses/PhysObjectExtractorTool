@@ -6,7 +6,7 @@ from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
-isData = False
+isData = True
 #Get jet corrections using PAT (Physics Analysis Tool) infrastructure
 doPat = True
 
