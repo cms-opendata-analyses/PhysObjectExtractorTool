@@ -1,7 +1,0 @@
------ Begin Fatal Exception 29-Jun-2021 18:56:21 CEST-----------------------
-An exception of category 'ConfigFileReadError' occurred while
-   [0] Processing the python configuration file named poet_cfg.py
-Exception Message:
-python encountered the error: <type 'exceptions.IOError'>
-[Errno 2] No such file or directory: 'poet_cfg.py'
------ End Fatal Exception -------------------------------------------------
