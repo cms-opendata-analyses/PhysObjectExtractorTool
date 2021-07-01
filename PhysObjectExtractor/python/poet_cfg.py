@@ -2,13 +2,13 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
-from PhysicsTools.PatAlgos.patTemplate_cfg import *
+#from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
 isData = True
 #Get jet corrections using PAT (Physics Analysis Tool) infrastructure
-doPat = True
+doPat = False
 
 process = cms.Process("POET")
 
@@ -89,6 +89,7 @@ JecString = 'START53_V27_'
 if isData: JecString = 'FT53_V21A_AN6_'
 
 if doPat:
+ from PhysicsTools.PatAlgos.patTemplate_cfg import *	
  # Load PAT config
  process.load("PhysicsTools.PatAlgos.patSequences_cff")
  process.load('Configuration.StandardSequences.Reconstruction_cff')
