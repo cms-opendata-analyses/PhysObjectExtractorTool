@@ -74,3 +74,6 @@ Jets
 * [JEC+JER main documentation](https://arxiv.org/abs/1607.03663): Includes jet pt resolution functions and scale factors (Fig 41) applied for JER
 * [JER Scale Factor Instructions](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideJetResolution)
 * [JER Scale Factor Lookup Table](https://github.com/adrager/cmssw/blob/JetResolution53/CondFormats/JetMETObjects/data/JetResolutionInputAK5PF.txt)
+* [BTagging CSV.csv File/Table](https://twiki.cern.ch/twiki/bin/view/CMSPublic/BtagRecommendation2011OpenData#Methods_to_Apply)
+* [BTagging Help Understand CSV.csv](https://twiki.cern.ch/twiki/bin/view/CMSPublic/BTagCalibration) 
+* [BTagging Weight Calculating Methods](https://twiki.cern.ch/twiki/bin/view/CMSPublic/BtagRecommendation2011OpenData#Methods_to_Apply_b_Tagging_Effic)
