@@ -7,7 +7,7 @@ from PhysicsTools.PatAlgos.patTemplate_cfg import *
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
 isData = False
-doPat = True
+doPat = False
 
 process = cms.Process("POET")
 
@@ -162,7 +162,7 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 			)
 
 process.TFileService = cms.Service(
-    "TFileService", fileName=cms.string("myoutput.root"))
+    "TFileService", fileName=cms.string("myoutput1.root"))
 
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
