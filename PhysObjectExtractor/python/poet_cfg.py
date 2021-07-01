@@ -5,6 +5,7 @@ import FWCore.ParameterSet.Types as CfgTypes
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 #Work with data (if False, assumed MC simulations)
+#This needs to be in agreement with the input files/datasets below.
 isData = False
 #Get jet corrections using PAT (Physics Analysis Tool) infrastructure
 doPat = True
@@ -27,11 +28,14 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-#Define the source files
+#Define the source files to be read using the xrootd protocol (root://), or local files (file:)
+#Several files can be comma-separated
+#A local file, for testing, can be downloaded using, e.g., the cern open data client (https://cernopendata-client.readthedocs.io/en/latest/):
+# python cernopendata-client download-files --recid 6004 --filter-range 1-1
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
       #'root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-      #'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
+      #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
     )
 )
@@ -111,7 +115,7 @@ if doPat:
  		 'AK5', 'PFCorr',
 		 doJTA        = True,
 		 doBTagging   = True,
-		 jetCorrLabel = ('AK5PF', cms.vstring(['L1FastJet','L2Relative','L3Absolute'])),
+		 jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
 		 doType1MET   = True,
 		 doL1Cleaning = True,
 		 doL1Counters = False,
