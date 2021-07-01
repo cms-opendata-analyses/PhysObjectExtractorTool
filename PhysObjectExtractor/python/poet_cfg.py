@@ -158,7 +158,7 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 			)
 
 process.TFileService = cms.Service(
-    "TFileService", fileName=cms.string("RecoJet.root"))
+    "TFileService", fileName=cms.string("myoutput.root"))
 
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
