@@ -96,7 +96,7 @@ private:
   std::vector<float> jet_phi;
   std::vector<float> jet_ch;
   std::vector<float> jet_mass;
-  std::vector<float> jet_btag;
+  std::vector<double> jet_btag;
   std::vector<float> corr_jet_pt;
   std::vector<float> corr_jet_ptUp;
   std::vector<float> corr_jet_ptDown;
@@ -474,6 +474,7 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        corr_jet_pz.push_back(itjet->pz());
        hadronFlavour = itjet->partonFlavour();
        corr = corr_jet_pt.at(value_jet_n);
+cout << jet_btag.at(value_jet_n) << "\n";
        if (jet_btag.at(value_jet_n) > 0.679){
          if(abs(hadronFlavour) == 5){
             eff = getBtagEfficiency(corr);

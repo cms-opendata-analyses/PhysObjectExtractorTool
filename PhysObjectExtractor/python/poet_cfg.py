@@ -3,6 +3,10 @@ import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
+import os 
+
+relBase = os.environ['CMSSW_BASE']
+
 
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
@@ -35,7 +39,8 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
       #'root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
       #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-       'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
+     'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root' 
+      # 'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
     )
 )
 
@@ -162,7 +167,7 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 			)
 
 process.TFileService = cms.Service(
-    "TFileService", fileName=cms.string("myoutput1.root"))
+    "TFileService", fileName=cms.string("RecoJet.root"))
 
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)

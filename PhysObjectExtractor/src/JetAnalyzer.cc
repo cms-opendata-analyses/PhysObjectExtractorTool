@@ -6,7 +6,7 @@
 
 // system include files
 #include <memory>
-
+#include <TMath.h>
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -35,7 +35,8 @@
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "SimDataFormats/JetMatching/interface/JetFlavourInfo.h"
 #include "SimDataFormats/JetMatching/interface/JetFlavourInfoMatching.h"
-
+#include "DataFormats/JetReco/interface/CaloJet.h"
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 
 
 //classes to save data
@@ -101,7 +102,7 @@ private:
   std::vector<float> jet_phi;
   std::vector<float> jet_ch;
   std::vector<float> jet_mass;
-  std::vector<float> jet_btag;
+  std::vector<double> jet_btag;
   std::vector<float> corr_jet_pt;
   std::vector<float> corr_jet_ptUp;
   std::vector<float> corr_jet_ptDown;
@@ -468,70 +469,77 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          ptscale_up = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[2]*(factors[2]+2))*res*itjet->pt())/itjet->pt());
        }
 
-       jet_e.push_back(itjet->energy());
-       jet_pt.push_back(itjet->pt());
-       jet_px.push_back(itjet->px());
-       jet_py.push_back(itjet->py());
-       jet_pz.push_back(itjet->pz());
-       jet_eta.push_back(itjet->eta());
-       jet_phi.push_back(itjet->phi());
-       jet_ch.push_back(itjet->charge());
-       jet_mass.push_back(itjet->mass());
-       jet_btag.push_back(btags->operator[](itjet - myjets->begin()).second);
-       corr_jet_pt.push_back(ptscale*corr*uncorrJet.pt());
-       corr_jet_ptUp.push_back(corrUp*uncorrJet.pt());
-       corr_jet_ptDown.push_back(corrDown*uncorrJet.pt());
-       corr_jet_ptSmearUp.push_back(ptscale_up*corrUp*uncorrJet.pt());
-       corr_jet_ptSmearDown.push_back(ptscale_down*corrUp*uncorrJet.pt());
-       corr = corr_jet_pt.at(value_jet_n);       
-       reco::JetFlavourInfo aInfo = injets->operator[](itjet - myjets->begin()).second;
-       hadronFlavour = aInfo.getPartonFlavour();
-        
-       if (jet_btag.at(value_jet_n) > 0.679){
-         if(abs(hadronFlavour) == 5){
-                  eff = getBtagEfficiency(corr);
-                  SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
-                  SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
-                  SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
-         } else if(abs(hadronFlavour) == 4){
+       int min_pt = 15;
+       if (ptscale*corr*uncorrJet.pt() > min_pt){ 
+
+         jet_e.push_back(itjet->energy());
+         jet_pt.push_back(itjet->pt());
+         jet_px.push_back(itjet->px());
+         jet_py.push_back(itjet->py());
+         jet_pz.push_back(itjet->pz());
+         jet_eta.push_back(itjet->eta());
+         jet_phi.push_back(itjet->phi());
+         jet_ch.push_back(itjet->charge());
+         jet_mass.push_back(itjet->mass());
+         jet_btag.push_back(btags->operator[](itjet - myjets->begin()).second);
+         corr_jet_pt.push_back(ptscale*corr*uncorrJet.pt());
+         corr_jet_ptUp.push_back(corrUp*uncorrJet.pt());
+         corr_jet_ptDown.push_back(corrDown*uncorrJet.pt());
+         corr_jet_ptSmearUp.push_back(ptscale_up*corrUp*uncorrJet.pt());
+         corr_jet_ptSmearDown.push_back(ptscale_down*corrUp*uncorrJet.pt());
+         corr = corr_jet_pt.at(value_jet_n);       
+         reco::JetFlavourInfo aInfo = injets->operator[](itjet - myjets->begin()).second;
+         hadronFlavour = aInfo.getPartonFlavour();
+
+         if (jet_btag.at(value_jet_n)> 0.679){
+           if(abs(hadronFlavour) == 5){
+                 eff = getBtagEfficiency(corr);
+                 SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
+                 SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+                 SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+           } else if(abs(hadronFlavour) == 4){
                  eff = getCtagEfficiency(corr);
                  SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
                  SFu = SF + (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
                  SFd = SF - (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
-         } else {
+           } else {
                  eff = getLFtagEfficiency(corr);
                  SF = getLFtagSF(corr, jet_eta.at(value_jet_n));
                  SFu = SF + ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
                  SFd = SF - ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
-         }
+           }
                  MC *= eff;
                  btagWeight *= SF * eff;
                  btagWeightUp *= SFu * eff;
                  btagWeightDn *= SFd * eff;
-         }
-       else {
-         if(abs(hadronFlavour) == 5){
-                  eff = getBtagEfficiency(corr);
-                  SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
-                  SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
-                  SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
-         } else if(abs(hadronFlavour) == 4){
+           }
+         else {
+           if(abs(hadronFlavour) == 5){
+                 eff = getBtagEfficiency(corr);
+                 SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
+                 SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+                 SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+           } else if(abs(hadronFlavour) == 4){
                  eff = getCtagEfficiency(corr);
                  SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
                  SFu = SF + (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
                  SFd = SF - (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
-         } else {
+           } else {
                  eff = getLFtagEfficiency(corr);
                  SF = getLFtagSF(corr, jet_eta.at(value_jet_n));
                  SFu = SF + ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
                  SFd = SF - ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
-         }
+           }
                  MC *= (1 - eff);
                  btagWeight *= (1 - ( SF * eff));
                  btagWeightUp *= (1 - (SFu * eff));
                  btagWeightDn *= (1 -  (SFd * eff));
        }
+
        ++value_jet_n;
+     } 
+
+
      }
    
   btagWeight = (btagWeight/MC);
