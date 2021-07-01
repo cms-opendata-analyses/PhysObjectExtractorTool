@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
-from PhysicsTools.PatAlgos.patTemplate_cfg import *
 import os 
 
 relBase = os.environ['CMSSW_BASE']
@@ -90,41 +89,34 @@ JecString = 'START53_V27_'
 if isData: JecString = 'FT53_V21A_AN6_'
 
 if doPat:
- # Load PAT config
- process.load("PhysicsTools.PatAlgos.patSequences_cff")
- process.load('Configuration.StandardSequences.Reconstruction_cff')
- process.load('RecoJets.Configuration.RecoPFJets_cff')
- process.load('RecoJets.Configuration.RecoJets_cff')
- process.load('RecoJets.JetProducers.TrackJetParameters_cfi')
- process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-
- from PhysicsTools.PatAlgos.tools.pfTools import *
- from PhysicsTools.PatAlgos.tools.coreTools import *
- from PhysicsTools.PatAlgos.tools.metTools import *	
- from PhysicsTools.PatAlgos.tools.jetTools import *
- from PhysicsTools.PatAlgos.tools.coreTools import *
- from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-
- jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
- if isData: 
-	runOnData(process, ['All'], "", None, [])
-	jetcorrlabels.append('L2L3Residual')
-
- # Set up the new jet collection
- process.ak5PFJets.doAreaFastjet = True
- addPfMET(process, 'PF')
+  # Load PAT configs and build some light sequences
+  process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
+  process.load('PhysicsTools.PatAlgos.producersLayer1.metProducer_cff')
+  process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+  process.patCandidates = cms.Sequence(process.makePatJets+process.makePatMETs)
+  process.selectedPatCandidates = cms.Sequence(process.selectedPatJets)
+  process.patDefaultSequence = cms.Sequence(process.patCandidates * process.selectedPatCandidates)
+  process.load('RecoJets.Configuration.RecoPFJets_cff')
+  from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
+  from PhysicsTools.PatAlgos.tools.coreTools import runOnData
+  jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
+  if isData:
+    runOnData(process, ['Jets','METs'], "", None, [])
+    jetcorrlabels.append('L2L3Residual')
+  # Set up the new jet collection
+  process.ak5PFJets.doAreaFastjet = True
+  addJetCollection(process,cms.InputTag('ak5PFJets'),
+  	'AK5', 'PFCorr',
+  	doJTA        = True,
+	doBTagging   = True,
+	jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
+	doType1MET   = True,
+	doL1Cleaning = False,
+	doL1Counters = False,
+	doJetID      = True,
+	jetIdLabel   = "ak5",
+	) 
  
- addJetCollection(process,cms.InputTag('ak5PFJets'),
- 		 'AK5', 'PFCorr',
-		 doJTA        = True,
-		 doBTagging   = True,
-		 jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
-		 doType1MET   = True,
-		 doL1Cleaning = True,
-		 doL1Counters = False,
-		 doJetID      = True,
-		 jetIdLabel   = "ak5",
-		 )
  process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
 				   InputCollection = cms.InputTag("selectedPatJetsAK5PFCorr"),
                                    isData = cms.bool(isData),
