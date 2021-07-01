@@ -173,47 +173,22 @@ WeightAnalyzerBEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 {
   using namespace edm;
   using namespace std;
- 
-
-
- 
-	//getLabel change here
-
-
+  
   // Basic +/- event weight
   Handle<GenEventInfoProduct> genEvtInfo;
-  //iEvent.getByToken(GEIPtoken, genEvtInfo);
-
   iEvent.getByLabel("generator", genEvtInfo);  
-
 
   double weight = 1.0;
   if(genEvtInfo->weight() < 0) weight = -1;
 
 
-	//getLabel change here
-  //switch from std:: ... to reco::PFJets
   Handle<std::vector<pat::Jet>> jetsAK4;
-  //iEvent.getByToken(JETtokenAK4,jetsAK4);
   iEvent.getByLabel(jetsTagAK4, jetsAK4);
-
-
-
-//  edm::Handle<reco::JetFlavourInfoMatchingCollection> theJetFlavourInfos;
- // iEvent.getByLabel(InputTag("jetFlavourInfosAK5PFJets"), theJetFlavourInfos );
 
   for(std::vector<pat::Jet>::const_iterator it = jetsAK4->begin(); it != jetsAK4->end(); ++it){
     double disc = it->bDiscriminator("combinedSecondaryVertexBJetTags");
-//	 double disc = btags->operator[](it - jetsAK4->begin()).second;
-//	 reco::JetFlavourInfo aInfo = theJetFlavourInfos->operator[](it - jetsAK4->begin()).second;
-    //cout << disc << "\n";  
     int hadronFlavor = it->partonFlavour();
-  
-    //cout << hadronFlavor << "\n";  
 
-
-
- // int hadronFlavor = aInfo.getHadronFlavour();
       if( abs(hadronFlavor)==5 ){
       BEff_Dptbins_b->Fill(it->pt(),weight);      
       if( disc >= discriminatorValueT) BEffTight_Nptbins_b->Fill(it->pt(),weight);

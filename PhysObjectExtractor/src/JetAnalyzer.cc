@@ -419,6 +419,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      btagWeight = 1;
      btagWeightUp = 1;
      btagWeightDn = 1;
+     int min_pt = 15;
 
      for (reco::PFJetCollection::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
        reco::Candidate::LorentzVector uncorrJet = itjet->p4();
@@ -469,7 +470,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          ptscale_up = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[2]*(factors[2]+2))*res*itjet->pt())/itjet->pt());
        }
 
-       int min_pt = 15;
+
        if (ptscale*corr*uncorrJet.pt() > min_pt){ 
 
          jet_e.push_back(itjet->energy());
@@ -493,59 +494,57 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
          if (jet_btag.at(value_jet_n)> 0.679){
            if(abs(hadronFlavour) == 5){
-                 eff = getBtagEfficiency(corr);
-                 SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
-                 SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
-                 SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+             eff = getBtagEfficiency(corr);
+             SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
+             SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+             SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
            } else if(abs(hadronFlavour) == 4){
-                 eff = getCtagEfficiency(corr);
-                 SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
-                 SFu = SF + (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
-                 SFd = SF - (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
+             eff = getCtagEfficiency(corr);
+             SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
+             SFu = SF + (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
+             SFd = SF - (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
            } else {
-                 eff = getLFtagEfficiency(corr);
-                 SF = getLFtagSF(corr, jet_eta.at(value_jet_n));
-                 SFu = SF + ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
-                 SFd = SF - ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
+             eff = getLFtagEfficiency(corr);
+             SF = getLFtagSF(corr, jet_eta.at(value_jet_n));
+             SFu = SF + ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
+             SFd = SF - ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
            }
-                 MC *= eff;
-                 btagWeight *= SF * eff;
-                 btagWeightUp *= SFu * eff;
-                 btagWeightDn *= SFd * eff;
-           }
+           MC *= eff;
+           btagWeight *= SF * eff;
+           btagWeightUp *= SFu * eff;
+           btagWeightDn *= SFd * eff;
+         }
          else {
            if(abs(hadronFlavour) == 5){
-                 eff = getBtagEfficiency(corr);
-                 SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
-                 SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
-                 SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+             eff = getBtagEfficiency(corr);
+             SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
+             SFu = SF + uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
+             SFd = SF - uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n));
            } else if(abs(hadronFlavour) == 4){
-                 eff = getCtagEfficiency(corr);
-                 SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
-                 SFu = SF + (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
-                 SFd = SF - (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
+             eff = getCtagEfficiency(corr);
+             SF = getBorCtagSF(corr, jet_eta.at(value_jet_n));
+             SFu = SF + (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
+             SFd = SF - (2 * uncertaintyForBTagSF(corr, jet_eta.at(value_jet_n)));
            } else {
-                 eff = getLFtagEfficiency(corr);
-                 SF = getLFtagSF(corr, jet_eta.at(value_jet_n));
-                 SFu = SF + ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
-                 SFd = SF - ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
+             eff = getLFtagEfficiency(corr);
+             SF = getLFtagSF(corr, jet_eta.at(value_jet_n));
+             SFu = SF + ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
+             SFd = SF - ( uncertaintyForLFTagSF(corr, jet_eta.at(value_jet_n)));
            }
-                 MC *= (1 - eff);
-                 btagWeight *= (1 - ( SF * eff));
-                 btagWeightUp *= (1 - (SFu * eff));
-                 btagWeightDn *= (1 -  (SFd * eff));
-       }
+           MC *= (1 - eff);
+           btagWeight *= (1 - ( SF * eff));
+           btagWeightUp *= (1 - (SFu * eff));
+           btagWeightDn *= (1 -  (SFd * eff));
+         }
 
        ++value_jet_n;
-     } 
-
-
+       } 
      }
    
-  btagWeight = (btagWeight/MC);
-  btagWeightUp = (btagWeightUp/MC);
-  btagWeightDn = (btagWeightDn/MC);   
-  } 
+   btagWeight = (btagWeight/MC);
+   btagWeightUp = (btagWeightUp/MC);
+   btagWeightDn = (btagWeightDn/MC);   
+   } 
  
   mtree->Fill();
   return;
