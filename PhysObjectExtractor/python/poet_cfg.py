@@ -104,8 +104,9 @@ if doPat:
 
  jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
  if isData: 
- 	runOnData(process, ['All'], "", None, [])
+	runOnData(process, ['All'], "", None, [])
 	jetcorrlabels.append('L2L3Residual')
+
  # Set up the new jet collection
  process.ak5PFJets.doAreaFastjet = True
  addPfMET(process, 'PF')
