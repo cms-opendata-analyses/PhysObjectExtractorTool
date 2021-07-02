@@ -6,11 +6,10 @@ import os
 
 relBase = os.environ['CMSSW_BASE']
 
-
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
 isData = False
-doPat = True
+doPat = False
 
 process = cms.Process("POET")
 
@@ -77,88 +76,91 @@ if isData:
 process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
 				     InputCollection = cms.InputTag("gsfElectrons")
-				    )
+				     )
 process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
 				 InputCollection = cms.InputTag("muons")
 				 )
 process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
                                    InputCollection = cms.InputTag("photons")
-                             )
+				   )
 #Path Strings: These correspond to the Global Tag. Run jec_cfg.py first to get .txt files
 JecString = 'START53_V27_'
 if isData: JecString = 'FT53_V21A_AN6_'
 
 if doPat:
-  # Load PAT configs and build some light sequences
-  process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
-  process.load('PhysicsTools.PatAlgos.producersLayer1.metProducer_cff')
-  process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-  process.patCandidates = cms.Sequence(process.makePatJets+process.makePatMETs)
-  process.selectedPatCandidates = cms.Sequence(process.selectedPatJets)
-  process.patDefaultSequence = cms.Sequence(process.patCandidates * process.selectedPatCandidates)
-  process.load('RecoJets.Configuration.RecoPFJets_cff')
-  from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
-  from PhysicsTools.PatAlgos.tools.coreTools import runOnData
-  jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
-  if isData:
-    runOnData(process, ['Jets','METs'], "", None, [])
-    jetcorrlabels.append('L2L3Residual')
-  # Set up the new jet collection
-  process.ak5PFJets.doAreaFastjet = True
-  addJetCollection(process,cms.InputTag('ak5PFJets'),
-  	'AK5', 'PFCorr',
-  	doJTA        = True,
-	doBTagging   = True,
-	jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
-	doType1MET   = True,
-	doL1Cleaning = False,
-	doL1Counters = False,
-	doJetID      = True,
-	jetIdLabel   = "ak5",
-	) 
+	# Load PAT configs and build some light sequences
+	process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
+	process.load('PhysicsTools.PatAlgos.producersLayer1.metProducer_cff')
+	process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+	process.patCandidates = cms.Sequence(process.makePatJets+process.makePatMETs)
+	process.selectedPatCandidates = cms.Sequence(process.selectedPatJets)
+	process.patDefaultSequence = cms.Sequence(process.patCandidates * process.selectedPatCandidates)
+	process.load('RecoJets.Configuration.RecoPFJets_cff')
+	from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
+	from PhysicsTools.PatAlgos.tools.coreTools import runOnData
+	jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
+	if isData:
+		runOnData(process, ['Jets','METs'], "", None, [])
+		jetcorrlabels.append('L2L3Residual')
+	# Set up the new jet collection
+	process.ak5PFJets.doAreaFastjet = True
+	addJetCollection(process,cms.InputTag('ak5PFJets'),
+			 'AK5', 'PFCorr',
+			 doJTA        = True,
+			 doBTagging   = True,
+			 jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
+			 doType1MET   = True,
+			 doL1Cleaning = False,
+			 doL1Counters = False,
+			 doJetID      = True,
+			 jetIdLabel   = "ak5",
+			 ) 
  
-  process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
-				   InputCollection = cms.InputTag("selectedPatJetsAK5PFCorr"),
-                                   isData = cms.bool(isData),
-                                   jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'), 
-                                   jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')         
-                               )
+	process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
+				       InputCollection = cms.InputTag("selectedPatJetsAK5PFCorr"),
+				       isData = cms.bool(isData),
+				       jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'), 
+				       jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')         
+				       )
 else:
-    from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
-    process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone()
-    from PhysicsTools.JetMCAlgos.AK5PFJetsMCFlavourInfos_cfi import ak5JetFlavourInfos
-    process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
-    process.myjets= cms.EDAnalyzer('JetAnalyzer',
-                                   InputCollection = cms.InputTag("ak5PFJets"),
-                                   isData = cms.bool(isData),
-                                   jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L1FastJet_AK5PF.txt'), 
-                                   jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2Relative_AK5PF.txt'),     #Don't forget to run jec_cfg.py
-                                   jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L3Absolute_AK5PF.txt'),     #to get these .txt files :)
-                                   jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2L3Residual_AK5PF.txt'),
-                                   jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'),
-                                   jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')
-                               )
+	from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+	process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone()
+	from PhysicsTools.JetMCAlgos.AK5PFJetsMCFlavourInfos_cfi import ak5JetFlavourInfos
+	process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
+	process.myjets= cms.EDAnalyzer('JetAnalyzer',
+				       InputCollection = cms.InputTag("ak5PFJets"),
+				       isData = cms.bool(isData),
+				       jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L1FastJet_AK5PF.txt'), 
+				       jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2Relative_AK5PF.txt'),     #Don't forget to run jec_cfg.py
+				       jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L3Absolute_AK5PF.txt'),     #to get these .txt files :)
+				       jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2L3Residual_AK5PF.txt'),
+				       jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'),
+				       jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')
+				       )
 
 process.mymets= cms.EDAnalyzer('MetAnalyzer',
-                               InputCollection = cms.InputTag("pfMet")
-                              )
+                               InputCollection = cms.InputTag("pfMet"),
+			       doPat = cms.bool(doPat),
+			       )
+if doPat: process.mymets.InputCollectionPat = cms.InputTag("pfType1CorrectedMet")
+
 process.mytaus = cms.EDAnalyzer('TauAnalyzer',
                                 InputCollection = cms.InputTag("hpsPFTauProducer")
-                               )
+				)
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
                                      filterName = cms.string("hltSingleJet190Regional"),
-                             )
+				     )
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
 process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
-			#collect particles with specific pdgid:status
-			#if 0:0, collect them all	
-			input_particle = cms.vstring("1:11","1:13","1:22","2:15")
-			)
+				      #collect particles with specific pdgid:status
+				      #if 0:0, collect them all	
+				      input_particle = cms.vstring("1:11","1:13","1:22","2:15")
+				      )
 
 process.TFileService = cms.Service(
-    "TFileService", fileName=cms.string("myoutput.root"))
+	"TFileService", fileName=cms.string("myoutput.root"))
 
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
