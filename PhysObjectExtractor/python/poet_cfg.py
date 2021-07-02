@@ -59,13 +59,14 @@ process.source = cms.Source("PoolSource",
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 #Uncomment and arrange a line like this if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
+#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db')
 #The global tag must correspond to the needed epoch (comment out if no conditions needed)
 if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
 else: process.GlobalTag.globaltag = "START53_V27::All"
 
+
+# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
 if isData:
-	# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
 	goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
 	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
 	process.source.lumisToProcess = CfgTypes.untracked(
@@ -146,7 +147,7 @@ process.mytaus = cms.EDAnalyzer('TauAnalyzer',
                                 InputCollection = cms.InputTag("hpsPFTauProducer")
                                )
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
-                                     filterName = cms.string("hltSingleJet190Regional"),
+                                     filterName = cms.string("hltL2DoubleMu23NoVertexL2PreFiltered"),
                              )
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
@@ -161,5 +162,5 @@ process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("myoutput.root"))
 
 if doPat:
-	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
-else: process.p = cms.Path(process.selectedHadronsAndPartons *  process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
+else: process.p = cms.Path(process.selectedHadronsAndPartons *  process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
