@@ -88,7 +88,7 @@ private:
   std::string              jerResName_;
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
   boost::shared_ptr<FactorizedJetCorrector> jec_;
-  boost::shared_ptr<SimpleJetCorrector> ak5PFCorrector;
+  boost::shared_ptr<SimpleJetCorrector> jer_;
   bool isData;
 
   int numjet; //number of jets in the event
@@ -156,8 +156,8 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   // Make the FactorizedJetCorrector and Uncertainty                                                                                              
   jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
-  JetCorrectorParameters *ak5PFPar = new JetCorrectorParameters(jerResName_);
-  ak5PFCorrector = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*ak5PFPar) );  
+  JetCorrectorParameters *jerPar = new JetCorrectorParameters(jerResName_);
+  jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*jerPar) );  
 
 	
   mtree->Branch("numberjet",&numjet);
@@ -456,7 +456,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          PTNPU.push_back( itjet->pt() );
          PTNPU.push_back( vertices->size() );
 
-         float res = ak5PFCorrector->correction(feta, PTNPU);
+         float res = jer_->correction(feta, PTNPU);
 
          TRandom3 JERrand;
 
@@ -469,7 +469,6 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
          ptscale_up = max(0.0, JERrand.Gaus(itjet->pt(),sqrt(factors[2]*(factors[2]+2))*res*itjet->pt())/itjet->pt());
        }
-
 
        if (ptscale*corr*uncorrJet.pt() > min_pt){ 
 

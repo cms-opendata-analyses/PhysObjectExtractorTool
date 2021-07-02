@@ -83,7 +83,7 @@ private:
   std::string              jecUncName_;
   std::string              jerResName_;
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
-  boost::shared_ptr<SimpleJetCorrector> ak5PFCorrector;
+  boost::shared_ptr<SimpleJetCorrector> jer_;
   bool isData;
 
   edm::InputTag jetInput;
@@ -140,6 +140,8 @@ PatJetAnalyzer::PatJetAnalyzer(const edm::ParameterSet& iConfig)
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
   JetCorrectorParameters *ak5PFPar = new JetCorrectorParameters(jerResName_);
   ak5PFCorrector = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*ak5PFPar) );  
+  jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*jerPar) );  
+
   mtree->Branch("numberjet",&numjet);
   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
   mtree->Branch("jet_pt",&jet_pt);
@@ -425,7 +427,7 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          PTNPU.push_back( itjet->pt() );
          PTNPU.push_back( vertices->size() );
 
-         res = ak5PFCorrector->correction(feta, PTNPU);
+         res = jer_->correction(feta, PTNPU);
          float pt = itjet->pt();
 	 const reco::GenJet *genJet = itjet->genJet();
 	 bool smeared = false;

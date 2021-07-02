@@ -71,9 +71,13 @@ Taus
 
 Jets
 
-* [JEC+JER main documentation](https://arxiv.org/abs/1607.03663): Includes jet pt resolution functions and scale factors (Fig 41) applied for JER
+* [JEC+JER main documentation](https://arxiv.org/abs/1607.03663.pdf): Includes jet pt resolution functions and scale factors (Fig 41) applied for JER
+    * [Application of Hybrid Smearing Method](https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool/blob/master/PhysObjectExtractor/src/JetAnalyzer.cc#L243-L270)
 * [JER Scale Factor Instructions](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideJetResolution)
 * [JER Scale Factor Lookup Table](https://github.com/adrager/cmssw/blob/JetResolution53/CondFormats/JetMETObjects/data/JetResolutionInputAK5PF.txt)
 * [BTagging CSV.csv File/Table](https://twiki.cern.ch/twiki/bin/view/CMSPublic/BtagRecommendation2011OpenData#Methods_to_Apply)
 * [BTagging Help Understand CSV.csv](https://twiki.cern.ch/twiki/bin/view/CMSPublic/BTagCalibration) 
 * [BTagging Weight Calculating Methods](https://twiki.cern.ch/twiki/bin/view/CMSPublic/BtagRecommendation2011OpenData#Methods_to_Apply_b_Tagging_Effic)
+* [Jet pT resolution Function Input File](https://github.com/adrager/cmssw/blob/JetResolution53/CondFormats/JetMETObjects/data/JetResolutionInputAK5PF.txt)
+  * [Application of Scale Factor Lookup Tables](https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool/blob/master/PhysObjectExtractor/src/JetAnalyzer.cc#L335-L357)
+
