@@ -10,7 +10,7 @@ relBase = os.environ['CMSSW_BASE']
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
 isData = False
-doPat = False
+doPat = True
 
 process = cms.Process("POET")
 
@@ -117,7 +117,7 @@ if doPat:
 	jetIdLabel   = "ak5",
 	) 
  
- process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
+  process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
 				   InputCollection = cms.InputTag("selectedPatJetsAK5PFCorr"),
                                    isData = cms.bool(isData),
                                    jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'), 
