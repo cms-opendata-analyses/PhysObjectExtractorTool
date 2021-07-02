@@ -11,7 +11,7 @@ relBase = os.environ['CMSSW_BASE']
 isData = False
 
 # Flag for using the Physics Analysis Toolkit for jets and MET
-doPat = True
+doPat = False
 
 process = cms.Process("POET")
 
@@ -37,11 +37,11 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # python cernopendata-client download-files --recid 6004 --filter-range 1-1
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-      #'root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-      #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-     'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root' 
+		#'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
+		'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root' 
     )
 )
+if isData: process.source.fileNames = cms.untracked.vstring('root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root')
 
 #Alternatively, to run on larger scale, one could use index files as obtained from the Cern Open Data Portal
 #files = FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_10000_file_index.txt")
@@ -140,11 +140,12 @@ if doPat:
 				       jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')         
 				       )
 else:
-	# Get non-PAT access to the jet flavour information
-	from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
-	process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone()
-	from PhysicsTools.JetMCAlgos.AK5PFJetsMCFlavourInfos_cfi import ak5JetFlavourInfos
-	process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
+	if not isData:
+		# Get non-PAT access to the jet flavour information
+		from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+		process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone()
+		from PhysicsTools.JetMCAlgos.AK5PFJetsMCFlavourInfos_cfi import ak5JetFlavourInfos
+		process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
 
 	# Configure the POET jet analyzer
 	# Don't forget to run jec_cfg.py to get these .txt files!
@@ -191,4 +192,5 @@ process.TFileService = cms.Service(
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
 else: 
-	process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+	if isData: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+	else: process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
