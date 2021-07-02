@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
+
 import os 
 
 relBase = os.environ['CMSSW_BASE']
@@ -12,6 +13,7 @@ isData = False
 
 # Flag for using the Physics Analysis Toolkit for jets and MET
 doPat = False
+
 
 process = cms.Process("POET")
 
@@ -61,14 +63,18 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 
 #Uncomment and arrange a line like this if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
+
 #The global tag must correspond to the needed epoch (comment out if no conditions needed)
-if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
+#if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
+if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
 else: process.GlobalTag.globaltag = "START53_V27::All"
 
+
+# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
 if isData:
+
 	# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
-	goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
+	goodJSON = "PhysObjectExtractor/data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
 	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
 	process.source.lumisToProcess = CfgTypes.untracked(
 	    	CfgTypes.VLuminosityBlockRange())
@@ -171,8 +177,8 @@ process.mytaus = cms.EDAnalyzer('TauAnalyzer',
 				)
 
 process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
-                                     filterName = cms.string("hltSingleJet190Regional"),
-				     )
+                                     filterName = cms.string("hltL2DoubleMu23NoVertexL2PreFiltered"),
+                             )
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
 
@@ -190,7 +196,7 @@ process.TFileService = cms.Service(
 
 #### Finally run everything! Separation by * implies that processing order is important, separation by + implies that any order will work
 if doPat:
-	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
 else: 
-	if isData: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
-	else: process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent)
+	if isData: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
+	else: process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
