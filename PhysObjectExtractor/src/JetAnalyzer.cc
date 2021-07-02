@@ -75,7 +75,7 @@ private:
   std::string              jerResName_;
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
   boost::shared_ptr<FactorizedJetCorrector> jec_;
-  boost::shared_ptr<SimpleJetCorrector> ak5PFCorrector;
+  boost::shared_ptr<SimpleJetCorrector> jer_;
   bool isData;
 
   int numjet; //number of jets in the event
@@ -139,8 +139,8 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   // Make the FactorizedJetCorrector and Uncertainty                                                                                              
   jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
-  JetCorrectorParameters *ak5PFPar = new JetCorrectorParameters(jerResName_);
-  ak5PFCorrector = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*ak5PFPar) );  
+  JetCorrectorParameters *jerPar = new JetCorrectorParameters(jerResName_);
+  jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*jerPar) );  
 
 	
   mtree->Branch("numberjet",&numjet);
@@ -255,7 +255,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          PTNPU.push_back( itjet->pt() );
          PTNPU.push_back( vertices->size() );
 
-         float res = ak5PFCorrector->correction(feta, PTNPU);
+         float res = jer_->correction(feta, PTNPU);
 
          TRandom3 JERrand;
 
@@ -282,8 +282,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        corr_jet_pt.push_back(ptscale*corr*uncorrJet.pt());
        corr_jet_ptUp.push_back(corrUp*uncorrJet.pt());
        corr_jet_ptDown.push_back(corrDown*uncorrJet.pt());
-       corr_jet_ptSmearUp.push_back(ptscale_up*corrUp*uncorrJet.pt());
-       corr_jet_ptSmearDown.push_back(ptscale_down*corrUp*uncorrJet.pt());
+       corr_jet_ptSmearUp.push_back(ptscale_up*corr*uncorrJet.pt());
+       corr_jet_ptSmearDown.push_back(ptscale_down*corr*uncorrJet.pt());
      }
    }
    
