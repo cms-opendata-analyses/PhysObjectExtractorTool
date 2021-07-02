@@ -124,19 +124,19 @@ WeightAnalyzerBEff::WeightAnalyzerBEff(const edm::ParameterSet& iConfig):
   edm::InputTag GEIPtag("generator");
 
   //Make histograms to save counts
-  double ptbinsB[11] = {0, 25, 50, 75, 100, 125, 150, 200, 400, 800, 1200};
-  BEff_Dptbins_b    = fs->make<TH1D>("BEff_Dptbins_b   ","",10,ptbinsB); BEff_Dptbins_b->Sumw2();
-  BEff_Dptbins_c    = fs->make<TH1D>("BEff_Dptbins_c   ","",10,ptbinsB); BEff_Dptbins_c->Sumw2();
-  BEff_Dptbins_udsg = fs->make<TH1D>("BEff_Dptbins_udsg","",10,ptbinsB); BEff_Dptbins_udsg->Sumw2();
-  BEffTight_Nptbins_b      = fs->make<TH1D>("BEffTight_Nptbins_b     ","",10,ptbinsB); BEffTight_Nptbins_b->Sumw2();
-  BEffTight_Nptbins_c      = fs->make<TH1D>("BEffTight_Nptbins_c     ","",10,ptbinsB); BEffTight_Nptbins_c->Sumw2();
-  BEffTight_Nptbins_udsg   = fs->make<TH1D>("BEffTight_Nptbins_udsg  ","",10,ptbinsB); BEffTight_Nptbins_udsg->Sumw2();
-  BEffMed_Nptbins_b      = fs->make<TH1D>("BEffMed_Nptbins_b     ","",10,ptbinsB); BEffMed_Nptbins_b->Sumw2();
-  BEffMed_Nptbins_c      = fs->make<TH1D>("BEffMed_Nptbins_c     ","",10,ptbinsB); BEffMed_Nptbins_c->Sumw2();
-  BEffMed_Nptbins_udsg   = fs->make<TH1D>("BEffMed_Nptbins_udsg  ","",10,ptbinsB); BEffMed_Nptbins_udsg->Sumw2();
-  BEffLoose_Nptbins_b      = fs->make<TH1D>("BEffLoose_Nptbins_b     ","",10,ptbinsB); BEffLoose_Nptbins_b->Sumw2();
-  BEffLoose_Nptbins_c      = fs->make<TH1D>("BEffLoose_Nptbins_c     ","",10,ptbinsB); BEffLoose_Nptbins_c->Sumw2();
-  BEffLoose_Nptbins_udsg   = fs->make<TH1D>("BEffLoose_Nptbins_udsg  ","",10,ptbinsB); BEffLoose_Nptbins_udsg->Sumw2();
+  double ptbinsB[10] = {0, 15, 30, 50, 70, 100, 150, 200, 500, 1000};
+  BEff_Dptbins_b    = fs->make<TH1D>("BEff_Dptbins_b   ","",9,ptbinsB); BEff_Dptbins_b->Sumw2();
+  BEff_Dptbins_c    = fs->make<TH1D>("BEff_Dptbins_c   ","",9,ptbinsB); BEff_Dptbins_c->Sumw2();
+  BEff_Dptbins_udsg = fs->make<TH1D>("BEff_Dptbins_udsg","",9,ptbinsB); BEff_Dptbins_udsg->Sumw2();
+  BEffTight_Nptbins_b      = fs->make<TH1D>("BEffTight_Nptbins_b     ","",9,ptbinsB); BEffTight_Nptbins_b->Sumw2();
+  BEffTight_Nptbins_c      = fs->make<TH1D>("BEffTight_Nptbins_c     ","",9,ptbinsB); BEffTight_Nptbins_c->Sumw2();
+  BEffTight_Nptbins_udsg   = fs->make<TH1D>("BEffTight_Nptbins_udsg  ","",9,ptbinsB); BEffTight_Nptbins_udsg->Sumw2();
+  BEffMed_Nptbins_b      = fs->make<TH1D>("BEffMed_Nptbins_b     ","",9,ptbinsB); BEffMed_Nptbins_b->Sumw2();
+  BEffMed_Nptbins_c      = fs->make<TH1D>("BEffMed_Nptbins_c     ","",9,ptbinsB); BEffMed_Nptbins_c->Sumw2();
+  BEffMed_Nptbins_udsg   = fs->make<TH1D>("BEffMed_Nptbins_udsg  ","",9,ptbinsB); BEffMed_Nptbins_udsg->Sumw2();
+  BEffLoose_Nptbins_b      = fs->make<TH1D>("BEffLoose_Nptbins_b     ","",9,ptbinsB); BEffLoose_Nptbins_b->Sumw2();
+  BEffLoose_Nptbins_c      = fs->make<TH1D>("BEffLoose_Nptbins_c     ","",9,ptbinsB); BEffLoose_Nptbins_c->Sumw2();
+  BEffLoose_Nptbins_udsg   = fs->make<TH1D>("BEffLoose_Nptbins_udsg  ","",9,ptbinsB); BEffLoose_Nptbins_udsg->Sumw2();
 
 }
 
@@ -177,26 +177,29 @@ WeightAnalyzerBEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     double disc = it->bDiscriminator(discriminatorStr);
     int hadronFlavor = it->partonFlavour();
 
+    float pt = it->pt();
+    if (pt > 1000) pt = 999; // all statistics in final bin
+
     if( abs(hadronFlavor)==5 ){
-      BEff_Dptbins_b->Fill(it->pt(),weight);      
-      if( disc >= discriminatorValueT) BEffTight_Nptbins_b->Fill(it->pt(),weight);
-      if( disc >= discriminatorValueM) BEffMed_Nptbins_b->Fill(it->pt(),weight);
-      if( disc >= discriminatorValueL) BEffLoose_Nptbins_b->Fill(it->pt(),weight);
+      BEff_Dptbins_b->Fill(pt,weight);      
+      if( disc >= discriminatorValueT) BEffTight_Nptbins_b->Fill(pt,weight);
+      if( disc >= discriminatorValueM) BEffMed_Nptbins_b->Fill(pt,weight);
+      if( disc >= discriminatorValueL) BEffLoose_Nptbins_b->Fill(pt,weight);
       
     }
     else if( abs(hadronFlavor)==4 ){
-      BEff_Dptbins_c->Fill(it->pt(),weight);
+      BEff_Dptbins_c->Fill(pt,weight);
       
-      if( disc >= discriminatorValueT) BEffTight_Nptbins_c->Fill(it->pt(),weight);
-      if( disc >= discriminatorValueM) BEffMed_Nptbins_c->Fill(it->pt(),weight); 
-      if( disc >= discriminatorValueL) BEffLoose_Nptbins_c->Fill(it->pt(),weight);
+      if( disc >= discriminatorValueT) BEffTight_Nptbins_c->Fill(pt,weight);
+      if( disc >= discriminatorValueM) BEffMed_Nptbins_c->Fill(pt,weight); 
+      if( disc >= discriminatorValueL) BEffLoose_Nptbins_c->Fill(pt,weight);
     }
     else{
-      BEff_Dptbins_udsg->Fill(it->pt(),weight);
+      BEff_Dptbins_udsg->Fill(pt,weight);
       
-      if( disc >= discriminatorValueT) BEffTight_Nptbins_udsg->Fill(it->pt(),weight);
-      if( disc >= discriminatorValueM) BEffMed_Nptbins_udsg->Fill(it->pt(),weight);
-      if( disc >= discriminatorValueL) BEffLoose_Nptbins_udsg->Fill(it->pt(),weight);
+      if( disc >= discriminatorValueT) BEffTight_Nptbins_udsg->Fill(pt,weight);
+      if( disc >= discriminatorValueM) BEffMed_Nptbins_udsg->Fill(pt,weight);
+      if( disc >= discriminatorValueL) BEffLoose_Nptbins_udsg->Fill(pt,weight);
     }
   }
 }
