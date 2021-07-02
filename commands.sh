@@ -1,4 +1,6 @@
 #!/bin/sh -l
+# exit on erro
+set -e
 sudo chown $USER /mnt/vol
 
 # For the plain github action with docker, the area would be available in /mnt/vol
