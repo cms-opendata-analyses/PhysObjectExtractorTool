@@ -85,7 +85,6 @@ private:
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
   boost::shared_ptr<SimpleJetCorrector> jer_;
   bool isData;
-
   edm::InputTag jetInput;
 
   int numjet; //number of jets in the event
@@ -137,7 +136,10 @@ PatJetAnalyzer::PatJetAnalyzer(const edm::ParameterSet& iConfig)
   jerResName_ = iConfig.getParameter<edm::FileInPath>("jerResName").fullPath(); // JER Resolutions                               
 
   // Make the FactorizedJetCorrector and Uncertainty
+
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
+  JetCorrectorParameters *ak5PFPar = new JetCorrectorParameters(jerResName_);
+  jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*ak5PFPar) );
   mtree->Branch("numberjet",&numjet);
   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
   mtree->Branch("jet_pt",&jet_pt);
