@@ -32,17 +32,19 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-#Define the source files to be read using the xrootd protocol (root://), or local files (file:)
+#Define the test source files to be read using the xrootd protocol (root://), or local files (file:)
 #Several files can be comma-separated
 #A local file, for testing, can be downloaded using, e.g., the cern open data client (https://cernopendata-client.readthedocs.io/en/latest/):
 # python cernopendata-client download-files --recid 6004 --filter-range 1-1
+#For running over larger number of files, comment out this section and use/uncomment the FileUtils infrastructure below
+if isData: 
+	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
+else: 
+	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-      'root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
       #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-
-      #'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
-
+	sourceFile
     )
 )
 
@@ -63,22 +65,21 @@ process.source = cms.Source("PoolSource",
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 #Uncomment and arrange a line like this if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-
+#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db')
 #The global tag must correspond to the needed epoch (comment out if no conditions needed)
-#if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
-if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
+if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
 else: process.GlobalTag.globaltag = "START53_V27::All"
 
 
-# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
-if isData:
-
-	# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
-	goodJSON = "PhysObjectExtractor/data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
-	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
-	process.source.lumisToProcess = CfgTypes.untracked(
-	    	CfgTypes.VLuminosityBlockRange())
-	process.source.lumisToProcess.extend(myLumis)
+# Uncomment this section to apply the data quality JSON file filter. 
+# It needs to be done after the process.source definition
+# Make sure the location of the file agrees with your setup
+#if isData:
+#	goodJSON = "PhysObjectExtractor/data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
+#	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
+#	process.source.lumisToProcess = CfgTypes.untracked(
+#	    	CfgTypes.VLuminosityBlockRange())
+#	process.source.lumisToProcess.extend(myLumis)
 
 
 #More information about InputCollections at https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
