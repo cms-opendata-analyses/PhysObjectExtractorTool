@@ -1,18 +1,11 @@
 // -*- C++ -*-
 //
-// Package:    FWLJMET/WeightAnalyzerBEff
+// Package:    PhysObjectExtractorTool/BTagging
 // Class:      WeightAnalyzerBEff
 //
-/**\class WeightAnalyzerBEff WeightAnalyzerBEff.cc FWLJMET/WeightAnalyzerBEff/plugins/WeightAnalyzerBEff.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
-*/
 //
-// Original Author:  Rizki Syarif
-//         Created:  Fri, 10 May 2019 18:16:01 GMT
+// Original Author:  Sid Boros
+//         Created:  July 2021
 //
 //
 
@@ -96,13 +89,12 @@ private:
   TH1D* BEffLoose_Nptbins_udsg;
   
   // ----------member data ---------------------------
-//  edm::EDGetTokenT<pat::JetCollection> JETtokenAK4;  
-//  edm::EDGetTokenT<GenEventInfoProduct> GEIPtoken;
+  //  edm::EDGetTokenT<pat::JetCollection> JETtokenAK4;  
+  //  edm::EDGetTokenT<GenEventInfoProduct> GEIPtoken;
 
-const edm::InputTag GEIPtoken;
-
-
+  const edm::InputTag GEIPtoken;
   const edm::InputTag jetsTagAK4;
+  std::string discriminatorStr;
   const double  discriminatorValueT;
   const double  discriminatorValueM;
   const double  discriminatorValueL;
@@ -122,19 +114,14 @@ const edm::InputTag GEIPtoken;
 //
 WeightAnalyzerBEff::WeightAnalyzerBEff(const edm::ParameterSet& iConfig):
   jetsTagAK4(iConfig.getParameter<edm::InputTag>("jetTag")),
+  discriminatorStr(iConfig.getParameter<std::string>("discriminator")),
   discriminatorValueT(iConfig.getParameter<double>("DiscriminatorValueTight")),
   discriminatorValueM(iConfig.getParameter<double>("DiscriminatorValueMedium")),
   discriminatorValueL(iConfig.getParameter<double>("DiscriminatorValueLoose"))
 {
   //now do what ever initialization is needed
   edm::Service<TFileService> fs;  
-
- // JETtokenAK4 = consumes<pat::JetCollection>(jetsTagAK4);
-
-	//getlabel change here?
-
   edm::InputTag GEIPtag("generator");
-  //GEIPtoken = consumes<GenEventInfoProduct>(GEIPtag);
 
   //Make histograms to save counts
   double ptbinsB[11] = {0, 25, 50, 75, 100, 125, 150, 200, 400, 800, 1200};
@@ -150,7 +137,7 @@ WeightAnalyzerBEff::WeightAnalyzerBEff(const edm::ParameterSet& iConfig):
   BEffLoose_Nptbins_b      = fs->make<TH1D>("BEffLoose_Nptbins_b     ","",10,ptbinsB); BEffLoose_Nptbins_b->Sumw2();
   BEffLoose_Nptbins_c      = fs->make<TH1D>("BEffLoose_Nptbins_c     ","",10,ptbinsB); BEffLoose_Nptbins_c->Sumw2();
   BEffLoose_Nptbins_udsg   = fs->make<TH1D>("BEffLoose_Nptbins_udsg  ","",10,ptbinsB); BEffLoose_Nptbins_udsg->Sumw2();
- //15 was original instead of 9
+
 }
 
 
@@ -186,10 +173,11 @@ WeightAnalyzerBEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   iEvent.getByLabel(jetsTagAK4, jetsAK4);
 
   for(std::vector<pat::Jet>::const_iterator it = jetsAK4->begin(); it != jetsAK4->end(); ++it){
-    double disc = it->bDiscriminator("combinedSecondaryVertexBJetTags");
+
+    double disc = it->bDiscriminator(discriminatorStr);
     int hadronFlavor = it->partonFlavour();
 
-      if( abs(hadronFlavor)==5 ){
+    if( abs(hadronFlavor)==5 ){
       BEff_Dptbins_b->Fill(it->pt(),weight);      
       if( disc >= discriminatorValueT) BEffTight_Nptbins_b->Fill(it->pt(),weight);
       if( disc >= discriminatorValueM) BEffMed_Nptbins_b->Fill(it->pt(),weight);
@@ -200,7 +188,8 @@ WeightAnalyzerBEff::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       BEff_Dptbins_c->Fill(it->pt(),weight);
       
       if( disc >= discriminatorValueT) BEffTight_Nptbins_c->Fill(it->pt(),weight);
-      if( disc >= discriminatorValueM) BEffMed_Nptbins_c->Fill(it->pt(),weight); if( disc >= discriminatorValueL) BEffLoose_Nptbins_c->Fill(it->pt(),weight);
+      if( disc >= discriminatorValueM) BEffMed_Nptbins_c->Fill(it->pt(),weight); 
+      if( disc >= discriminatorValueL) BEffLoose_Nptbins_c->Fill(it->pt(),weight);
     }
     else{
       BEff_Dptbins_udsg->Fill(it->pt(),weight);
@@ -234,11 +223,6 @@ WeightAnalyzerBEff::fillDescriptions(edm::ConfigurationDescriptions& description
   desc.setUnknown();
   descriptions.addDefault(desc);
 
-  //Specify that only 'tracks' is allowed
-  //To use, remove the default given above and uncomment below
-  //ParameterSetDescription desc;
-  //desc.addUntracked<edm::InputTag>("tracks","ctfWithMaterialTracks");
-  //descriptions.addDefault(desc);
 }
 
 //define this as a plug-in
