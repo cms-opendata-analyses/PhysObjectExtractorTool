@@ -39,14 +39,10 @@ process.GlobalTag.globaltag = "START53_V27::All"
 
 # Load PAT configs and build some light sequences
 process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
-process.load('PhysicsTools.PatAlgos.producersLayer1.metProducer_cff')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-process.patCandidates = cms.Sequence(process.makePatJets+process.makePatMETs)
-process.selectedPatCandidates = cms.Sequence(process.selectedPatJets)
-process.patDefaultSequence = cms.Sequence(process.patCandidates * process.selectedPatCandidates)
+process.patDefaultSequence = cms.Sequence(process.makePatJets * process.selectedPatJets)
 process.load('RecoJets.Configuration.RecoPFJets_cff')
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
-from PhysicsTools.PatAlgos.tools.coreTools import runOnData
 jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
 
 # Set up the new jet collection
@@ -56,7 +52,7 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),
                  doJTA        = True,
                  doBTagging   = True,
                  jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
-                 doType1MET   = True,
+                 doType1MET   = False,
                  doL1Cleaning = False,
                  doL1Counters = False,
                  doJetID      = True,
