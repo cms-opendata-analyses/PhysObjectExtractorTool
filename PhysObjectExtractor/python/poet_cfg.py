@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
+
 import os 
 
 relBase = os.environ['CMSSW_BASE']
@@ -11,6 +12,7 @@ relBase = os.environ['CMSSW_BASE']
 #This needs to be in agreement with the input files/datasets below.
 isData = False
 doPat = True
+
 
 process = cms.Process("POET")
 
@@ -36,9 +38,11 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # python cernopendata-client download-files --recid 6004 --filter-range 1-1
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-      #'root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
+      'root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
       #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-     'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root' 
+
+      #'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
+
     )
 )
 
@@ -59,15 +63,18 @@ process.source = cms.Source("PoolSource",
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 #Uncomment and arrange a line like this if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db')
+
 #The global tag must correspond to the needed epoch (comment out if no conditions needed)
-if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
+#if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
+if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
 else: process.GlobalTag.globaltag = "START53_V27::All"
 
 
 # Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
 if isData:
-	goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
+
+	# Apply JSON file with lumi mask for data quality purposes (needs to be done after the process.source definition)
+	goodJSON = "PhysObjectExtractor/data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
 	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
 	process.source.lumisToProcess = CfgTypes.untracked(
 	    	CfgTypes.VLuminosityBlockRange())
