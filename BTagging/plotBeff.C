@@ -22,9 +22,11 @@ void plotBeff(){
   cout << "L FLAVOR Med 2011" << endl;
   for(int i = 1; i < numL->GetNbinsX()+1; i++){printf("pT > %f, fake = %f\n",numL->GetBinLowEdge(i),numL->GetBinContent(i));}
 
+  TCanvas *c1 = new TCanvas("c1","c1",800,600);
+  gStyle->SetOptStat(0);
   num->GetYaxis()->SetRangeUser(0.0,1.0);
-  num->GetYaxis()->SetTitle("Efficiency of DeepJet Medium");
-  num->GetXaxis()->SetTitle("AK4 jet p_{T} [GeV]");
+  num->GetYaxis()->SetTitle("Efficiency of CSV Medium");
+  num->GetXaxis()->SetTitle("AK5 jet p_{T} [GeV]");
   num->SetLineWidth(2);
   num->SetMarkerStyle(20);
   num->SetMarkerColor(kBlack);
@@ -40,10 +42,14 @@ void plotBeff(){
   num->Draw();
   numC->Draw("same");
   numL->Draw("same");
-  //leg->Draw("same");
-  //c1->SaveAs("CSVMed_2011.png");
-  //c1->SaveAs("CSVMed_2011.pdf");
-  //c1->SaveAs("CSVMed_2011.root");
+  TLegend *leg = new TLegend(0.7,0.7,0.98,0.98);
+  leg->AddEntry(num,"b quarks","pl");                                        
+  leg->AddEntry(numC,"c quarks","pl");                                       
+  leg->AddEntry(numL,"udsg","pl");                                           
+  leg->Draw("same");
+  c1->SaveAs("CSVMedium_2011.png");
+  c1->SaveAs("CSVMedium_2011.pdf");
+  c1->SaveAs("CSVMedium_2011.root");
 
 
 }
