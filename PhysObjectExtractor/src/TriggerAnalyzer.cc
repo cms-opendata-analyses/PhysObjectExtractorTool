@@ -25,12 +25,6 @@
 #include <boost/foreach.hpp>
 #include <iterator>
 #include <map> 
-#ifdef __MAKECINT__ 
-#pragma link C++ class map<std::string, std::vector<int>>; 
-#pragma link C++ class map<std::string, std::vector<int>>::iterator; 
-#pragma link C++ class pair<std::string, std::vector<int>>; 
-#endif// __MAKECINT__
-using namespace std;
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -39,7 +33,6 @@ using namespace std;
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -53,7 +46,6 @@ using namespace std;
 #include "TTree.h"
 #include "TFile.h"
 #include "TROOT.h"
-
 
 
 //
@@ -71,7 +63,7 @@ class TriggerAnalyzer : public edm::EDAnalyzer {
       virtual void initPattern(const edm::TriggerResults & result,
                         const edm::EventSetup& iSetup,
                         const edm::TriggerNames & triggerNames);
-      //the follwing are not being used here
+      //the following are not being used here
       virtual void beginJob() ;
       virtual void endJob() ;
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
@@ -107,8 +99,6 @@ class TriggerAnalyzer : public edm::EDAnalyzer {
 
       // ----------member data ---------------------------
       TTree *mtree;
-    //std::vector<int> triggervecs[1000];
-    //std::vector<std::string> triggname;
       std::map<std::string, int> trigmap;
 
 };
@@ -162,17 +152,11 @@ HLTPathsByName_()
   edm::Service<TFileService> fs;
   mtree = fs->make<TTree>("Events", "Events");
   
-  //gROOT->ProcessLine("#include <map>");
-  
-  //mtree->Branch("triggmap","map<std::string, std::vector<int>>", &triggmap);
-  //mtree->GetBranch("triggmap")->SetTitle("Trigger Information C++ map");
-
-  
-  //for (unsigned int i=0; i!=1000; ++i) {
-  //     triggervecs[i].clear();
-  // }
-  
-  //iter = 0;
+  mtree->Branch("triggermap", &trigmap);
+  //second  stores the multiplication acceptbit*L1ps*HLTps 
+  //so, if negative, it means that L1ps couldn't be found.
+  //look below in the code to understand the specifics
+  mtree->GetBranch("triggermap")->SetTitle("first:name of trigger, second: acceptbit*L1ps*HLTps");
   
 }
 
@@ -270,13 +254,14 @@ void TriggerAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        analyzeSimplePrescales(iEvent,iSetup,HLTPathsByName_[i]);
   }
 
-  //temporary printout
+  //Printout for testing
   //map<string, int>::iterator it;
   //for (it = trigmap.begin(); it != trigmap.end(); it++)
   //{
   //    cout << "********Trigger Name: "<<it->first<<"  accbit*L1ps*HLTps: "<<it->second<< endl;
   //}
-  
+
+  mtree->Fill();  
 
   return;
 
