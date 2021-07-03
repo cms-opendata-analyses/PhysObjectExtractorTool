@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
-from PhysicsTools.PatAlgos.patTemplate_cfg import *
 import os 
 
 relBase = os.environ['CMSSW_BASE']
@@ -31,44 +30,34 @@ process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 ##### ------- This is a test file
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-#'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/0448AB4F-364D-E311-B1E7-001E67397CBA.root',
-'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/04FCA1D5-E74C-E311-92CE-002590A887F0.root'))
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/04FCA1D5-E74C-E311-92CE-002590A887F0.root'))
 
 # Set global tag
 process.load('Configuration.StandardSequences.Services_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = "START53_V27::All"
 
-# Load PAT config                                                                                                                     
-process.load("PhysicsTools.PatAlgos.patSequences_cff")
-process.load('Configuration.StandardSequences.Reconstruction_cff')
+# Load PAT configs and build some light sequences
+process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
+process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+process.patDefaultSequence = cms.Sequence(process.makePatJets * process.selectedPatJets)
 process.load('RecoJets.Configuration.RecoPFJets_cff')
-process.load('RecoJets.Configuration.RecoJets_cff')
-process.load('RecoJets.JetProducers.TrackJetParameters_cfi')
-process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-     
-from PhysicsTools.PatAlgos.tools.pfTools import *
-from PhysicsTools.PatAlgos.tools.coreTools import *
-from PhysicsTools.PatAlgos.tools.metTools import *
-from PhysicsTools.PatAlgos.tools.jetTools import *
-from PhysicsTools.PatAlgos.tools.coreTools import *
-from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
+jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
 
 # Set up the new jet collection
 process.ak5PFJets.doAreaFastjet = True
-addPfMET(process, 'PF')
-
 addJetCollection(process,cms.InputTag('ak5PFJets'),
                  'AK5', 'PFCorr',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5PF', cms.vstring(['L1FastJet','L2Relative','L3Absolute'])),
-                 doType1MET   = True,
-                 doL1Cleaning = True,
+                 jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
+                 doType1MET   = False,
+                 doL1Cleaning = False,
                  doL1Counters = False,
                  doJetID      = True,
                  jetIdLabel   = "ak5",
-                 )
+                 ) 
 
 # Number of events to be skipped (0 by default)
 process.source.skipEvents = cms.untracked.uint32(0)
@@ -80,6 +69,7 @@ process.source.skipEvents = cms.untracked.uint32(0)
 process.mcweightanalyzer = cms.EDAnalyzer(
     "WeightAnalyzerBEff",
     jetTag = cms.InputTag("selectedPatJetsAK5PFCorr"),
+    discriminator = cms.string("combinedSecondaryVertexBJetTags"),
     DiscriminatorValueTight = cms.double(0.898),
     DiscriminatorValueMedium = cms.double(0.679),
     DiscriminatorValueLoose = cms.double(0.244),
