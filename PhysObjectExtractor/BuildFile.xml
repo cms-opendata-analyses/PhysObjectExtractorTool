@@ -12,5 +12,6 @@
 <use name="RecoEgamma/EgammaTools"/>
 <use name="CondFormats/JetMETObjects"/>
 <use name="DataFormats/PatCandidates"/>
+<use name="HLTrigger/HLTcore"/>
 <flags EDM_PLUGIN="1"/>
 </buildfile>
