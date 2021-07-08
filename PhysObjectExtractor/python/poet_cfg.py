@@ -192,13 +192,13 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 				      #if 0:0, collect them all	
 				      input_particle = cms.vstring("1:11","1:13","1:22","2:15")
 				      )
+
 process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
                               processName = cms.string("HLT"),
                               triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu12_v*", "HLT_Photon20_CaloIdVL_v*", "HLT_Ele22_CaloIdL_CaloIsoVL_v*", "HLT_Jet370_NoJetID_v*"), #if left empty, all triggers will run        
                               triggerResults = cms.InputTag("TriggerResults","","HLT"),
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")                             
                               )
-
 
 # Configure the output ROOT filename
 process.TFileService = cms.Service(
