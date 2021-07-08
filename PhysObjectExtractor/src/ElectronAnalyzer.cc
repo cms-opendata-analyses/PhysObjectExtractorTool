@@ -194,8 +194,9 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	 if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.15 && 
 	      itElec->sigmaIetaIeta()<.01 && itElec->hadronicOverEm()<.12 && 
 	      abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-	                missing_hits<=1 && el_pfIso<.15 && passelectronveto==true &&
-	      abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05 ){
+	      missing_hits<=1 && passelectronveto==true &&
+	      abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05 && 
+	      el_pfIso<.15){
 	       
 	   isLoose = true;
 	       
@@ -212,7 +213,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	 if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.1 && 
 	      itElec->sigmaIetaIeta()<.03 && itElec->hadronicOverEm()<.1 && 
 	      abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-	                missing_hits<=1 && el_pfIso<.15 && passelectronveto==true &&
+	      missing_hits<=1 && el_pfIso<.15 && passelectronveto==true &&
 	      abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05) {
 	       
 	   isLoose = true;
