@@ -180,10 +180,12 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    if(myelectrons.isValid()){
      // get the number of electrons in the event
      numelectron=myelectrons->size();
-     float el_pfIso = -999;
      for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+	     
        int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
        bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
+	     
+       float el_pfIso = 999;
        if (itElec->passingPflowPreselection()) {
 	 auto iso03 = itElec->pfIsolationVariables();
 	 el_pfIso = (iso03.chargedHadronIso + iso03.neutralHadronIso + iso03.photonIso)/itElec->pt();
