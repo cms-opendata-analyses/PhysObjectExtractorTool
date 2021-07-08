@@ -49,6 +49,8 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
+  virtual float effectiveArea0p3cone(float eta);
+
   //declare the input tag for GsfElectronCollection
   edm::InputTag electronInput;
   
@@ -129,6 +131,18 @@ ElectronAnalyzer::~ElectronAnalyzer()
 // member functions
 //
 
+float
+ElectronAnalyzer::effectiveArea0p3cone(float eta)
+{
+  if(fabs(eta) < 1.0) return 0.13;
+  else if(fabs(eta) < 1.479) return 0.14;
+  else if(fabs(eta) < 2.0) return 0.07;
+  else if(fabs(eta) < 2.2) return 0.09;
+  else if(fabs(eta) < 2.3) return 0.11;
+  else if(fabs(eta) < 2.4) return 0.11;
+  else return 0.14;
+}
+
 // ------------ method called for each event  ------------
 void
 ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -146,6 +160,8 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    Handle<reco::VertexCollection> vertices;
    iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
    math::XYZPoint pv(vertices->begin()->position());
+  Handle<double> rhoHandle;
+  iEvent.getByLabel(InputTag("kt6PFJets"), rhoHandle);
 
    numelectron = 0;
    electron_e.clear();
@@ -169,8 +185,10 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
        int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
        bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
        if (itElec->passingPflowPreselection()) {
+	 double rho = *(rhoHandle.product());
+	 double Aeff = effectiveArea0p3cone(itElec->eta());
 	 auto iso03 = itElec->pfIsolationVariables();
-	 el_pfIso = (iso03.chargedHadronIso + iso03.neutralHadronIso + iso03.photonIso)/itElec->pt();
+	 el_pfIso = (iso03.chargedHadronIso + std::max(0,iso03.neutralHadronIso + iso03.photonIso - rho*Aeff)/itElec->pt();
        } 
        auto trk = itElec->gsfTrack();
        bool isLoose = false, isMedium = false, isTight = false;
