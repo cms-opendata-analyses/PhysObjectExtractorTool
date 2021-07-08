@@ -69,6 +69,10 @@ private:
   std::vector<bool> electron_isLoose;
   std::vector<bool> electron_isMedium;
   std::vector<bool> electron_isTight;
+  std::vector<float> electron_dxy;
+  std::vector<float> electron_dz;
+  std::vector<float> electron_dxyError;
+  std::vector<float> electron_dzError;
 };
 
 //
@@ -117,6 +121,14 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_isMedium")->SetTitle("electron tagged medium");
   mtree->Branch("electron_isTight",&electron_isTight);
   mtree->GetBranch("electron_isTight")->SetTitle("electron tagged tight");
+  mtree->Branch("electron_dxy",&electron_dxy);
+  mtree->GetBranch("electron_dxy")->SetTitle("electron transverse plane impact parameter (mm)");
+  mtree->Branch("electron_dz",&electron_dz);
+  mtree->GetBranch("electron_dz")->SetTitle("electron longitudinal impact parameter (mm)");
+  mtree->Branch("electron_dxyError",&electron_dxyError);
+  mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
+  mtree->Branch("electron_dzError",&electron_dzError);
+  mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
 }
 
 ElectronAnalyzer::~ElectronAnalyzer()
@@ -160,6 +172,10 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    electron_isLoose.clear();
    electron_isMedium.clear();
    electron_isTight.clear();
+   electron_dxy.clear();
+   electron_dz.clear();
+   electron_dxyError.clear();
+   electron_dzError.clear();
 
    if(myelectrons.isValid()){
      // get the number of electrons in the event
@@ -223,6 +239,10 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
        electron_isLoose.push_back(isLoose);
        electron_isMedium.push_back(isMedium);
        electron_isTight.push_back(isTight);
+       electron_dxy.push_back(trk->dxy(pv));
+       electron_dz.push_back(trk->dz(pv));
+       electron_dxyError.push_back(trk->d0Error());
+       electron_dzError.push_back(trk->dzError());
      }
   }
 
