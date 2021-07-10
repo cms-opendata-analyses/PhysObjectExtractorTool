@@ -2,8 +2,8 @@
 // This template analysis code has been built with fragments from the 
 // classes automatically obtained by the TTree MakeClass() method.
 //
-// The template show the structre of a potential analysis code
-// where more TTree friend can be added with more physics objects.
+// The template shows the structre of a potential analysis code
+// where more TTree friends can be added with more physics objects.
 //
 // Done with ROOT version 5.32/00
 // from TTree Events/Events
@@ -229,29 +229,6 @@ void EventLoopAnalysisTemplate::Loop()
 
 
 //-----------------------------------------------------------------
-int main()
-{
-//-----------------------------------------------------------------
-
-    cout<<"Build the analysis object"<<endl;
-    EventLoopAnalysisTemplate mytemplate;
-
-    cout<<"Run the event loop"<<endl;
-    mytemplate.Loop();
-
-    cout<<"Save the histograms"<<endl;
-    TFile* hfile = new TFile("histograms.root","RECREATE");
-    lumib->Write();
-    h_nmu->Write();
-    h_mu_e->Write();
-    h_mu_pt->Write();
-    hfile->Close();
-
-    return 1;
-
-}
-
-//-----------------------------------------------------------------
 void EventLoopAnalysisTemplate::analysis()
 {
 //-----------------------------------------------------------------
@@ -276,3 +253,29 @@ void EventLoopAnalysisTemplate::analysis()
 
 
 }
+
+
+//-----------------------------------------------------------------
+int main()
+{
+//-----------------------------------------------------------------
+
+    cout<<"Build the analysis object"<<endl;
+    EventLoopAnalysisTemplate mytemplate;
+
+    cout<<"Run the event loop"<<endl;
+    mytemplate.Loop();
+
+    cout<<"Save the histograms"<<endl;
+    TFile* hfile = new TFile("histograms.root","RECREATE");
+    lumib->Write();
+    h_nmu->Write();
+    h_mu_e->Write();
+    h_mu_pt->Write();
+    hfile->Close();
+
+    return 1;
+
+}
+
+
