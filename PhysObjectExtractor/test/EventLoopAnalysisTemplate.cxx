@@ -184,8 +184,8 @@ Int_t EventLoopAnalysisTemplate::Cut(Long64_t entry)
 void EventLoopAnalysisTemplate::Loop()
 {
 //   In a ROOT session, you can do:
-//      Root > .L events.C
-//      Root > events t
+//      Root > .L EventLoopAnalysisTemplate.C
+//      Root > EventLoopAnalysisTemplate t
 //      Root > t.GetEntry(12); // Fill t data members with entry number 12
 //      Root > t.Show();       // Show values of entry 12
 //      Root > t.Show(16);     // Read and show values of entry 16
