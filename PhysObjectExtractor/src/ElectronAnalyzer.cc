@@ -173,7 +173,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
   math::XYZPoint pv(vertices->begin()->position());
   Handle<double> rhoHandle;
-  iEvent.getByLabel(InputTag("kt6PFJets"), rhoHandle);
+  iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
   
   numelectron = 0;
   electron_e.clear();
