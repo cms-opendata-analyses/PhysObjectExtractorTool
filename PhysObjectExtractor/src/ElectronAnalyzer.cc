@@ -159,114 +159,115 @@ ElectronAnalyzer::effectiveArea0p3cone(float eta)
 void
 ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   using namespace edm;
-   using namespace std;
-
-   Handle<reco::GsfElectronCollection> myelectrons;
-   iEvent.getByLabel(electronInput, myelectrons);
-   Handle<reco::ConversionCollection> hConversions;
-   iEvent.getByLabel("allConversions", hConversions);
-   Handle<reco::BeamSpot> bsHandle;
-   iEvent.getByLabel("offlineBeamSpot", bsHandle);
-   const reco::BeamSpot &beamspot = *bsHandle.product();
-   Handle<reco::VertexCollection> vertices;
-   iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
-   math::XYZPoint pv(vertices->begin()->position());
+  using namespace edm;
+  using namespace std;
+  
+  Handle<reco::GsfElectronCollection> myelectrons;
+  iEvent.getByLabel(electronInput, myelectrons);
+  Handle<reco::ConversionCollection> hConversions;
+  iEvent.getByLabel("allConversions", hConversions);
+  Handle<reco::BeamSpot> bsHandle;
+  iEvent.getByLabel("offlineBeamSpot", bsHandle);
+  const reco::BeamSpot &beamspot = *bsHandle.product();
+  Handle<reco::VertexCollection> vertices;
+  iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
+  math::XYZPoint pv(vertices->begin()->position());
   Handle<double> rhoHandle;
   iEvent.getByLabel(InputTag("kt6PFJets"), rhoHandle);
-
-   numelectron = 0;
-   electron_e.clear();
-   electron_pt.clear();
-   electron_px.clear();
-   electron_py.clear();
-   electron_pz.clear();
-   electron_eta.clear();
-   electron_phi.clear();
-   electron_ch.clear();
-   electron_iso.clear();
-   electron_isLoose.clear();
-   electron_isMedium.clear();
-   electron_isTight.clear();
-   electron_dxy.clear();
-   electron_dz.clear();
-   electron_dxyError.clear();
-   electron_dzError.clear();
-
-   if(myelectrons.isValid()){
-     // get the number of electrons in the event
-     numelectron=myelectrons->size();
-     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
-	     
-       int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
-       bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
-	     
-       float el_pfIso = 999;
-       if (itElec->passingPflowPreselection()) {
-	 double rho = *(rhoHandle.product());
-	 double Aeff = effectiveArea0p3cone(itElec->eta());
-	 auto iso03 = itElec->pfIsolationVariables();
-	 el_pfIso = (iso03.chargedHadronIso + std::max(0,iso03.neutralHadronIso + iso03.photonIso - rho*Aeff)/itElec->pt();
-       } 
-       auto trk = itElec->gsfTrack();
-       bool isLoose = false, isMedium = false, isTight = false;
-       if ( abs(itElec->eta()) <= 1.479 ) {   
-	 if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.15 && 
-	      itElec->sigmaIetaIeta()<.01 && itElec->hadronicOverEm()<.12 && 
-	      abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-	      missing_hits<=1 && passelectronveto==true &&
-	      abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05 && 
-	      el_pfIso<.15){
-	       
-	   isLoose = true;
-	       
-	   if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
-	     isMedium = true;
-	             
-	     if (abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && el_pfIso<.10 ){
-	       isTight = true;
-	     }
-	   }
-	 }
-       }
-       else if ( abs(itElec->eta()) > 1.479 && abs(itElec->eta()) < 2.5 ) {
-	 if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.1 && 
-	      itElec->sigmaIetaIeta()<.03 && itElec->hadronicOverEm()<.1 && 
-	      abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-	      missing_hits<=1 && el_pfIso<.15 && passelectronveto==true &&
-	      abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05) {
-	       
-	   isLoose = true;
-	       
-	   if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
-	     isMedium = true;
-	             
-	     if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && el_pfIso<.10 ){
-	       isTight = true;
-	     }
-	   }
-	 }
-       }
-
-       electron_e.push_back(itElec->energy());
-       electron_pt.push_back(itElec->pt());
-       electron_px.push_back(itElec->px());
-       electron_py.push_back(itElec->py());
-       electron_pz.push_back(itElec->pz());
-       electron_eta.push_back(itElec->eta());
-       electron_phi.push_back(itElec->phi());
-       electron_ch.push_back(itElec->charge());
-       electron_iso.push_back(el_pfIso);
-       electron_isLoose.push_back(isLoose);
-       electron_isMedium.push_back(isMedium);
-       electron_isTight.push_back(isTight);
-       electron_dxy.push_back(trk->dxy(pv));
-       electron_dz.push_back(trk->dz(pv));
-       electron_dxyError.push_back(trk->d0Error());
-       electron_dzError.push_back(trk->dzError());
-     }
+  
+  numelectron = 0;
+  electron_e.clear();
+  electron_pt.clear();
+  electron_px.clear();
+  electron_py.clear();
+  electron_pz.clear();
+  electron_eta.clear();
+  electron_phi.clear();
+  electron_ch.clear();
+  electron_iso.clear();
+  electron_isLoose.clear();
+  electron_isMedium.clear();
+  electron_isTight.clear();
+  electron_dxy.clear();
+  electron_dz.clear();
+  electron_dxyError.clear();
+  electron_dzError.clear();
+  
+  if(myelectrons.isValid()){
+    // get the number of electrons in the event
+    numelectron=myelectrons->size();
+    for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+      
+      int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
+      bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
+      
+      float el_pfIso = 999;
+      if (itElec->passingPflowPreselection()) {
+	double rho = 0;
+	if(rhoHandle.isValid()) rho = *(rhoHandle.product());
+	double Aeff = effectiveArea0p3cone(itElec->eta());
+	auto iso03 = itElec->pfIsolationVariables();
+	el_pfIso = (iso03.chargedHadronIso + std::max(0.0,iso03.neutralHadronIso + iso03.photonIso - rho*Aeff))/itElec->pt();
+      } 
+      auto trk = itElec->gsfTrack();
+      bool isLoose = false, isMedium = false, isTight = false;
+      if ( abs(itElec->eta()) <= 1.479 ) {   
+	if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.15 && 
+	     itElec->sigmaIetaIeta()<.01 && itElec->hadronicOverEm()<.12 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	     missing_hits<=1 && passelectronveto==true &&
+	     abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05 && 
+	     el_pfIso<.15){
+	  
+	  isLoose = true;
+	  
+	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
+	    isMedium = true;
+	    
+	    if (abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && el_pfIso<.10 ){
+	      isTight = true;
+	    }
+	  }
+	}
+      }
+      else if ( abs(itElec->eta()) > 1.479 && abs(itElec->eta()) < 2.5 ) {
+	if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.1 && 
+	     itElec->sigmaIetaIeta()<.03 && itElec->hadronicOverEm()<.1 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	     missing_hits<=1 && el_pfIso<.15 && passelectronveto==true &&
+	     abs(1/itElec->ecalEnergy()-1/(itElec->ecalEnergy()/itElec->eSuperClusterOverP()))<.05) {
+	  
+	  isLoose = true;
+	  
+	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
+	    isMedium = true;
+	    
+	    if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && el_pfIso<.10 ){
+	      isTight = true;
+	    }
+	  }
+	}
+      }
+      
+      electron_e.push_back(itElec->energy());
+      electron_pt.push_back(itElec->pt());
+      electron_px.push_back(itElec->px());
+      electron_py.push_back(itElec->py());
+      electron_pz.push_back(itElec->pz());
+      electron_eta.push_back(itElec->eta());
+      electron_phi.push_back(itElec->phi());
+      electron_ch.push_back(itElec->charge());
+      electron_iso.push_back(el_pfIso);
+      electron_isLoose.push_back(isLoose);
+      electron_isMedium.push_back(isMedium);
+      electron_isTight.push_back(isTight);
+      electron_dxy.push_back(trk->dxy(pv));
+      electron_dz.push_back(trk->dz(pv));
+      electron_dxyError.push_back(trk->d0Error());
+      electron_dzError.push_back(trk->dzError());
+    }
   }
-
+  
   mtree->Fill();
   return;
 
