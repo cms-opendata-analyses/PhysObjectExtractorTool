@@ -146,7 +146,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByLabel("offlineBeamSpot", bsHandle);
    const reco::BeamSpot &beamspot = *bsHandle.product();
    Handle<double> rhoHandle;
-   iEvent.getByLabel(InputTag("kt6PFJets"), rhoHandle);
+   iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
    double rhoIso = std::max(*(rhoHandle.product()), 0.0);   
 
    numphoton = 0;
