@@ -200,7 +200,6 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")                             
                               )
 
-
 # Configure the output ROOT filename
 process.TFileService = cms.Service(
 	"TFileService", fileName=cms.string("myoutput.root"))
