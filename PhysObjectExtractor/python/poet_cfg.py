@@ -4,15 +4,25 @@ import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 
 import os 
+import sys
 
 relBase = os.environ['CMSSW_BASE']
 
+# sys.argv takes the parameters given as input e.g: cmsRun PhysObjectExtractor/python/poet_cfg.py True True
+# NB the first two parameters are always "cmsRun" and the config file name
+
 #Work with data (if False, assumed MC simulations)
 #This needs to be in agreement with the input files/datasets below.
-isData = False
+if len(sys.argv) > 2:
+    isData = eval(sys.argv[2])
+else:
+    isData = False
 
 # Flag for using the Physics Analysis Toolkit for jets and MET
-doPat = False
+if len(sys.argv) > 3:
+    doPat = eval(sys.argv[3])
+else:
+    doPat = False
 
 
 process = cms.Process("POET")
