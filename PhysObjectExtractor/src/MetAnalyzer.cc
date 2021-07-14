@@ -19,6 +19,7 @@
 //classes to extract PFMET information
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/PFMETFwd.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 
 //classes to save data
 #include "TTree.h"
@@ -30,36 +31,39 @@
 //
 
 class MetAnalyzer : public edm::EDAnalyzer {
-   public:
-      explicit MetAnalyzer(const edm::ParameterSet&);
-      ~MetAnalyzer();
+public:
+  explicit MetAnalyzer(const edm::ParameterSet&);
+  ~MetAnalyzer();
+  
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  
+private:
+  virtual void beginJob() ;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void endJob() ;
+  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+  virtual void endRun(edm::Run const&, edm::EventSetup const&);
+  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  
+  //declare the input tag for PFMETCollection
+  edm::InputTag metInput;
+  bool doPat = false;
+  edm::InputTag metInputPat;
+  
+  // ----------member data ---------------------------
+  
+  TTree *mtree;
+  float met_e;
+  float met_pt;
+  float met_px;
+  float met_py;
+  float met_phi;
+  float met_significance;
+  float met_rawe;
+  float met_rawpt;
+  float met_rawphi;
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-   private:
-      virtual void beginJob() ;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-      
-      //declare the input tag for PFMETCollection
-      edm::InputTag metInput;
-
-      // ----------member data ---------------------------
-      
-      TTree *mtree;
-      int nummet; //number of mets in the event
-      std::vector<float> met_e;
-      std::vector<float> met_pt;
-      std::vector<float> met_px;
-      std::vector<float> met_py;
-    //std::vector<float> met_pz;
-    //std::vector<float> met_eta;
-      std::vector<float> met_phi;
-      std::vector<float> met_ch;
 };
 
 //
@@ -77,22 +81,33 @@ class MetAnalyzer : public edm::EDAnalyzer {
 MetAnalyzer::MetAnalyzer(const edm::ParameterSet& iConfig)
 
 {
-//now do what ever initialization is needed
-	metInput = iConfig.getParameter<edm::InputTag>("InputCollection");
-	edm::Service<TFileService> fs;
-	mtree = fs->make<TTree>("Events", "Events");
-	
-	
-	mtree->Branch("numbermet",&nummet);
-	mtree->Branch("met_e",&met_e);
-	mtree->Branch("met_pt",&met_pt);
-	mtree->Branch("met_px",&met_px);
-	mtree->Branch("met_py",&met_py);
-        //mtree->Branch("met_pz",&met_pz);
-        //mtree->Branch("met_eta",&met_eta);
-        mtree->Branch("met_phi",&met_phi);
-        mtree->Branch("met_ch",&met_ch);
-        
+  //now do what ever initialization is needed
+  metInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+  doPat = iConfig.getParameter<bool>("doPat");
+  if (doPat) metInputPat = iConfig.getParameter<edm::InputTag>("InputCollectionPat");
+  edm::Service<TFileService> fs;
+  mtree = fs->make<TTree>("Events", "Events");
+  
+  mtree->Branch("met_e",&met_e,"met_e/F");	
+  mtree->GetBranch("met_e")->SetTitle("Sum of transverse energy (corrected if using PAT) [GeV]");
+  mtree->Branch("met_pt",&met_pt,"met_pt/F");
+  mtree->GetBranch("met_pt")->SetTitle("Missing transverse momentum (corrected if using PAT) [GeV]");
+  mtree->Branch("met_px",&met_px,"met_px/F");
+  mtree->GetBranch("met_px")->SetTitle("Missing x momentum (corrected if using PAT) [GeV]");
+  mtree->Branch("met_py",&met_py,"met_py/F");
+  mtree->GetBranch("met_py")->SetTitle("Missing y momentum (corrected if using PAT) [GeV]");
+  mtree->Branch("met_phi",&met_phi,"met_phi/F");
+  mtree->GetBranch("met_phi")->SetTitle("Missing momentum azimuthal angle (corrected if using PAT)");
+  mtree->Branch("met_significance",&met_significance,"met_significance/F");
+  mtree->GetBranch("met_significance")->SetTitle("Missing transverse momentum significance");
+  if(doPat) { 
+    mtree->Branch("met_rawpt",&met_rawpt,"met_rawpt/F");
+    mtree->GetBranch("met_rawpt")->SetTitle("Missing transverse momentum (uncorrected) [GeV]");
+    mtree->Branch("met_rawphi",&met_rawphi,"met_rawphi/F");
+    mtree->GetBranch("met_phi")->SetTitle("Missing momentum azimuthal angle (uncorrected)");
+    mtree->Branch("met_rawe",&met_rawe,"met_rawe/F");
+    mtree->GetBranch("met_rawe")->SetTitle("Sum of transverse energy (uncorrected) [GeV]");
+  }
 }
 
 MetAnalyzer::~MetAnalyzer()
@@ -115,30 +130,31 @@ MetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<reco::PFMETCollection> mymets;
    iEvent.getByLabel(metInput, mymets);
    
-   nummet = 0;
-   met_e.clear();
-   met_pt.clear();
-   met_px.clear();
-   met_py.clear();
-   //met_pz.clear();
-   //met_eta.clear();
-   met_phi.clear();
-   met_ch.clear();
-
   if(mymets.isValid()){
-     // get the number of mets in the event
-     nummet=mymets->size();
-        for (reco::PFMETCollection::const_iterator itmet=mymets->begin(); itmet!=mymets->end(); ++itmet){
+    met_e = mymets->begin()->sumEt();
+    met_pt = mymets->begin()->pt();
+    met_px = mymets->begin()->px();
+    met_py = mymets->begin()->py();
+    met_phi = mymets->begin()->phi();
+    met_significance = mymets->begin()->significance();
 
-        	    met_e.push_back(itmet->energy());
-        	    met_pt.push_back(itmet->pt());
-        	    met_px.push_back(itmet->px());
-        	    met_py.push_back(itmet->py());
-        	    //met_pz.push_back(itmet->pz());
-        	    //met_eta.push_back(itmet->eta());
-        	    met_phi.push_back(itmet->phi());
-        	    met_ch.push_back(itmet->charge());
-        }
+    if(doPat){
+      met_rawe = met_e;
+      met_rawpt = met_pt;
+      met_rawphi = met_phi;
+    }
+  }
+  if(doPat){
+    Handle<reco::PFMETCollection> patmets;
+    iEvent.getByLabel(metInputPat, patmets);
+
+    if(patmets.isValid()){
+      met_e = patmets->begin()->sumEt();
+      met_pt = patmets->begin()->pt();
+      met_px = patmets->begin()->px();
+      met_py = patmets->begin()->py();
+      met_phi = patmets->begin()->phi();
+    }
   }
   
   mtree->Fill();
