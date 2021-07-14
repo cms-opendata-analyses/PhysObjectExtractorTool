@@ -391,8 +391,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       jec_->setNPV   ( vertices->size() );
       corr = jec_->getCorrection();
       
-      double corrUp = 1.0;
-      double corrDown = 1.0;
+      corrUp = 1.0;
+      corrDown = 1.0;
 
       if( itjet->eta() < 5) jecUnc_->setJetEta( itjet->eta() );
       else jecUnc_->setJetEta( 4.99 );
