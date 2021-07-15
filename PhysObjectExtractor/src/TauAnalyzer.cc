@@ -72,7 +72,8 @@ private:
   std::vector<float> tau_idisoloose;
   std::vector<float> tau_idisomedium;
   std::vector<float> tau_idisotight;
-  
+  std::vector<float> tau_idantieletight;
+  std::vector<float> tau_idantimutight;  
 };
 
 //
@@ -131,7 +132,10 @@ TauAnalyzer::TauAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("tau_idisomedium")->SetTitle("tau id isomedium");
   mtree->Branch("tau_idisotight",&tau_idisotight);
   mtree->GetBranch("tau_idisotight")->SetTitle("tau id isotight");
-
+  mtree->Branch("tau_idantieletight",&tau_idantieletight);
+  mtree->GetBranch("tau_idantieletight")->SetTitle("tau id antieletight");
+  mtree->Branch("tau_idantimutight",&tau_idantimutight); 
+  mtree->GetBranch("tau_idantimutight")->SetTitle("tau id antimutight");
 }
 
 TauAnalyzer::~TauAnalyzer()
@@ -156,8 +160,8 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //Discriminators
 
-  Handle<reco::PFTauDiscriminator> tausLooseIso, tausVLooseIso, tausMediumIso, tausTightIso,
-                             tausDecayMode, tausRawIso;
+  Handle<reco::PFTauDiscriminator> tausLooseIso, tausVLooseIso, tausMediumIso, tausTightIso, 
+    tausTightEleRej, tausTightMuonRej, tausDecayMode, tausRawIso;
 
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByDecayModeFinding"),tausDecayMode);
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr"), tausRawIso);
@@ -165,7 +169,9 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr"), tausLooseIso);
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr"), tausMediumIso);
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr"), tausTightIso);
-  
+  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByTightElectronRejection"), tausTightEleRej);
+  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByTightMuonRejection"), tausTightMuonRej);  
+
   numtau = 0;
   tau_e.clear();
   tau_pt.clear();
@@ -184,6 +190,8 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   tau_idisoloose.clear();
   tau_idisomedium.clear();
   tau_idisotight.clear();
+  tau_idantieletight.clear();
+  tau_idantimutight.clear();
   
   if(mytaus.isValid()){
     // get the number of taus in the event
@@ -210,6 +218,8 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        	tau_idisoloose.push_back(tausLooseIso->operator[](idx).second);
        	tau_idisomedium.push_back(tausMediumIso->operator[](idx).second);
        	tau_idisotight.push_back(tausTightIso->operator[](idx).second);
+        tau_idantieletight.push_back(tausTightEleRej->operator[](idx).second);
+        tau_idantimutight.push_back(tausTightMuonRej->operator[](idx).second);
 
        	tau_reliso_all.push_back((itTau->isolationPFChargedHadrCandsPtSum() + itTau->isolationPFGammaCandsEtSum()) / itTau->pt());
       }   	
