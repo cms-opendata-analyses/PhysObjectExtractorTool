@@ -147,7 +147,8 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    const reco::BeamSpot &beamspot = *bsHandle.product();
    Handle<double> rhoHandle;
    iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
-   double rhoIso = std::max(*(rhoHandle.product()), 0.0);   
+   double rhoIso = 0;
+   if(rhoHandle.isValid()) rhoIso = std::max(*(rhoHandle.product()), 0.0);   
 
    numphoton = 0;
    photon_e.clear();
