@@ -65,9 +65,9 @@ ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RU
 cmsRun poet_cfg.py <isData> <doPat>
 ```
 
-`<isData>` (to run on Data or not) is an optional argument (default is `False`, i.e., runs over MC simulations)
+`<isData>` (to run on Data or not) is an optional boolean argument (default is `False`, i.e., runs over MC simulations)
 
-`<doPat>` (to run Physics Analysis Tool routines) is an optional argument (default is `False`)
+`<doPat>` (to run Physics Analysis Tool routines) is an optional boolean argument (default is `False`)
 
 
 The result will be a `myoutput.root` file with simple variables.  The information in this file is organized in `ROOT` directories corresponding to each type of physics object (or kind of information).  In order to further analyze the data in these file, the analysis templates in the `test` folder may be used.
