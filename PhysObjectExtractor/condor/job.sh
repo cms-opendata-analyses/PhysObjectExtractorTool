@@ -18,7 +18,7 @@ echo "Process:" $PROCESS
 FILE=$3
 echo "File:" $FILE
 
-ISDATA=True
+ISDATA=False
 DOPAT=False
 
 EOS_HOME=/eos/user/e/ecarrera
@@ -66,12 +66,12 @@ mkdir -p configs/
 CONFIG_COPY=configs/cfg_${ID}.py
 cp $CONFIG $CONFIG_COPY
 
-#Deprecated
+
 #Decide if it is data or simulations
 #if [[ ${FILE} == *"Run2012"* ]]; then
-#    sed -i -e "s,isData = False,isData = True,g" $CONFIG_COPY
+     ISDATA=True
 #else
-#     sed -i -e "s,isData = True,isData = False,g" $CONFIG_COPY
+     ISDATA=False
 #fi
 
 # Modify CMSSW config to run only a single file
