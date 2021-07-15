@@ -18,7 +18,7 @@ PROCESSES=( \
     #W2JetsToLNu \
     #W3JetsToLNu \
     #DYJetsToLL \
-    Run2012B_TauPlusX\
+    #Run2012B_TauPlusX\
     #Run2012C_TauPlusX\
     #DY2JetsToLL \
     #DY3JetsToLL \

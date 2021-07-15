@@ -81,7 +81,7 @@ def main(input_dir):
         out_list = open(path_list, "w")
         for a in argument_list:
             out_list.write(a+"\n")
-        #raise Exception("Found missing files, wrote arguments list to %s."%(path_list))
+        raise Exception("Found missing files, wrote arguments list to %s."%(path_list))
 
 
     #https://root-forum.cern.ch/t/moving-ttrees-into-tdirectories/25386/8
