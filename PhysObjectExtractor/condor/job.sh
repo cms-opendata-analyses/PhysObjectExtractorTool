@@ -18,8 +18,8 @@ echo "Process:" $PROCESS
 FILE=$3
 echo "File:" $FILE
 
-ISDATA=False
-DOPAT=False
+ISDATA=True
+DOPAT=True
 
 EOS_HOME=/eos/user/e/ecarrera
 #EOS_HOME=/eos/user/FIRST_LETTER/USERNAME
@@ -68,11 +68,16 @@ cp $CONFIG $CONFIG_COPY
 
 
 #Decide if it is data or simulations
-#if [[ ${FILE} == *"Run2012"* ]]; then
+if [[ ${FILE} == *"Run2012"* ]]; then
      ISDATA=True
-#else
+else
      ISDATA=False
-#fi
+fi
+
+echo "ISDATA:" $ISDATA
+
+echo "DOPAT:" $DOPAT
+
 
 # Modify CMSSW config to run only a single file
 sed -i -e "s,^files =,files = ['"${FILE}"'] #,g" $CONFIG_COPY
