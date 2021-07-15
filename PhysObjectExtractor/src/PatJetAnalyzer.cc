@@ -90,7 +90,6 @@ private:
   int numjet; //number of jets in the event
   TTree *mtree;
   
-  int jet_nCSVM;
   std::vector<float> jet_pt;
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
@@ -141,7 +140,6 @@ PatJetAnalyzer::PatJetAnalyzer(const edm::ParameterSet& iConfig)
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
   JetCorrectorParameters *ak5PFPar = new JetCorrectorParameters(jerResName_);
   jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*ak5PFPar) );
-  mtree->Branch("jet_nCSVM",&jet_nCSVM);
   mtree->Branch("numberjet",&numjet);
   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
   mtree->Branch("jet_pt",&jet_pt);
@@ -350,7 +348,6 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   if(myjets.isValid()){
 
-    jet_nCSVM = 0;
     for (std::vector<pat::Jet>::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
       pat::Jet uncorrJet = itjet->correctedJet(0);     
       
@@ -417,7 +414,6 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       jet_ch.push_back(itjet->charge());
       jet_mass.push_back(uncorrJet.mass());
       jet_btag.push_back(itjet->bDiscriminator("combinedSecondaryVertexBJetTags"));
-      if(itjet->bDiscriminator("combinedSecondaryVertexBJetTags") > 0.679) jet_nCSVM++;
       corr_jet_pt.push_back(ptscale*itjet->pt());
       corr_jet_ptUp.push_back(ptscale*corrUp*itjet->pt());
       corr_jet_ptDown.push_back(ptscale*corrDown*itjet->pt());
