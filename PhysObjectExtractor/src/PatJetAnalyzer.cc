@@ -345,11 +345,9 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   btagWeightUp = 1;
   btagWeightDn = 1;
   int min_pt = 20;
-  int value_jet_n = 0; 
 
   if(myjets.isValid()){
-    // get the number of jets in the event
-    numjet=myjets->size();
+
     for (std::vector<pat::Jet>::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
       pat::Jet uncorrJet = itjet->correctedJet(0);     
       
@@ -379,36 +377,32 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	PTNPU.push_back( vertices->size() );
 	
 	res = jer_->correction(feta, PTNPU);
-	float pt = itjet->pt();
+	float reco_pt = itjet->pt();
 	
 	const reco::GenJet *genJet = itjet->genJet();
 	bool smeared = false;
 	if(genJet){
-	  double deltaPt = fabs(genJet->pt() - pt);
+	  double deltaPt = fabs(genJet->pt() - reco_pt);
 	  double deltaR = reco::deltaR(genJet->p4(),itjet->p4());
-	  if ((deltaR < 0.2) && deltaPt <= 3*pt*res){
-	    double gen_pt = genJet->pt();
-	    double reco_pt = pt;
-	    double deltapt = (reco_pt - gen_pt) * factors[0];
-	    double deltapt_down = (reco_pt - gen_pt) * factors[1];
-	    double deltapt_up = (reco_pt - gen_pt) * factors[2];
-	    ptscale = max(0.0, (reco_pt + deltapt) / reco_pt);
-	    ptscale_up = max(0.0, (reco_pt + deltapt_up) / reco_pt);
-	    ptscale_down = max(0.0, (reco_pt + deltapt_down) / reco_pt);
+	  if ((deltaR < 0.25) && deltaPt <= 2*reco_pt*res){
+	    double ptratio = reco_pt / genJet->pt();
+	    ptscale = max(0.0, ptratio + factors[0]*(1 - ptratio));
+	    ptscale_up = max(0.0, ptratio + factors[1]*(1 - ptratio));
+	    ptscale_down = max(0.0, ptratio + factors[2]*(1 - ptratio));
 	    smeared = true;
 	  }
 	} 
-	if (!smeared && factors[0]>0) {
+	if (!smeared) {
 	  TRandom3 JERrand;
 	  
 	  JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
-	  ptscale = max(0.0, JERrand.Gaus(pt,sqrt(factors[0]*(factors[0]+2))*res*pt)/pt);
-	  
+	  ptscale = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, factors[0]*factors[0] - 1.0)));
+	
 	  JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
-	  ptscale_down = max(0.0, JERrand.Gaus(pt,sqrt(factors[1]*(factors[1]+2))*res*pt)/pt);
-	  
+	  ptscale_down = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, factors[1]*factors[1] - 1.0)));
+	
 	  JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
-	  ptscale_up = max(0.0, JERrand.Gaus(pt,sqrt(factors[2]*(factors[2]+2))*res*pt)/pt);
+	  ptscale_up = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, factors[2]*factors[2] - 1.0)));
 	}
       }
       
@@ -437,24 +431,24 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	SFd = 1;
 	eff = 1;
 	hadronFlavour = itjet->partonFlavour();
-	corrpt = corr_jet_pt.at(value_jet_n);
+	corrpt = corr_jet_pt.at(numjet);
 
-	if (jet_btag.at(value_jet_n) > 0.679){
+	if (jet_btag.at(numjet) > 0.679){
 	  if(abs(hadronFlavour) == 5){
 	    eff = getBtagEfficiency(corrpt);
-	    SF = getBorCtagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFu = SF + uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFd = SF - uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n));
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
+	    SFd = SF - uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
 	  } else if(abs(hadronFlavour) == 4){
 	    eff = getCtagEfficiency(corrpt);
-	    SF = getBorCtagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFu = SF + (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n)));
-	    SFd = SF - (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n)));
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
 	  } else {
 	    eff = getLFtagEfficiency(corrpt);
-	    SF = getLFtagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFu = SF + ( uncertaintyForLFTagSF(corrpt, jet_eta.at(value_jet_n)));
-	    SFd = SF - ( uncertaintyForLFTagSF(corrpt, jet_eta.at(value_jet_n)));
+	    SF = getLFtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
 	  }
 	  MC *= eff;
 	  btagWeight *= SF * eff;
@@ -463,19 +457,19 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	} else {
 	  if(abs(hadronFlavour) == 5){
 	    eff = getBtagEfficiency(corrpt);
-	    SF = getBorCtagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFu = SF + uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFd = SF - uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n));
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
+	    SFd = SF - uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
 	  } else if(abs(hadronFlavour) == 4){
 	    eff = getCtagEfficiency(corrpt);
-	    SF = getBorCtagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFu = SF + (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n)));
-	    SFd = SF - (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(value_jet_n)));
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
 	  } else {
 	    eff = getLFtagEfficiency(corrpt);
-	    SF = getLFtagSF(corrpt, jet_eta.at(value_jet_n));
-	    SFu = SF + ( uncertaintyForLFTagSF(corrpt, jet_eta.at(value_jet_n)));
-	    SFd = SF - ( uncertaintyForLFTagSF(corrpt, jet_eta.at(value_jet_n)));
+	    SF = getLFtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
 	  }
 	  MC *= (1 - eff);
 	  btagWeight *= (1 - ( SF * eff));
@@ -483,7 +477,7 @@ PatJetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  btagWeightDn *= (1 -  (SFd * eff));
 	}
       }
-      ++value_jet_n;
+      ++numjet;
     }
     btagWeight = (btagWeight/MC);
     btagWeightUp = (btagWeightUp/MC);
@@ -536,7 +530,7 @@ PatJetAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 std::vector<float>
 PatJetAnalyzer::factorLookup(float eta) { //used in jet loop for JER factor value
   //eta input is > 0
-  if(eta > 3.2) return {1.056, .865, 1.247}; // {factor, factor_down, factor_up}
+  if(eta > 3.2) return {1.056, 0.865, 1.247}; // {factor, factor_down, factor_up}
   else if(eta > 2.8) return {1.395, 1.332, 1.468};
   else if(eta > 2.3) return {1.254, 1.192, 1.316};
   else if(eta > 1.7) return {1.208, 1.162, 1.254};
