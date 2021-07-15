@@ -239,7 +239,6 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        isolator.initializePhotonIsolation(kTRUE);
        isolator. setConeSize(0.3);
        const reco::VertexRef vertex(vertices, 0);
-       //const reco::PFCandidate pfph(itphoton->charge(),itphoton->p4(),gamma);
        const reco::Photon &thephoton = *itphoton;
        isolator.fGetIsolation(&thephoton, pfCands.product(), vertex, vertices);
        double corrPFCHIso = std::max(isolator.getIsolationCharged() - rhoIso * aEff.CH_AEff, 0.)/itphoton->pt();
