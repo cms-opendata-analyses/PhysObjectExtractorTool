@@ -10,6 +10,7 @@
 <use name="DataFormats/TrackReco"/>
 <use name="RecoMuon/TrackingTools"/>
 <use name="RecoEgamma/EgammaTools"/>
+<use name="EgammaAnalysis/ElectronTools"/>
 <use name="CondFormats/JetMETObjects"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="HLTrigger/HLTcore"/>
