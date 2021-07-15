@@ -1,17 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
-from RecoMET.METProducers.METSigParams_cfi import *
 import os 
-
-
-
 
 relBase = os.environ['CMSSW_BASE']
 
 process = cms.Process("AOD2NanoAOD")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
-#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = "WARNING"
@@ -55,6 +50,7 @@ process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
 process.mcweightanalyzer = cms.EDAnalyzer(
     "WeightAnalyzerBEff",
     JetsTag = cms.InputTag("ak5PFJets"),
+    discriminator = cms.string("combinedSecondaryVertexBJetTags"),
     DiscriminatorValueTight = cms.double(0.898),
     DiscriminatorValueMedium = cms.double(0.679),
     DiscriminatorValueLoose = cms.double(0.244),
@@ -63,6 +59,4 @@ process.mcweightanalyzer = cms.EDAnalyzer(
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("flavortagefficiencies.root"))
 
-#process.p = cms.Path(process.selectedHadronsAndPartons *  process.jetFlavourInfosAK5PFJets)
-#process.p = cms.Path( process.mcweightanalyzer)
 process.p = cms.Path(process.selectedHadronsAndPartons *  process.jetFlavourInfosAK5PFJets * process.mcweightanalyzer)
