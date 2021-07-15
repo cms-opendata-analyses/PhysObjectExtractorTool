@@ -8,7 +8,7 @@ The package is meant to resemble a [CMSSW](https://cms-opendata-guide.web.cern.c
 
 The `data` directory is reserved for files with information about the location of datafiles, data quality files, etc.
 
-The `JEC` directory hosts text files with energy corrections for jets. These were obtained executing the `jec_cfg.py` config file.
+The `JEC` directory hosts text files with energy corrections for jets. These were obtained executing the `jec_cfg.py` config file that resides within.
 
 The `python` directory hosts the configuration file `poet_cfg.py` and possibly special versions of it.
 
@@ -66,6 +66,7 @@ cmsRun poet_cfg.py <isData> <doPat>
 ```
 
 `<isData>` (to run on Data or not) is an optional argument (default is `False`, i.e., runs over MC simulations)
+
 `<doPat>` (to run Physics Analysis Tool routines) is an optional argument (default is `False`)
 
 
