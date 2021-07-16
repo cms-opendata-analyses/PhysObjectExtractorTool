@@ -22,11 +22,13 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "EgammaAnalysis/ElectronTools/interface/PFIsolationEstimator.h"
 
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
 #include<vector>
+#include<tuple>
 
 //
 // class declaration
@@ -47,7 +49,13 @@ private:
   virtual void endRun(edm::Run const&, edm::EventSetup const&);
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-  
+
+  struct AEff {
+    float CH_AEff;
+    float NH_AEff;
+    float Ph_AEff;
+  };
+  virtual struct AEff effectiveArea0p3cone(float eta);  
   //declare the input tag for PhotonCollection
   edm::InputTag photonInput;
 
@@ -63,7 +71,9 @@ private:
   std::vector<float> photon_eta;
   std::vector<float> photon_phi;
   std::vector<float> photon_ch;
-  std::vector<float> photon_iso;
+  std::vector<float> photon_chIso;
+  std::vector<float> photon_nhIso;
+  std::vector<float> photon_phIso;
   std::vector<bool>  photon_isLoose;
   std::vector<bool>  photon_isMedium;
   std::vector<bool>  photon_isTight;
@@ -108,8 +118,12 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("photon_phi")->SetTitle("photon polar angle");
   mtree->Branch("photon_ch",&photon_ch);
   mtree->GetBranch("photon_ch")->SetTitle("photon charge");
-  mtree->Branch("photon_iso",&photon_iso);
-  mtree->GetBranch("photon_iso")->SetTitle("photon isolation");
+  mtree->Branch("photon_chIso",&photon_chIso);
+  mtree->GetBranch("photon_chIso")->SetTitle("corrected photon charged hadron isolation");
+  mtree->Branch("photon_nhIso",&photon_nhIso);
+  mtree->GetBranch("photon_nhIso")->SetTitle("corrected photon neutral hadron isolation");  
+  mtree->Branch("photon_phIso",&photon_phIso);
+  mtree->GetBranch("photon_phIso")->SetTitle("corrected photon isolation from other photons");
   mtree->Branch("photon_isLoose",&photon_isLoose);
   mtree->GetBranch("photon_isLoose")->SetTitle("photon tagged loose");
   mtree->Branch("photon_isMedium",&photon_isMedium);
@@ -129,6 +143,49 @@ PhotonAnalyzer::~PhotonAnalyzer()
 // member functions
 //
 
+struct PhotonAnalyzer::AEff
+PhotonAnalyzer::effectiveArea0p3cone(float eta)
+{
+  struct AEff A;
+  if(fabs(eta) >2.4) {
+    A.CH_AEff = 0.012;
+    A.NH_AEff = 0.072;
+    A.Ph_AEff = 0.266;
+  }
+  else if(fabs(eta) >2.3) {
+    A.CH_AEff = 0.020;
+    A.NH_AEff = 0.039;
+    A.Ph_AEff = 0.260;
+  }
+  else if(fabs(eta) >2.2) {
+    A.CH_AEff = 0.016;
+    A.NH_AEff = 0.024;
+    A.Ph_AEff = 0.262;
+  }
+  else if(fabs(eta) >2.0) {
+    A.CH_AEff = 0.012;
+    A.NH_AEff = 0.015;
+    A.Ph_AEff = 0.216;
+  }
+  else if(fabs(eta) >1.479) {
+    A.CH_AEff = 0.014;
+    A.NH_AEff = 0.039;
+    A.Ph_AEff = 0.112;
+  }
+  else if(fabs(eta) >0.1) {
+    A.CH_AEff = 0.010;
+    A.NH_AEff = 0.057;
+    A.Ph_AEff = 0.130;
+  }
+  else {
+    A.CH_AEff = 0.012;
+    A.NH_AEff = 0.030;
+    A.Ph_AEff = 0.148;
+  }
+  return A;
+}
+
+
 // ------------ method called for each event  ------------
 void
 PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -147,7 +204,12 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    const reco::BeamSpot &beamspot = *bsHandle.product();
    Handle<double> rhoHandle;
    iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
-   double rhoIso = std::max(*(rhoHandle.product()), 0.0);   
+   double rhoIso = 0;
+   if(rhoHandle.isValid()) rhoIso = std::max(*(rhoHandle.product()), 0.0);   
+   Handle<reco::PFCandidateCollection> pfCands;
+   iEvent.getByLabel("particleFlow", pfCands);
+   Handle<reco::VertexCollection> vertices;
+   iEvent.getByLabel("offlinePrimaryVertices", vertices);
 
    numphoton = 0;
    photon_e.clear();
@@ -158,7 +220,9 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    photon_eta.clear();
    photon_phi.clear();
    photon_ch.clear();
-   photon_iso.clear();
+   photon_chIso.clear();
+   photon_nhIso.clear();
+   photon_phIso.clear();
    photon_isLoose.clear();
    photon_isMedium.clear();
    photon_isTight.clear();
@@ -169,48 +233,18 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      for (reco::PhotonCollection::const_iterator itphoton=myphotons->begin(); itphoton!=myphotons->end(); ++itphoton){
        bool passelectronveto = !ConversionTools::hasMatchedPromptElectron(itphoton->superCluster(), electrons, hConversions, beamspot.position());
        double scEta = (itphoton)->superCluster()->eta();
-       double CH_AEff, NH_AEff, Ph_AEff;
-       if(fabs(scEta) >2.4) {
-	 CH_AEff = 0.012;
-	 NH_AEff = 0.072;
-	 Ph_AEff = 0.266;
-       }
-       else if(fabs(scEta) >2.3) {
-	 CH_AEff = 0.020;
-	 NH_AEff = 0.039;
-	 Ph_AEff = 0.260;
-       } 
-       else if(fabs(scEta) >2.2) {
-	 CH_AEff = 0.016;
-	 NH_AEff = 0.024;
-	 Ph_AEff = 0.262;
-       } 
-       else if(fabs(scEta) >2.0) {
-	 CH_AEff = 0.012;
-	 NH_AEff = 0.015;
-	 Ph_AEff = 0.216;
-       } 
-       else if(fabs(scEta) >1.479) {
-	 CH_AEff = 0.014;
-	 NH_AEff = 0.039;
-	 Ph_AEff = 0.112;
-       } 
-       else if(fabs(scEta) >0.1) {
-	 CH_AEff = 0.010;
-	 NH_AEff = 0.057;
-	 Ph_AEff = 0.130;
-       } 
-       else {
-	 CH_AEff = 0.012;
-	 NH_AEff = 0.030;
-	 Ph_AEff = 0.148;
-       } 
+       struct PhotonAnalyzer::AEff aEff = effectiveArea0p3cone(scEta);
        double ph_hOverEm = itphoton->hadTowOverEm();
        double ph_sigIetaIeta = itphoton->sigmaIetaIeta();
-       double ph_photonIso = itphoton->photonIso();
-       double corrPFCHIso = std::max(itphoton->chargedHadronIso() - rhoIso * CH_AEff, 0.);
-       double corrPFNHIso = std::max(itphoton->neutralHadronIso() - rhoIso * NH_AEff, 0.);
-       double corrPFPhIso = std::max(itphoton->photonIso() - rhoIso * Ph_AEff, 0.);
+       PFIsolationEstimator isolator;
+       isolator.initializePhotonIsolation(kTRUE);
+       isolator. setConeSize(0.3);
+       const reco::VertexRef vertex(vertices, 0);
+       const reco::Photon &thephoton = *itphoton;
+       isolator.fGetIsolation(&thephoton, pfCands.product(), vertex, vertices);
+       double corrPFCHIso = std::max(isolator.getIsolationCharged() - rhoIso * aEff.CH_AEff, 0.)/itphoton->pt();
+       double corrPFNHIso = std::max(isolator.getIsolationNeutral() - rhoIso * aEff.NH_AEff, 0.)/itphoton->pt();
+       double corrPFPhIso = std::max(isolator.getIsolationPhoton() - rhoIso * aEff.Ph_AEff, 0.)/itphoton->pt();
        bool isLoose = false, isMedium = false, isTight = false;
        if ( itphoton->eta() <= 1.479 ){
 	 if ( ph_hOverEm<.05 && ph_sigIetaIeta<.012 && 
@@ -249,7 +283,9 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        photon_eta.push_back(itphoton->eta());
        photon_phi.push_back(itphoton->phi());
        photon_ch.push_back(itphoton->charge());
-       photon_iso.push_back(ph_photonIso);
+       photon_chIso.push_back(corrPFCHIso);
+       photon_nhIso.push_back(corrPFNHIso);
+       photon_phIso.push_back(corrPFPhIso);
        photon_isLoose.push_back(isLoose);
        photon_isMedium.push_back(isMedium);
        photon_isTight.push_back(isTight);
