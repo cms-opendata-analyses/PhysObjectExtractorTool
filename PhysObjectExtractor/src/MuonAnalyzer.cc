@@ -187,8 +187,6 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   if(mymuons.isValid()){
   
-     // get the number of muons in the event
-     nummuon=(*mymuons).size();
      const float mu_min_pt = 3;
      math::XYZPoint pv(vertices->begin()->position());
      
@@ -231,7 +229,8 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         	    }
         	    muon_genpartidx.push_back(-1);
         	    muon_jetidx.push_back(-1);
-          } 
+		    nummuon++;
+	   } 
         }
   }
 	
