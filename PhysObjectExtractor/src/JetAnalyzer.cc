@@ -392,12 +392,12 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       corrUp = 1.0;
       corrDown = 1.0;
 
-      if( itjet->eta() < 5) jecUnc_->setJetEta( itjet->eta() );
+      if( fabs(itjet->eta()) < 5) jecUnc_->setJetEta( itjet->eta() );
       else jecUnc_->setJetEta( 4.99 );
       jecUnc_->setJetPt( itjet->pt() );
       corrUp = (1 + fabs(jecUnc_->getUncertainty(1)));
 
-      if( itjet->eta() < 5) jecUnc_->setJetEta( itjet->eta() );
+      if( fabs(itjet->eta()) < 5) jecUnc_->setJetEta( itjet->eta() );
       else jecUnc_->setJetEta( 4.99 );
       jecUnc_->setJetPt( itjet->pt() );
       corrDown = (1 - fabs(jecUnc_->getUncertainty(-1)));
