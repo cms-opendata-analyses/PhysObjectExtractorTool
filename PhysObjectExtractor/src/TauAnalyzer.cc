@@ -194,9 +194,7 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   tau_idantimutight.clear();
   
   if(mytaus.isValid()){
-    // get the number of taus in the event
-    numtau=mytaus->size();
-    
+     
     const float tau_min_pt = 15;
     for (reco::PFTauCollection::const_iterator itTau=mytaus->begin(); itTau!=mytaus->end(); ++itTau){
       if (itTau->pt() > tau_min_pt) {
@@ -222,6 +220,7 @@ TauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         tau_idantimutight.push_back(tausTightMuonRej->operator[](idx).second);
 
        	tau_reliso_all.push_back((itTau->isolationPFChargedHadrCandsPtSum() + itTau->isolationPFGammaCandsEtSum()) / itTau->pt());
+	numtau++;
       }   	
     }
   }
