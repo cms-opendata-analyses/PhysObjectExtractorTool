@@ -220,6 +220,31 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")                             
                               )
 
+
+#---- Example of a CMSSW filter that can be used to cut on a given set of triggers
+#---- This filter, however, does know about prescales
+#---- A previous trigger study would be needed to cut hard on a given trigger or set of triggers
+#---- The filter can be added to the path below if needed but is not applied by default
+#process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+#process.hltHighLevel.HLTPaths = cms.vstring('HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v*')
+
+
+
+
+#---- Example of a very basic home-made filter to select only events of interest
+#---- The filter can be added to the running path below if needed but is not applied by default
+#process.mutaufilter = cms.EDFilter('SimpleMuTauFilter',
+#                                  InputCollectionMuons = cms.InputTag("muons"),
+#                                   InputCollectionTaus = cms.InputTag("hpsPFTauProducer"),
+#                                   mu_minpt = cms.double(17),
+#                                   mu_etacut = cms.double(2.1),
+#                                   tau_minpt = cms.double(20),
+#                                   tau_etacut = cms.double(2.3)
+#                                   )
+
+
+
+
 #---- Configure the output ROOT filename
 process.TFileService = cms.Service(
 	"TFileService", fileName=cms.string("myoutput.root"))
