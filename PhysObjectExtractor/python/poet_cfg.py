@@ -12,53 +12,19 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
     limit=cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
-
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-        'root://eospublic.cern.ch//eos/opendata/cms/Run2011A/SingleElectron/AOD/12Oct2013-v1/10000/1045436C-1240-E311-851B-003048D2BF1C.root'
-#	 'file:/playground/002F62E1-B53D-E311-A49F-003048F1B950.root'
-    )
-)
+                                # replace 'myfile.root' with the source file you want to use
+                                fileNames = cms.untracked.vstring(
+            'root://cms-xrd-global.cern.ch//store/data/Run2018A/DoubleMuon/MINIAOD/17Sep2018-v2/00000/0068887D-518C-2B47-8C29-E699E295A2CC.root'
+                )
+                            )
 
-#These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
-#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-#process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
+process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',electrons = cms.InputTag("slimmedElectrons"), 
+                               vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
+                              
 
-#Uncomment this line if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db')
+process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
-#Here, you can enter the desired input tag, corresponding to each container, In addition, you can add more containers.
-#More information about InputCollections at https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
-process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
-process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
-				     InputCollection = cms.InputTag("gsfElectrons")
-				    )
-process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
-				 InputCollection = cms.InputTag("muons")
-				 )
-process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
-                             InputCollection = cms.InputTag("photons")
-                             )
-process.myjets= cms.EDAnalyzer('JetAnalyzer',
-                             InputCollection = cms.InputTag("ak5PFJets")
-                             )
-process.mymets= cms.EDAnalyzer('MetAnalyzer',
-                              InputCollection = cms.InputTag("pfMet")
-                              )
-process.mytaus = cms.EDAnalyzer('TauAnalyzer',
-                               InputCollection = cms.InputTag("hpsPFTauProducer")
-                               )
-process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
-                             filterName = cms.string("hltSingleJet190Regional"),
-                             )
-process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
-process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
-process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer')
-
-process.TFileService = cms.Service(
-    "TFileService", fileName=cms.string("myoutput.root"))
-
-
-process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle)
+process.p = cms.Path(process.myelectrons)

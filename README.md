@@ -4,17 +4,14 @@ This page contains instructions and examples of a way to extract information fro
 
 ## Usage instrucctions
 
-1. Install CERN [virtual machine](http://opendata.cern.ch/docs/cms-virtual-machine-2011) from the CMS open data website.
-2. Set up your enviroment
-
 * Create a project area:
 ```
-cmsrel CMSSW_5_3_32
+cmsrel CMSSW_10_2_18
 ```
 * Change to the CMSSW_5_3_32/src/ directory:
 
 ```
-cd CMSSW_5_3_32/src/
+cd CMSSW_10_2_18/src/
 ```
 * Then, run the following command to create the CMS runtime variables:
 
@@ -23,8 +20,9 @@ cmsenv
 ```
 3. Obtain the code from git:
 ```
-git clone git://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
+git clone  https://github.com/apetkovi1/PhysObjectExtractorTool.git
 cd PhysObjectExtractorTool
+git checkout MiniAOD
 ```
 4. Compile everything:
 ```
@@ -35,12 +33,7 @@ scram b
 ```
 ln -s python/poet_cfg.py .
 ```
-6. Make symbolic links to the conditions database: (trigger analizer)
-```
-ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA FT_53_LV5_AN1
-ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RUNA.db
-```
-7. Run the CMSSW configuration file:
+6. Run the CMSSW configuration file:
 ```
 cmsRun poet_cfg.py
 ```
