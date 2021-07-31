@@ -1,12 +1,6 @@
 # Objects Information Extractor Tool
 ## Description
-This page contains instructions and examples of a way to extract information from a CMS root file type EDM.
-The root files contain collections of physical objects arranged within this structure, these objects can be: electrons, muons, photons, jets, tracks, etc.
-Scientific research requires specific information to obtain good results. This information can be extracted from an EDM file by creating an EDAnalyzer.
-
-The instructions to write your own EDAnalyzer are [here](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWriteFrameworkModule).
-
-In the code there are several comments explaining the logic that follows, also, some twiki links were added to expand the knowledge on the subject.
+This page contains instructions and examples of a way to extract information from MiniAOD file
 
 ## Usage instrucctions
 
