@@ -6,12 +6,12 @@ This page contains instructions and examples of a way to extract information fro
 
 * Create a project area:
 ```
-cmsrel CMSSW_10_2_18
+cmsrel CMSSW_7_6_7
 ```
-* Change to the CMSSW_5_3_32/src/ directory:
+* Change to the CMSSW_7_6_7/src/ directory:
 
 ```
-cd CMSSW_10_2_18/src/
+cd CMSSW_7_6_7/src/
 ```
 * Then, run the following command to create the CMS runtime variables:
 

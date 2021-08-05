@@ -17,7 +17,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.source = cms.Source("PoolSource",
                                 # replace 'myfile.root' with the source file you want to use
                                 fileNames = cms.untracked.vstring(
-            'root://cms-xrd-global.cern.ch//store/data/Run2018A/DoubleMuon/MINIAOD/17Sep2018-v2/00000/0068887D-518C-2B47-8C29-E699E295A2CC.root'
+            #'root://cms-xrd-global.cern.ch//store/data/Run2018A/DoubleMuon/MINIAOD/17Sep2018-v2/00000/0068887D-518C-2B47-8C29-E699E295A2CC.root'
+            'root://cmsxrootd.fnal.gov//store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
                 )
                             )
 
