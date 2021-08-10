@@ -192,9 +192,9 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_phi.push_back(el.phi());
       electron_ch.push_back(el.charge());
       electron_iso.push_back(el.ecalPFClusterIso());
-      electron_isLoose.push_back(el.electronID("cutBasedElectronID-Fall17-94X-V1-loose"));
-      electron_isMedium.push_back(el.electronID("cutBasedElectronID-Fall17-94X-V1-medium"));
-      electron_isTight.push_back(el.electronID("cutBasedElectronID-Fall17-94X-V1-tight"));
+      electron_isLoose.push_back(el.electronID("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"));
+      electron_isMedium.push_back(el.electronID("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"));
+      electron_isTight.push_back(el.electronID("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"));
       electron_dxy.push_back(el.gsfTrack()->dxy(pv));
       electron_dz.push_back(el.gsfTrack()->dz(pv));
       electron_dxyError.push_back(el.gsfTrack()->d0Error());
