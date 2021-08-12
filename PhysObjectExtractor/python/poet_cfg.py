@@ -25,7 +25,10 @@ process.source = cms.Source("PoolSource",
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',electrons = cms.InputTag("slimmedElectrons"), 
                                vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
                               
+process.mymuons = cms.EDAnalyzer('MuonAnalyzer',muons = cms.InputTag("slimmedMuons"), 
+                               vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
 
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
-process.p = cms.Path(process.myelectrons)
+process.p = cms.Path(process.myelectrons+process.mymuons)
+

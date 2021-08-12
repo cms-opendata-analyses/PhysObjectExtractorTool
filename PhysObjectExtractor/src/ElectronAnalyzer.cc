@@ -156,10 +156,10 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 {
    using namespace edm;
 
-   edm::Handle<pat::ElectronCollection> electrons;
+   Handle<pat::ElectronCollection> electrons;
    iEvent.getByToken(electronToken_, electrons);
 
-   edm::Handle<reco::VertexCollection> vertices;
+   Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
    math::XYZPoint pv(vertices->begin()->position());
 
