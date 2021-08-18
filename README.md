@@ -4,11 +4,11 @@ This page contains instructions and examples of a way to extract information fro
 
 ## Usage instrucctions
 
-* 1. Get the slc6 CMSSW_7_6_7 image:
+* Get the slc6 CMSSW_7_6_7 image:
 ```
 docker pull gitlab-registry.cern.ch/cms-cloud/cmssw-docker/cmssw_7_6_7-slc6_amd64_gcc493:2021-08-11-75df77cf
 ```
-* 2. Add vnc to the image:
+* Add vnc to the image:
 ```
 cd cmssw-docker
 git checkout vnc
@@ -17,7 +17,7 @@ vi Docker file
 //replace the IMAGEBASE argument with gitlab-registry.cern.ch/cms-cloud/cmssw-docker/cmssw_7_6_7-slc6_amd64_gcc493:2021-08-11-75df77cf
 docker build .
 ```
-* 3. Get the MiniAOD POET:
+* Get the MiniAOD POET:
 ```
 cd ../../
 mkdir MiniAOD
@@ -26,23 +26,23 @@ git clone https://github.com/apetkovi1/PhysObjectExtractorTool.git
 cd PhysObjectExtractorTool
 git checkout MiniAOD
 ```
-* 4. Create a container based on slc6 CMSSW_7_6_7 image with vnc installed and mount MiniAOD local volume:
+* Create a container based on slc6 CMSSW_7_6_7 image with vnc installed and mount MiniAOD local volume:
 ```
 cd ../../
 docker run -it --name slc6_MiniAOD -P -p 5901:5901 -v ${HOME}/MiniAOD:/home/cmsusr/MiniAOD  [put your image ID here] /bin/bash
 ln -s ~/MiniAOD/
 
 ```
-* 5. Create a CMS runtime variables and compile everything:
+* Create a CMS runtime variables and compile everything:
 ```
 cmsenv
 scram b
 ```
-* 6. Run the configuration file:
+* Run the configuration file:
 ```
 cmsRun MiniAOD/PhysObjectExtractorTool/PhysObjectExtractor/python/poet_cfg.py
 ```
-* 7. As a result you will get myoutput.root file with simple variables. To check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
+* As a result you will get myoutput.root file with simple variables. To check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
 ```
 start_vnc
 //When prompted enter a password
