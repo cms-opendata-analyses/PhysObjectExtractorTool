@@ -30,7 +30,8 @@ git checkout MiniAOD
 ```
 cd ../../
 docker run -it --name slc6_MiniAOD -P -p 5901:5901 -v ${HOME}/MiniAOD:/home/cmsusr/MiniAOD  [put your image ID here] /bin/bash
-ln -s ~/MiniAOD/
+//run all the following commands from the container
+ln -s ~/MiniAOD/   
 
 ```
 * Create a CMS runtime variables and compile everything:
