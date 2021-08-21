@@ -10,6 +10,7 @@ docker pull gitlab-registry.cern.ch/cms-cloud/cmssw-docker/cmssw_7_6_7-slc6_amd6
 ```
 * Add vnc to the image:
 ```
+git clone https://gitlab.cern.ch/cms-cloud/cmssw-docker.git
 cd cmssw-docker
 git checkout vnc
 cd vnc
