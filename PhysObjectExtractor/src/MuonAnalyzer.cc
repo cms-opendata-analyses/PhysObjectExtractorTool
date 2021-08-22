@@ -68,7 +68,6 @@ class MuonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       std::vector<float> muon_eta;
       std::vector<float> muon_phi;
       std::vector<float> muon_ch;
-      std::vector<float> muon_iso;
       std::vector<int> muon_isSoft;
       std::vector<int> muon_isTight;
       std::vector<float> muon_dxy;
@@ -121,8 +120,6 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("muon_phi")->SetTitle("muon polar angle");
   mtree->Branch("muon_ch",&muon_ch);
   mtree->GetBranch("muon_ch")->SetTitle("muon charge");
-  mtree->Branch("muon_iso",&muon_iso);
-  mtree->GetBranch("muon_iso")->SetTitle("muon isolation");
   mtree->Branch("muon_isSoft",&muon_isSoft);
   mtree->GetBranch("muon_isSoft")->SetTitle("muon tagged soft");
   mtree->Branch("muon_isTight",&muon_isTight);
@@ -183,7 +180,6 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    muon_eta.clear();
    muon_phi.clear();
    muon_ch.clear();
-   muon_iso.clear();
    muon_isSoft.clear();
    muon_isTight.clear();
    muon_dxy.clear();
