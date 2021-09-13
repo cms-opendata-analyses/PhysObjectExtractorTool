@@ -43,7 +43,7 @@ cmsenv
 ```
 3. Obtain the code from git:
 ```
-git clone git://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
+git clone -b 2012 git://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
 cd PhysObjectExtractorTool
 ```
 4. Compile everything:
@@ -71,6 +71,3 @@ cmsRun poet_cfg.py <isData> <doPat>
 
 
 The result will be a `myoutput.root` file with simple variables.  The information in this file is organized in `ROOT` directories corresponding to each type of physics object (or kind of information).  In order to further analyze the data in these file, the analysis templates in the `test` folder may be used.
-
-
-
