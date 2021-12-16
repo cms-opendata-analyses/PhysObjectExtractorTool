@@ -1,0 +1,108 @@
+image:
+  name: cmsopendata/cmssw_5_3_32
+  entrypoint: [""]
+
+before_script:
+  - source /opt/cms/cmsset_default.sh
+
+stages:
+  - build
+  - run
+  - test
+
+# build stage
+build:
+  stage: build
+  script:
+    - scramv1 project CMSSW $CMSSW_VERSION
+    - shopt -s extglob
+    - mkdir $CMSSW_VERSION/src/PhysObjectExtractorTool
+    - mv !($CMSSW_VERSION) $CMSSW_VERSION/src/PhysObjectExtractorTool
+    - cd $CMSSW_VERSION/src
+    - eval `scramv1 runtime -sh`
+    - scram b
+  artifacts:
+    paths:
+      - CMSSW_*/
+    expire_in: 6 hour
+
+# run  stage
+.poet:
+  stage: run
+  script:
+    - cd $CMSSW_VERSION/src/PhysObjectExtractorTool/PhysObjectExtractor
+    - eval `scramv1 runtime -sh`
+    - cmsRun python/poet_cfg.py $ARGS
+    - mv myoutput.root $CI_PROJECT_DIR/myoutput-${CI_JOB_NAME:5}.root
+  artifacts:
+    paths:
+      - myoutput-${CI_JOB_NAME:5}.root
+    expire_in: 6 hours
+
+poet-data:
+  extends: .poet
+  variables:
+    ARGS: True False
+
+poet-data-pat:
+  extends: .poet
+  variables:
+    ARGS: True True
+
+poet-mc:
+  extends: .poet
+  variables:
+    ARGS: False False
+
+poet-mc-pat:
+  extends: .poet
+  variables:
+    ARGS: False True
+
+# test stage
+.test:
+  stage: test
+  image: rootproject/root:6.22.08-centos7
+  before_script:
+    - export PATH=$HOME/.local/bin:$PATH
+    - pip3 install -qq --user pytest pyyaml
+  script:
+    - pytest PhysObjectExtractor/pytest/test_poet.yaml
+      --input=${CI_PROJECT_DIR}/myoutput-${CI_JOB_NAME:5}.root
+      --output=${CI_PROJECT_DIR}/myhistograms-${CI_JOB_NAME:5}.root
+      --junit-xml=${CI_PROJECT_DIR}/poet-${CI_JOB_NAME:5}.xml
+      $ARGS
+  artifacts:
+    paths:
+      - myhistograms-${CI_JOB_NAME:5}.root
+    reports:
+      junit: poet-${CI_JOB_NAME:5}.xml
+    expire_in: 7 days
+
+test-data:
+  extends: .test
+  dependencies:
+    - poet-data
+  variables:
+    ARGS: "--data"
+
+test-data-pat:
+  extends: .test
+  dependencies:
+    - poet-data-pat
+  variables:
+    ARGS: "--data"
+
+test-mc:
+  extends: .test
+  dependencies:
+    - poet-mc
+  variables:
+    ARGS: ""
+
+test-mc-pat:
+  extends: .test
+  dependencies:
+    - poet-mc-pat
+  variables:
+    ARGS: ""
