@@ -198,7 +198,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     numelectron=myelectrons->size();
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
       
-      int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
+      int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
       bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
       
       float el_pfIso = 999;
@@ -224,7 +224,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
 	    isMedium = true;
 	    
-	    if (abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && el_pfIso<.10 ){
+	    if (abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits==0 && el_pfIso<.10 ){
 	      isTight = true;
 	    }
 	  }
@@ -242,7 +242,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
 	    isMedium = true;
 	    
-	    if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && el_pfIso<.10 ){
+	    if ( abs(itElec->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(itElec->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits==0 && el_pfIso<.10 ){
 	      isTight = true;
 	    }
 	  }
