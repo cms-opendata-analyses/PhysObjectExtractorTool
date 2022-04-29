@@ -15,34 +15,34 @@ The `test` directory contains `ROOT` analysis templates/examples that can be use
 
 ## Usage instrucctions
 
-1. Set up a [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) and start it (you could also work with a [virtual machine](https://opendata.cern.ch/docs/cms-virtual-machine-2015)):
+1. Set up a [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) and start it interactively (you could also work with a [virtual machine](https://opendata.cern.ch/docs/cms-virtual-machine-2015)):
 ```
 docker run -it --name my_od -P -p 5901:5901 cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493 /bin/bash
 ```
 
-1. Obtain the code from git (this repository):
+2. Obtain the code from git (this repository):
 ```
 git clone -b 2015MiniAOD https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
 cd PhysObjectExtractorTool
 ```
 
-1. Compile everything:
+3. Compile everything:
 ```
 cd PhysObjectExtractor
 scram b
 ```
 
-1. For convenience, make a soft link to the python configuration file
+4. For convenience, make a soft link to the python configuration file
 ```
 ln -s python/poet_cfg.py .
 ```
 
-1. Run the job:
+5. Run the job:
 ```
 cmsRun poet_cfg.py
 ```
 
-1. As a result you will get myoutput.root file with simple variables.  If using the Windows OS, to check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
+6. As a result you will get myoutput.root file with simple variables.  If using the Windows OS, to check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
 ```
 start_vnc
 //When prompted enter a password
