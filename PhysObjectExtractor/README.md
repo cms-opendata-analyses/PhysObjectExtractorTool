@@ -1,4 +1,4 @@
-# Physics Objects Extractor (PhysObjectExtractor)
+# Physics Objects Extractor (PhysObjectExtractor) for 2012 (AOD) data
 
 ## Description
 
