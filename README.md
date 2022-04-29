@@ -1,8 +1,8 @@
-# Physics Objects Extractor Tool (POET)
+# Physics Objects Extractor Tool (POET) - 2012
 
 ## Description
 
-The POET repository contains packages that verse instructions and examples on how to extract physics (objects) information from Run 1 (AOD format) CMS open/legacy data and methods or tools needed for processing them. These objects can be: electrons, muons, photons, jets, tracks, etc.
+This POET repository contains packages that verse instructions and examples on how to extract physics (objects) information from Run 1 (AOD format) CMS open/legacy data and methods or tools needed for processing them. These objects can be: electrons, muons, photons, jets, tracks, etc.
 
 Please check out the `README` in each package for further instructions.
 
