@@ -69,6 +69,7 @@ class MuonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       std::vector<float> muon_phi;
       std::vector<float> muon_ch;
       std::vector<int> muon_isLoose;
+      std::vector<int> muon_isMedium;
       std::vector<int> muon_isTight;
       std::vector<int> muon_isSoft;
       std::vector<int> muon_isHighPt;
@@ -78,6 +79,8 @@ class MuonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       std::vector<float> muon_dzError;
       std::vector<float> muon_pfreliso03all;
       std::vector<float> muon_pfreliso04all;
+      std::vector<float> muon_pfreliso04DBCorr;
+      std::vector<float> muon_TkIso03;
       std::vector<float> muon_genpartidx;
       std::vector<float> muon_jetidx;
 };
@@ -124,6 +127,8 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("muon_ch")->SetTitle("muon charge");
   mtree->Branch("muon_isLoose",&muon_isLoose);
   mtree->GetBranch("muon_isLoose")->SetTitle("muon tagged loose");
+  mtree->Branch("muon_isMedium",&muon_isMedium);
+  mtree->GetBranch("muon_isMedium")->SetTitle("muon tagged medium");
   mtree->Branch("muon_isTight",&muon_isTight);
   mtree->GetBranch("muon_isTight")->SetTitle("muon tagged tight");
   mtree->Branch("muon_isSoft",&muon_isSoft);
@@ -142,6 +147,10 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("muon_pfreliso03all")->SetTitle("muon particle flow relative isolation cone 03");
   mtree->Branch("muon_pfreliso04all",&muon_pfreliso04all);
   mtree->GetBranch("muon_pfreliso04all")->SetTitle("muon particle flow relative isolation cone 04");
+  mtree->Branch("muon_pfreliso04DBCorr",&muon_pfreliso04DBCorr);
+  mtree->GetBranch("muon_pfreliso04DBCorr")->SetTitle("muon particle flow relative isolation cone 04 DB Corrected");
+  mtree->Branch("muon_TkIso03",&muon_TkIso03);
+  mtree->GetBranch("muon_TkIso03")->SetTitle("muon tracker based isolation with cone size 03");
   mtree->Branch("muon_jetidx",&muon_jetidx);
   mtree->GetBranch("muon_jetidx")->SetTitle("index of the associated jet");
   mtree->Branch("muon_genpartidx",&muon_genpartidx);
@@ -187,6 +196,7 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    muon_phi.clear();
    muon_ch.clear();
    muon_isLoose.clear();
+   muon_isMedium.clear();
    muon_isTight.clear();
    muon_isSoft.clear();
    muon_isHighPt.clear();   
@@ -196,6 +206,8 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    muon_dzError.clear();
    muon_pfreliso03all.clear();
    muon_pfreliso04all.clear();
+   muon_pfreliso04DBCorr.clear();
+   muon_TkIso03.clear();
    muon_jetidx.clear();
    muon_genpartidx.clear();
 
@@ -210,6 +222,7 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       muon_phi.push_back(mu.phi());
       muon_ch.push_back(mu.charge());
       muon_isLoose.push_back(mu.isLooseMuon());
+      muon_isMedium.push_back(mu.isMediumMuon());
       muon_isTight.push_back(mu.isTightMuon(PV));
       muon_isSoft.push_back(mu.isSoftMuon(PV));
       muon_isHighPt.push_back(mu.isHighPtMuon(PV));
@@ -221,6 +234,9 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       muon_pfreliso03all.push_back((iso03.sumChargedHadronPt + iso03.sumNeutralHadronEt + iso03.sumPhotonEt)/mu.pt());
       auto iso04 = mu.pfIsolationR04();
       muon_pfreliso04all.push_back((iso04.sumChargedHadronPt + iso04.sumNeutralHadronEt + iso04.sumPhotonEt)/mu.pt());
+      muon_pfreliso04DBCorr.push_back((iso04.sumChargedHadronPt + max(0., iso04.sumNeutralHadronEt + iso04.sumPhotonEt - 0.5*iso04.sumPUPt))/mu.pt());
+      auto TkIso03 = mu.isolationR03();
+      muon_TkIso03.push_back(TkIso03.sumPt/mu.pt());
       muon_genpartidx.push_back(-1);
       muon_jetidx.push_back(-1);
       nummuon++;
