@@ -196,10 +196,10 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_phi.push_back(el.phi());
       electron_ch.push_back(el.charge());
       electron_iso.push_back(el.ecalPFClusterIso());
-      electron_veto.push_back(el.electronID("cutBasedElectronID-Spring15-50ns-V2-standalone-veto"));//
-      electron_isLoose.push_back(el.electronID("cutBasedElectronID-Spring15-50ns-V2-standalone-loose"));
-      electron_isMedium.push_back(el.electronID("cutBasedElectronID-Spring15-50ns-V2-standalone-medium"));
-      electron_isTight.push_back(el.electronID("cutBasedElectronID-Spring15-50ns-V2-standalone-tight"));
+      electron_veto.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"));//
+      electron_isLoose.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"));
+      electron_isMedium.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"));
+      electron_isTight.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"));
       electron_dxy.push_back(el.gsfTrack()->dxy(pv));
       electron_dz.push_back(el.gsfTrack()->dz(pv));
       electron_dxyError.push_back(el.gsfTrack()->d0Error());
