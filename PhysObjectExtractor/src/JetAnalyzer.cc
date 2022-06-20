@@ -340,7 +340,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<reco::JetTagCollection> btags;
   iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
   Handle<double> rhoHandle;
-  iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
+  iEvent.getByLabel(InputTag("kt6PFJets:rho"), rhoHandle);
   Handle<reco::VertexCollection> vertices;
   iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
   Handle<reco::JetFlavourInfoMatchingCollection> injets;
