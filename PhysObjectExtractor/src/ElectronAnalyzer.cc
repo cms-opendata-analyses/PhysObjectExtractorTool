@@ -6,7 +6,6 @@
  
 // system include files
 #include <memory>
-#include <vector>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -16,31 +15,22 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-
-#include "DataFormats/Candidate/interface/Candidate.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
-#include "DataFormats/Common/interface/ValueMap.h"
-
-#include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
-#include "DataFormats/EgammaCandidates/interface/Conversion.h"
-#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
-
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
+#include "DataFormats/Common/interface/ValueMap.h"
+
 //class to extract electron information
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
-#include "Math/VectorUtil.h"
+#include<vector>
 //
 // class declaration
 //
@@ -53,51 +43,29 @@
 
 //using reco::TrackCollection;
 
-class ElectronNtuplerVIDwithMVADemo : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
-      explicit ElectronNtuplerVIDwithMVADemo(const edm::ParameterSet&);
-      ~ElectronNtuplerVIDwithMVADemo();
+      explicit ElectronAnalyzer(const edm::ParameterSet&);
+      ~ElectronAnalyzer();
 
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-   enum ElectronMatchType {UNMATCHED =0,//
-			  TRUE_PROMPT_ELECTRON, //
-			  TRUE_ELECTRON_FROM_TAU,//
-			  TRUE_NON_PROMPT_ELECTRON};//
 
    private:
       virtual void beginJob() override;
       virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() override;
 
-      int matchToTruth(const edm::Ptr<reco::GsfElectron> el, //
-		       const edm::Handle<edm::View<reco::GenParticle>>  &genParticles);//
-
-      void findFirstNonElectronMother(const reco::Candidate *particle,//
-				    int &ancestorPID, int &ancestorStatus);//
-
-
       edm::EDGetTokenT<pat::ElectronCollection> electronToken_;
       edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
-      edm::EDGetToken electronsMiniAODToken_;
-      edm::EDGetTokenT<edm::View<reco::GenParticle> > genParticlesMiniAODToken_;//
 
-      // MVA values and categories (optional)
-      edm::EDGetTokenT<edm::ValueMap<float> > mvaValuesMapToken_;//
-      edm::EDGetTokenT<edm::ValueMap<int> > mvaCategoriesMapToken_;//
-
+     // MVA values and categories (optional)
+      edm::EDGetTokenT<edm::ValueMap<float>> mvaValuesMapToken_;
+      edm::EDGetTokenT<edm::ValueMap<int>> mvaCategoriesMapToken_;
       // ----------member data ---------------------------
-
+      
       TTree *mtree;
-
-      //Global info
-      Int_t run_;//
-      Int_t lumi_;//
-      Int_t evtnum_;//
-
-      // all the variables for the output tree
       int numelectron; //number of electrons in the event
-
       std::vector<float> electron_e;
       std::vector<float> electron_pt;
       std::vector<float> electron_px;
@@ -115,9 +83,9 @@ class ElectronNtuplerVIDwithMVADemo : public edm::one::EDAnalyzer<edm::one::Shar
       std::vector<float> electron_dz;
       std::vector<float> electron_dxyError;
       std::vector<float> electron_dzError;
-
-      std::vector<float> mvaValue_;//
-      std::vector<int> mvaCategory_;//
+      std::vector<float> electron_ecalIso;
+      std::vector<float> electron_mvaValue;
+      std::vector<int> electron_mvaCategory;
 };
 
 //
@@ -131,31 +99,18 @@ class ElectronNtuplerVIDwithMVADemo : public edm::one::EDAnalyzer<edm::one::Shar
 //
 // constructors and destructor
 //
-ElectronNtuplerVIDwithMVADemo::ElectronNtuplerVIDwithMVADemo(const edm::ParameterSet& iConfig):
+ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
  electronToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"))),
  vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices"))),
  mvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("mvaValuesMap"))),
  mvaCategoriesMapToken_(consumes<edm::ValueMap<int>>(iConfig.getParameter<edm::InputTag>("mvaCategoriesMap")))
 {
-
-   //miniAOD Tokens
-   electronsMiniAODToken_    = mayConsume<edm::View<reco::GsfElectron> >
-    (iConfig.getParameter<edm::InputTag>
-     ("electronsMiniAOD"));
-
-   genParticlesMiniAODToken_ = mayConsume<edm::View<reco::GenParticle> >
-    (iConfig.getParameter<edm::InputTag>
-     ("genParticlesMiniAOD"));
-
    //now do what ever initialization is needed
 
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
 
-  mtree->Branch("run"        ,  &run_     , "run/I");//
-  mtree->Branch("lumi"       ,  &lumi_    , "lumi/I");//
-  mtree->Branch("evtnum"     ,  &evtnum_  , "evtnum/I");//
- 
+
   mtree->Branch("numberelectron",&numelectron);
   mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
   mtree->Branch("electron_e",&electron_e);
@@ -192,17 +147,19 @@ ElectronNtuplerVIDwithMVADemo::ElectronNtuplerVIDwithMVADemo(const edm::Paramete
   mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
   mtree->Branch("electron_dzError",&electron_dzError);
   mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
-
-  mtree->Branch("mvaVal" ,  &mvaValue_ );//
-  mtree->Branch("mvaCat" ,  &mvaCategory_ );//
-
+  mtree->Branch("electron_ecalIso",&electron_ecalIso);
+  mtree->GetBranch("electron_ecalIso")->SetTitle("electron Ecal Reconstruction Hit");
+  mtree->Branch("electron_mvaValue",&electron_mvaValue);
+  mtree->GetBranch("electron_mvaValue")->SetTitle("electron mva Value map");
+  mtree->Branch("electron_mvaCategory",&electron_mvaCategory);
+  mtree->GetBranch("electron_mvaCategory")->SetTitle("electron mva category map");
 }
 
 
-ElectronNtuplerVIDwithMVADemo::~ElectronNtuplerVIDwithMVADemo()
+ElectronAnalyzer::~ElectronAnalyzer()
 {
 
-   // do anything here that needs to be done at dectruction time
+   // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 
 }
@@ -214,9 +171,11 @@ ElectronNtuplerVIDwithMVADemo::~ElectronNtuplerVIDwithMVADemo()
 
 // ------------ method called for each event  ------------
 void
-ElectronNtuplerVIDwithMVADemo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
+   using namespace std;
+   using namespace reco;
 
    Handle<pat::ElectronCollection> electrons;
    iEvent.getByToken(electronToken_, electrons);
@@ -224,6 +183,15 @@ ElectronNtuplerVIDwithMVADemo::analyze(const edm::Event& iEvent, const edm::Even
    Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
    math::XYZPoint pv(vertices->begin()->position());
+
+   // Get MVA values and categories (optional)
+   edm::Handle<edm::ValueMap<float>> mvaValues;
+   edm::Handle<edm::ValueMap<int>> mvaCategories;
+   iEvent.getByToken(mvaValuesMapToken_,mvaValues);
+   iEvent.getByToken(mvaCategoriesMapToken_,mvaCategories);
+
+//   edm::Handle<edm::View<reco::GsfElectron>> elec;
+//   iEvent.getByToken(electronsMiniAODToken_,elec);
 
    numelectron = 0;
    electron_e.clear();
@@ -243,6 +211,9 @@ ElectronNtuplerVIDwithMVADemo::analyze(const edm::Event& iEvent, const edm::Even
    electron_dz.clear();
    electron_dxyError.clear();
    electron_dzError.clear();
+   electron_ecalIso.clear();
+   electron_mvaValue.clear();
+   electron_mvaCategory.clear();
 
     for (const pat::Electron &el : *electrons)
     {
@@ -255,7 +226,7 @@ ElectronNtuplerVIDwithMVADemo::analyze(const edm::Event& iEvent, const edm::Even
       electron_phi.push_back(el.phi());
       electron_ch.push_back(el.charge());
       electron_iso.push_back(el.ecalPFClusterIso());
-      electron_veto.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"));//
+      electron_veto.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));//
       electron_isLoose.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"));
       electron_isMedium.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"));
       electron_isTight.push_back(el.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"));
@@ -263,8 +234,18 @@ ElectronNtuplerVIDwithMVADemo::analyze(const edm::Event& iEvent, const edm::Even
       electron_dz.push_back(el.gsfTrack()->dz(pv));
       electron_dxyError.push_back(el.gsfTrack()->d0Error());
       electron_dzError.push_back(el.gsfTrack()->dzError());
+      electron_mvaValue.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
+      electron_mvaCategory.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
+
       numelectron++;
-    }
+    } 
+
+  for ( const reco::GsfElectron &ele : *electrons)
+  {
+      electron_ecalIso.push_back(ele.dr03EcalRecHitSumEt());
+//      electron_mvaValue.push_back((*mvaValues)[ele]);
+//      electron_mvaCategory.push_back((*mvaCatagories)[ele]);
+  }
 
   mtree->Fill();
   return;
@@ -274,19 +255,19 @@ ElectronNtuplerVIDwithMVADemo::analyze(const edm::Event& iEvent, const edm::Even
 
 // ------------ method called once each job just before starting event loop  ------------
 void
-ElectronNtuplerVIDwithMVADemo::beginJob()
+ElectronAnalyzer::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
-ElectronNtuplerVIDwithMVADemo::endJob()
+ElectronAnalyzer::endJob()
 {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-ElectronNtuplerVIDwithMVADemo::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+ElectronAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -296,4 +277,4 @@ ElectronNtuplerVIDwithMVADemo::fillDescriptions(edm::ConfigurationDescriptions& 
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(ElectronNtuplerVIDwithMVADemo);
+DEFINE_FWK_MODULE(ElectronAnalyzer);
