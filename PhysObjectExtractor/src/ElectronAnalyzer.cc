@@ -19,10 +19,18 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
+#include "DataFormats/Common/interface/ValueMap.h"
+
 //class to extract electron information
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+
+//Transient track for impact parameter
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 //classes to save data
 #include "TTree.h"
@@ -50,14 +58,14 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 
    private:
       virtual void beginJob() override;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void analyze(const edm::Event&, const edm::EventSetup& ) override;
       virtual void endJob() override;
 
-      edm::EDGetTokenT<pat::ElectronCollection> electronToken_;
+      edm::EDGetTokenT<pat::ElectronCollection> electronToken_, electronToken2_;
       edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
 
       // ----------member data ---------------------------
-      
+
       TTree *mtree;
       int numelectron; //number of electrons in the event
       std::vector<float> electron_e;
@@ -77,6 +85,9 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
       std::vector<float> electron_dz;
       std::vector<float> electron_dxyError;
       std::vector<float> electron_dzError;
+      std::vector<float> electron_ecalIso;
+      std::vector<int> electron_ismvaLoose;
+      std::vector<int> electron_ismvaTight;
 };
 
 //
@@ -90,18 +101,16 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 //
 // constructors and destructor
 //
-ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig): 
+ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
  electronToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"))),
  vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
-   
 {
    //now do what ever initialization is needed
-   
+
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
   
-  
-  mtree->Branch("numberelectron",&numelectron);
+  mtree->Branch("numberelectron",&numelectron);   
   mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
   mtree->Branch("electron_e",&electron_e);
   mtree->GetBranch("electron_e")->SetTitle("electron energy");
@@ -137,9 +146,15 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
   mtree->Branch("electron_dzError",&electron_dzError);
   mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
+  mtree->Branch("electron_ecalIso",&electron_ecalIso);
+  mtree->GetBranch("electron_ecalIso")->SetTitle("electron Ecal Reconstruction Hit");
+  mtree->Branch("electron_ismvaLoose",&electron_ismvaLoose);
+  mtree->GetBranch("electron_ismvaLoose")->SetTitle("electron mva Loose");
+  mtree->Branch("electron_ismvaTight",&electron_ismvaTight);
+  mtree->GetBranch("electron_ismvaTight")->SetTitle("electron mva Tight");
 }
 
-
+//Destructor
 ElectronAnalyzer::~ElectronAnalyzer()
 {
 
@@ -155,7 +170,7 @@ ElectronAnalyzer::~ElectronAnalyzer()
 
 // ------------ method called for each event  ------------
 void
-ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
    using namespace edm;
 
@@ -184,6 +199,9 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    electron_dz.clear();
    electron_dxyError.clear();
    electron_dzError.clear();
+   electron_ecalIso.clear();
+   electron_ismvaLoose.clear();
+   electron_ismvaTight.clear();
 
     for (const pat::Electron &el : *electrons)
     {
@@ -204,13 +222,20 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_dz.push_back(el.gsfTrack()->dz(pv));
       electron_dxyError.push_back(el.gsfTrack()->d0Error());
       electron_dzError.push_back(el.gsfTrack()->dzError());
+      electron_ismvaLoose.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
+      electron_ismvaTight.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"));
+
       numelectron++;
-    } 
+    }
+
+  for ( const reco::GsfElectron &ele : *electrons)
+  {
+      electron_ecalIso.push_back(ele.dr03EcalRecHitSumEt());
+  }
 
   mtree->Fill();
-  return;      
-          
- 
+  return;
+
 }
 
 

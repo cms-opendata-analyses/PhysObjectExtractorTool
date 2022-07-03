@@ -20,7 +20,9 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
                 )
                             )
 
-process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer', electrons = cms.InputTag("slimmedElectrons"), 
+
+process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
+                               electrons = cms.InputTag("slimmedElectrons"), 
                                vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
                               
 process.mymuons = cms.EDAnalyzer('MuonAnalyzer', muons = cms.InputTag("slimmedMuons"), 
