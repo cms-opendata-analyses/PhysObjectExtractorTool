@@ -20,9 +20,13 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
                 )
                             )
 
+#globaltag for 2015 collision data
+#process.load("Configuration.StandardSequences.Services_cff")
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_dataRun2_16Dec2015_v0.db')
+#process.GlobalTag.globaltag = '76X_dataRun2_16Dec2015_v0'
 
-process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
-                               electrons = cms.InputTag("slimmedElectrons"), 
+process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer', electrons = cms.InputTag("slimmedElectrons"), 
                                vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
                               
 process.mymuons = cms.EDAnalyzer('MuonAnalyzer', muons = cms.InputTag("slimmedMuons"), 
