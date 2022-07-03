@@ -3,7 +3,7 @@
 // Package:    Electron/ElectronAnalyzer
 // Class:      ElectronAnalyzer
 //
- 
+
 // system include files
 #include <memory>
 
