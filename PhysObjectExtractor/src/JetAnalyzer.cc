@@ -3,7 +3,6 @@
 // Package:    Jet/JetAnalyzer
 // Class:      JetAnalyzer
 //
- 
 // system include files
 #include <memory>
 
