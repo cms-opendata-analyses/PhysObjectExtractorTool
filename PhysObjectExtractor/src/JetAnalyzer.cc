@@ -3,7 +3,6 @@
 // Package:    Jet/JetAnalyzer
 // Class:      JetAnalyzer
 //
- 
 // system include files
 #include <memory>
 
@@ -165,7 +164,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   jet_phi.push_back(jet.phi());
 	   jet_ch.push_back(jet.charge());
 	   jet_mass.push_back(jet.mass());
-     jet_btag.push_back(std::max(0.f,jet.bDiscriminator("combinedSecondaryVertexBJetTags")));
+     jet_btag.push_back(std::max(0.f,jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags")));
      jet_pt_uncorr.push_back(jet.pt()*jet.jecFactor(0));
 	   numjet++;
     } 
