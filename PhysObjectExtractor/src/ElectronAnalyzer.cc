@@ -109,50 +109,49 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
-
-
-   mtree->Branch("numberelectron",&numelectron);
-   mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
-   mtree->Branch("electron_e",&electron_e);
-   mtree->GetBranch("electron_e")->SetTitle("electron energy");
-   mtree->Branch("electron_pt",&electron_pt);
-   mtree->GetBranch("electron_pt")->SetTitle("electron transverse momentum");
-   mtree->Branch("electron_px",&electron_px);
-   mtree->GetBranch("electron_px")->SetTitle("electron momentum x-component");
-   mtree->Branch("electron_py",&electron_py);
-   mtree->GetBranch("electron_py")->SetTitle("electron momentum y-component");
-   mtree->Branch("electron_pz",&electron_pz);
-   mtree->GetBranch("electron_pz")->SetTitle("electron momentum z-component");
-   mtree->Branch("electron_eta",&electron_eta);
-   mtree->GetBranch("electron_eta")->SetTitle("electron pseudorapidity");
-   mtree->Branch("electron_phi",&electron_phi);
-   mtree->GetBranch("electron_phi")->SetTitle("electron polar angle");
-   mtree->Branch("electron_ch",&electron_ch);
-   mtree->GetBranch("electron_ch")->SetTitle("electron charge");
-   mtree->Branch("electron_iso",&electron_iso);
-   mtree->GetBranch("electron_iso")->SetTitle("electron isolation");
-   mtree->Branch("electron_veto",&electron_veto);//
-   mtree->GetBranch("electron_veto")->SetTitle("electron veto");//
-   mtree->Branch("electron_isLoose",&electron_isLoose);
-   mtree->GetBranch("electron_isLoose")->SetTitle("electron tagged loose");
-   mtree->Branch("electron_isMedium",&electron_isMedium);
-   mtree->GetBranch("electron_isMedium")->SetTitle("electron tagged medium");
-   mtree->Branch("electron_isTight",&electron_isTight);
-   mtree->GetBranch("electron_isTight")->SetTitle("electron tagged tight");
-   mtree->Branch("electron_dxy",&electron_dxy);
-   mtree->GetBranch("electron_dxy")->SetTitle("electron transverse plane impact parameter (mm)");
-   mtree->Branch("electron_dz",&electron_dz);
-   mtree->GetBranch("electron_dz")->SetTitle("electron longitudinal impact parameter (mm)");
-   mtree->Branch("electron_dxyError",&electron_dxyError);
-   mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
-   mtree->Branch("electron_dzError",&electron_dzError);
-   mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
-   mtree->Branch("electron_ecalIso",&electron_ecalIso);
-   mtree->GetBranch("electron_ecalIso")->SetTitle("electron Ecal Reconstruction Hit");
-   mtree->Branch("electron_ismvaLoose",&electron_ismvaLoose);
-   mtree->GetBranch("electron_ismvaLoose")->SetTitle("electron mva Loose");
-   mtree->Branch("electron_ismvaTight",&electron_ismvaTight);
-   mtree->GetBranch("electron_ismvaTight")->SetTitle("electron mva Tight");
+  
+  mtree->Branch("numberelectron",&numelectron);   
+  mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
+  mtree->Branch("electron_e",&electron_e);
+  mtree->GetBranch("electron_e")->SetTitle("electron energy");
+  mtree->Branch("electron_pt",&electron_pt);
+  mtree->GetBranch("electron_pt")->SetTitle("electron transverse momentum");
+  mtree->Branch("electron_px",&electron_px);
+  mtree->GetBranch("electron_px")->SetTitle("electron momentum x-component");
+  mtree->Branch("electron_py",&electron_py);
+  mtree->GetBranch("electron_py")->SetTitle("electron momentum y-component");
+  mtree->Branch("electron_pz",&electron_pz);
+  mtree->GetBranch("electron_pz")->SetTitle("electron momentum z-component");
+  mtree->Branch("electron_eta",&electron_eta);
+  mtree->GetBranch("electron_eta")->SetTitle("electron pseudorapidity");
+  mtree->Branch("electron_phi",&electron_phi);
+  mtree->GetBranch("electron_phi")->SetTitle("electron polar angle");
+  mtree->Branch("electron_ch",&electron_ch);
+  mtree->GetBranch("electron_ch")->SetTitle("electron charge");
+  mtree->Branch("electron_iso",&electron_iso);
+  mtree->GetBranch("electron_iso")->SetTitle("electron isolation");
+  mtree->Branch("electron_veto",&electron_veto);//
+  mtree->GetBranch("electron_veto")->SetTitle("electron veto");//
+  mtree->Branch("electron_isLoose",&electron_isLoose);
+  mtree->GetBranch("electron_isLoose")->SetTitle("electron tagged loose");
+  mtree->Branch("electron_isMedium",&electron_isMedium);
+  mtree->GetBranch("electron_isMedium")->SetTitle("electron tagged medium");
+  mtree->Branch("electron_isTight",&electron_isTight);
+  mtree->GetBranch("electron_isTight")->SetTitle("electron tagged tight");
+  mtree->Branch("electron_dxy",&electron_dxy);
+  mtree->GetBranch("electron_dxy")->SetTitle("electron transverse plane impact parameter (mm)");
+  mtree->Branch("electron_dz",&electron_dz);
+  mtree->GetBranch("electron_dz")->SetTitle("electron longitudinal impact parameter (mm)");
+  mtree->Branch("electron_dxyError",&electron_dxyError);
+  mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
+  mtree->Branch("electron_dzError",&electron_dzError);
+  mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
+  mtree->Branch("electron_ecalIso",&electron_ecalIso);
+  mtree->GetBranch("electron_ecalIso")->SetTitle("electron Ecal Reconstruction Hit");
+  mtree->Branch("electron_ismvaLoose",&electron_ismvaLoose);
+  mtree->GetBranch("electron_ismvaLoose")->SetTitle("electron mva Loose");
+  mtree->Branch("electron_ismvaTight",&electron_ismvaTight);
+  mtree->GetBranch("electron_ismvaTight")->SetTitle("electron mva Tight");
 }
 
 //Destructor
