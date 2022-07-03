@@ -20,35 +20,10 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
                 )
                             )
 
-#
-# Set up electron ID (VID framework)
-#
-
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-# turn on VID producer, indicate data format  to be
-# DataFormat.AOD or DataFormat.MiniAOD, as appropriate 
-dataFormat = DataFormat.MiniAOD
-
-switchOnVIDElectronIdProducer(process, dataFormat)
-
-# define which IDs we want to produce
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff']
-
-#add them to the VID producer
-for idmod in my_id_modules:
-    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
-
 
 process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
                                electrons = cms.InputTag("slimmedElectrons"), 
                                vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
-                               #
-                               #ID decisions
-                               #eleLooseIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp90"),
-                               #eleTightIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp80"),
-                               #embedHighLevelSelection = cms.bool(True))
-                               # mvaValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"),
-                               # mvaCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Categories"))
                               
 process.mymuons = cms.EDAnalyzer('MuonAnalyzer', muons = cms.InputTag("slimmedMuons"), 
                                vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))

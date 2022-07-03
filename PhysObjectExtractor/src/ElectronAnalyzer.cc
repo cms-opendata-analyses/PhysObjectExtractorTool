@@ -58,26 +58,13 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 
    private:
       virtual void beginJob() override;
-      virtual void myVar(//const pat::Electron&,
-                     const reco::Vertex&,
-                     const TransientTrackBuilder&, const edm::Event& /*, const edm::EventSetup&*/);
       virtual void analyze(const edm::Event&, const edm::EventSetup& ) override;
       virtual void endJob() override;
 
       edm::EDGetTokenT<pat::ElectronCollection> electronToken_, electronToken2_;
       edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
 
-      // ID decisions objects
-     // edm::EDGetTokenT<edm::ValueMap<bool>> eleLooseIdMapToken_;
-     // edm::EDGetTokenT<edm::ValueMap<bool>> eleTightIdMapToken_;;
-
-      // MVA values and categories (optional)
-     // edm::EDGetTokenT<edm::ValueMap<float>> mvaValuesMapToken_;
-     // edm::EDGetTokenT<edm::ValueMap<int>> mvaCategoriesMapToken_;
       // ----------member data ---------------------------
-
-      // embed various impact parameters with errors
-    // embed high level selection
 
       TTree *mtree;
       int numelectron; //number of electrons in the event
@@ -99,14 +86,8 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
       std::vector<float> electron_dxyError;
       std::vector<float> electron_dzError;
       std::vector<float> electron_ecalIso;
-     // std::vector<float> electron_mvaValue;
-     // std::vector<int> electron_mvaCategory;
       std::vector<int> electron_ismvaLoose;
       std::vector<int> electron_ismvaTight;
-      std::vector<float> electron_ip3d;
-
-      Float_t myMVAVar_ip3d;
-      Float_t myMVAVar_ip3dSig;
 };
 
 //
@@ -123,10 +104,6 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
  electronToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"))),
  vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
-// eleLooseIdMapToken_(consumes<edm::ValueMap<bool>>(iConfig.getParameter<edm::InputTag>("eleLooseIdMap"))),
-// eleTightIdMapToken_(consumes<edm::ValueMap<bool>>(iConfig.getParameter<edm::InputTag>("eleTightIdMap")))
-// mvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("mvaValuesMap"))),
-// mvaCategoriesMapToken_(consumes<edm::ValueMap<int>>(iConfig.getParameter<edm::InputTag>("mvaCategoriesMap")))
 {
    //now do what ever initialization is needed
 
@@ -172,16 +149,10 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
    mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
    mtree->Branch("electron_ecalIso",&electron_ecalIso);
    mtree->GetBranch("electron_ecalIso")->SetTitle("electron Ecal Reconstruction Hit");
-   //mtree->Branch("electron_mvaValue",&electron_mvaValue);
-   //mtree->GetBranch("electron_mvaValue")->SetTitle("electron mva Value map");
-   //mtree->Branch("electron_mvaCategory",&electron_mvaCategory);
-   //mtree->GetBranch("electron_mvaCategory")->SetTitle("electron mva category map");
    mtree->Branch("electron_ismvaLoose",&electron_ismvaLoose);
    mtree->GetBranch("electron_ismvaLoose")->SetTitle("electron mva Loose");
    mtree->Branch("electron_ismvaTight",&electron_ismvaTight);
    mtree->GetBranch("electron_ismvaTight")->SetTitle("electron mva Tight");
-   mtree->Branch("electron_ip3d",&electron_ip3d);
-   mtree->GetBranch("electron_ip3d")->SetTitle("electron impact parameter");
 }
 
 //Destructor
@@ -210,23 +181,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
    math::XYZPoint pv(vertices->begin()->position());
-   // Get the electron ID data from the event stream.
-   // Note: this implies that the VID ID modules have been run upstream.
-   // If you need more info, check with the EGM group.
-   //edm::Handle<edm::ValueMap<bool>> loose_id_decisions;
-   //edm::Handle<edm::ValueMap<bool>> tight_id_decisions;
-   //iEvent.getByToken(eleLooseIdMapToken_,loose_id_decisions);
-   //iEvent.getByToken(eleTightIdMapToken_,tight_id_decisions);
-   // Get MVA values and categories (optional)
-   //edm::Handle<edm::ValueMap<float>> mvaValues;
-   //edm::Handle<edm::ValueMap<int>> mvaCategories;
-  // iEvent.getByToken(mvaValuesMapToken_,mvaValues);
-  // iEvent.getByToken(mvaCategoriesMapToken_,mvaCategories);
-
-//   edm::Handle<edm::View<reco::GsfElectron>> elec;
-//   iEvent.getByToken(electronsMiniAODToken_,elec);
-//   bool isPassLoose = (*loose_id_decisions)[el];
-//   bool isPassTight  = (*tight_id_decisions)[el];
 
    numelectron = 0;
    electron_e.clear();
@@ -247,16 +201,11 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    electron_dxyError.clear();
    electron_dzError.clear();
    electron_ecalIso.clear();
-  // electron_mvaValue.clear();
-  // electron_mvaCategory.clear();
    electron_ismvaLoose.clear();
    electron_ismvaTight.clear();
 
     for (const pat::Electron &el : *electrons)
     {
-     // bool isPassLoose = (*loose_id_decisions)[el];
-     // bool isPassTight  = (*tight_id_decisions)[el];
-
       electron_e.push_back(el.energy());
       electron_pt.push_back(el.pt());
       electron_px.push_back(el.px());
@@ -274,8 +223,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_dz.push_back(el.gsfTrack()->dz(pv));
       electron_dxyError.push_back(el.gsfTrack()->d0Error());
       electron_dzError.push_back(el.gsfTrack()->dzError());
-     // electron_mvaValue.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
-     // electron_mvaCategory.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
       electron_ismvaLoose.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
       electron_ismvaTight.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"));
 
@@ -285,8 +232,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   for ( const reco::GsfElectron &ele : *electrons)
   {
       electron_ecalIso.push_back(ele.dr03EcalRecHitSumEt());
-      //electron_mvaValue.push_back((*mvaValues)[ele]);
-      //electron_mvaCategory.push_back((*mvaCatagories)[ele]);
   }
 
   mtree->Fill();
@@ -294,47 +239,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 }
 
-// ------------ method called once each job just before starting event loop  ------------
-void ElectronAnalyzer::myVar(//const reco::GsfElectron& ele,
-			     const reco::Vertex& vertex,
-			     const TransientTrackBuilder& transientTrackBuilder,
-                             const edm::Event& iEvent/*, const edm::EventSetup& iSetup*/)
-{
-   using namespace edm;
 
-   Handle<pat::ElectronCollection> electrons;
-   iEvent.getByToken(electronToken2_, electrons);
-
-   Handle<reco::VertexCollection> vertices;
-   iEvent.getByToken(vtxToken_, vertices);
-   math::XYZPoint pv(vertices->begin()->position());
-
-   numelectron = 0;
-   electron_ip3d.clear();
-
-   //default values for IP3D
-   for(const pat::Electron &el : *electrons)
-   {
-     myMVAVar_ip3d = -999.;
-     // myMVAVar_ip3dSig = 0.0;
-     if (el.gsfTrack().isNonnull()) {
-     const double gsfsign   = ( (-el.gsfTrack()->dxy(pv))   >=0 ) ? 1. : -1.;
-
-     const reco::TransientTrack& tt = transientTrackBuilder.build(el.gsfTrack());
-     const std::pair<bool,Measurement1D>& ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
-     if (ip3dpv.first) {
-       //double ip3d = gsfsign*ip3dpv.second.value();
-	//double ip3derr = ip3dpv.second.error();
-       electron_ip3d.push_back(gsfsign*ip3dpv.second.value());
-      // electron_ip3d.push_back(myMVAVar_ip3d);
-       // myMVAVar_ip3dSig = ip3d/ip3derr;
-       }
-      }
-   numelectron++;
-  }
-   mtree->Fill();
-   return;
-}
 // ------------ method called once each job just before starting event loop  ------------
 void
 ElectronAnalyzer::beginJob()

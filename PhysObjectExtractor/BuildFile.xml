@@ -4,6 +4,4 @@
 <use name="DataFormats/PatCandidates"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
-<use name="RecoEgamma/EgammaTools" />
-<use name="RecoEgamma/ElectronIdentification" />
 <flags EDM_PLUGIN="1"/>
