@@ -1,74 +1,114 @@
 // -*- C++ -*-
 //
-// Package:    Jet/JetAnalyzer
+// Package:    JetAnalyzer
 // Class:      JetAnalyzer
 //
- 
+
 // system include files
 #include <memory>
-
+#include <TMath.h>
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-
+#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Utilities/interface/InputTag.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Common/interface/Ref.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "math.h"
 
 //class to extract jet information
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetResolutionObject.h"
+#include "JetMETCorrections/Modules/interface/JetResolution.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
 #include<vector>
+
+#include "TRandom3.h"
+
+
 //
 // class declaration
 //
 
-// If the analyzer does not use TFileService, please remove
-// the template argument to the base class so the class inherits
-// from  edm::one::EDAnalyzer<>
-// This will improve performance in multithreaded jobs.
+class JetAnalyzer : public edm::EDAnalyzer {
+public:
+  explicit JetAnalyzer(const edm::ParameterSet&);
+  ~JetAnalyzer();
+  
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+private:
+  virtual void beginJob() ;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual double getBtagEfficiency(double pt);
+  virtual double getCtagEfficiency(double pt);
+  virtual double getLFtagEfficiency(double pt);
+  virtual double getBorCtagSF(double pt, double eta); 
+  virtual double getLFtagSF(double pt, double eta);
+  virtual double uncertaintyForBTagSF( double pt, double eta);
+  virtual double uncertaintyForLFTagSF( double pt, double eta);
+  virtual void endJob() ;
+  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+  virtual void endRun(edm::Run const&, edm::EventSetup const&);
+  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;  
+       
+  //declare the input tag for PFJetCollection
+  edm::EDGetTokenT<pat::JetCollection> jetToken_;
+  edm::EDGetTokenT<double> rhoToken_;
+  edm::EDGetTokenT<reco::VertexCollection> pvToken_;
+  
+  // ----------member data ---------------------------    
+  // jec variables
+  std::vector<std::string> jecPayloadNames_;
+  std::string              jecL1_;
+  std::string              jecL2_;
+  std::string              jecL3_;
+  std::string              jecRes_;
+  std::string              jetJECUncName_;
+  std::string              jetResName_;
+  std::string              sfName_;
+  boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
+  boost::shared_ptr<FactorizedJetCorrector> jec_;
+  bool isData;
 
-
-
-class JetAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
-   public:
-      explicit JetAnalyzer(const edm::ParameterSet&);
-      ~JetAnalyzer();
-
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-
-   private:
-      virtual void beginJob() override;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
-      virtual void endJob() override;
-
-       edm::EDGetTokenT<pat::JetCollection> jetToken_;
-
-      // ----------member data ---------------------------
-      
-     
-  TTree *mtree;
+  JME::JetResolution resolution;
+  JME::JetResolutionScaleFactor resolution_sf;
 
   int numjet; //number of jets in the event
-  std::vector<float> jet_e;
+  TTree *mtree;
   std::vector<float> jet_pt;
-  std::vector<float> jet_pt_uncorr;
-  std::vector<float> jet_px;
-  std::vector<float> jet_py;
-  std::vector<float> jet_pz;
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
   std::vector<float> jet_ch;
   std::vector<float> jet_mass;
   std::vector<double> jet_btag;
+  std::vector<int>   jet_hflav;
+  std::vector<float> corr_jet_pt;
+  std::vector<float> corr_jet_ptUp;
+  std::vector<float> corr_jet_ptDown;
+  std::vector<float> corr_jet_ptSmearUp;
+  std::vector<float> corr_jet_ptSmearDown;
+  std::vector<float> corr_jet_mass;
+  std::vector<float> corr_jet_e;
+  std::vector<float> corr_jet_px;
+  std::vector<float> corr_jet_py;
+  std::vector<float> corr_jet_pz;
+  float btagWeight;
+  float btagWeightUp;
+  float btagWeightDn;
 
 };
 
@@ -83,121 +123,455 @@ class JetAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 //
 // constructors and destructor
 //
-JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig): 
-  jetToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
-   
-{
-   //now do what ever initialization is needed
-   
-   edm::Service<TFileService> fs;
-   mtree = fs->make<TTree>("Events", "Events");
-  
-   mtree->Branch("numberjet",&numjet);
-   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
-   mtree->Branch("jet_e",&jet_e);
-   mtree->GetBranch("jet_e")->SetTitle("Jet Energy");
-   mtree->Branch("jet_pt",&jet_pt);
-   mtree->GetBranch("jet_pt")->SetTitle("Transverse Jet Momentum");
-   mtree->Branch("jet_px",&jet_px);
-   mtree->GetBranch("jet_px")->SetTitle("X-Component of Jet Momentum");
-   mtree->Branch("jet_py",&jet_py); 
-   mtree->GetBranch("jet_py")->SetTitle("Y-Component of Jet Momentum");
-   mtree->Branch("jet_pz",&jet_pz);
-   mtree->GetBranch("jet_pz")->SetTitle("Z-Component of Jet Momentum");
-   mtree->Branch("jet_eta",&jet_eta);
-   mtree->GetBranch("jet_eta")->SetTitle("Jet Eta");
-   mtree->Branch("jet_phi",&jet_phi);
-   mtree->GetBranch("jet_phi")->SetTitle("Jet Phi");
-   mtree->Branch("jet_ch",&jet_ch);
-   mtree->GetBranch("jet_ch")->SetTitle("Jet Charge");
-   mtree->Branch("jet_mass",&jet_mass);
-   mtree->GetBranch("jet_mass")->SetTitle("Jet Mass");
-   mtree->Branch("jet_btag",&jet_btag);
-   mtree->GetBranch("jet_btag")->SetTitle("Jet Btagging Discriminant (CSV)");
-   mtree->Branch("jet_pt_uncorr",&jet_pt_uncorr);
-   mtree->GetBranch("jet_pt_uncorr")->SetTitle("Uncorrected Transverse Jet Momentum");
-}
 
+JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig):
+  jetToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets"))),
+  jecL1_(iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath()), // JEC level payloads for test                  
+  jecL2_(iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath()), // JEC level payloads for test            
+  jecL3_(iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath()), // JEC level payloads for test            
+  jecRes_(iConfig.getParameter<edm::FileInPath>("jecResName").fullPath()),
+  jetJECUncName_(iConfig.getParameter<edm::FileInPath>("jetJECUncName").fullPath()), // JEC uncertainties
+  jetResName_(iConfig.getParameter<edm::FileInPath>("jerResName").fullPath()), // JER Resolutions
+  sfName_(iConfig.getParameter<edm::FileInPath>("jerSFName").fullPath()), // JER Resolutions
+  isData(iConfig.getParameter<bool>("isData"))
+{
+//now do what ever initialization is needed
+  edm::Service<TFileService> fs;
+  mtree = fs->make<TTree>("Events", "Events");
+
+  //Get the factorized jet corrector parameters.
+  jecPayloadNames_.push_back(jecL1_);
+  jecPayloadNames_.push_back(jecL2_);
+  jecPayloadNames_.push_back(jecL3_);
+  if( isData == true ) jecPayloadNames_.push_back(jecRes_);
+  std::vector<JetCorrectorParameters> vPar;
+  for ( std::vector<std::string>::const_iterator payloadBegin = jecPayloadNames_.begin(),
+	  payloadEnd = jecPayloadNames_.end(), ipayload = payloadBegin; ipayload != payloadEnd; ++ipayload ) {
+    JetCorrectorParameters pars(*ipayload);
+    vPar.push_back(pars);
+  }
+
+  // Make the FactorizedJetCorrector and Uncertainty                                                                                              
+  jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
+  jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jetJECUncName_) );
+
+  resolution = JME::JetResolution(jetResName_);
+  resolution_sf = JME::JetResolutionScaleFactor(sfName_);
+
+  edm::InputTag rhotag("fixedGridRhoFastjetAll");
+  rhoToken_ = consumes<double>(rhotag);
+  edm::InputTag pvtag("offlineSlimmedPrimaryVertices");
+  pvToken_ = consumes<reco::VertexCollection>(pvtag);
+	
+  mtree->Branch("numberjet",&numjet);
+  mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
+  mtree->Branch("jet_pt",&jet_pt);
+  mtree->GetBranch("jet_pt")->SetTitle("Uncorrected Transverse Jet Momentum");
+  mtree->Branch("jet_eta",&jet_eta);
+  mtree->GetBranch("jet_eta")->SetTitle("Jet Eta");
+  mtree->Branch("jet_phi",&jet_phi);
+  mtree->GetBranch("jet_phi")->SetTitle("Jet Phi");
+  mtree->Branch("jet_ch",&jet_ch);
+  mtree->GetBranch("jet_ch")->SetTitle("Jet Charge");
+  mtree->Branch("jet_mass",&jet_mass);
+  mtree->GetBranch("jet_mass")->SetTitle("Jet Mass");
+  mtree->Branch("jet_btag",&jet_btag);
+  mtree->GetBranch("jet_btag")->SetTitle("Jet Btagging Discriminant (CSV)");
+  mtree->Branch("jet_hflav",&jet_hflav);
+  mtree->GetBranch("jet_hflav")->SetTitle("Jet hadron-based flavour (in MC)");
+  mtree->Branch("corr_jet_pt",&corr_jet_pt);
+  mtree->GetBranch("corr_jet_pt")->SetTitle("Corrected Transverse Jet Momentum");
+  mtree->Branch("corr_jet_ptUp",&corr_jet_ptUp);
+  mtree->GetBranch("corr_jet_ptUp")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Up)");
+  mtree->Branch("corr_jet_ptDown",&corr_jet_ptDown);
+  mtree->GetBranch("corr_jet_ptDown")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Down)");
+  mtree->Branch("corr_jet_ptSmearUp",&corr_jet_ptSmearUp);
+  mtree->GetBranch("corr_jet_ptSmearUp")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Up)");
+  mtree->Branch("corr_jet_ptSmearDown",&corr_jet_ptSmearDown);	
+  mtree->GetBranch("corr_jet_ptSmearDown")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Down)");
+  mtree->Branch("corr_jet_mass",&corr_jet_mass);  
+  mtree->GetBranch("corr_jet_mass")->SetTitle("Corrected Jet Mass");
+  mtree->Branch("corr_jet_e",&corr_jet_e);
+  mtree->GetBranch("corr_jet_e")->SetTitle("Corrected Jet Energy");
+  mtree->Branch("corr_jet_px",&corr_jet_px);
+  mtree->GetBranch("corr_jet_px")->SetTitle("Corrected X-Component of Jet Momentum");
+  mtree->Branch("corr_jet_py",&corr_jet_py);
+  mtree->GetBranch("corr_jet_py")->SetTitle("Corrected Y-Component of Jet Momentum");
+  mtree->Branch("corr_jet_pz",&corr_jet_pz);
+  mtree->GetBranch("corr_jet_pz")->SetTitle("Corrected Z-Component of Jet Momentum");
+  mtree->Branch("btag_Weight", &btagWeight);
+  mtree->GetBranch("btag_Weight")->SetTitle("B-Tag Event Weight");
+  mtree->Branch("btag_WeightUp", &btagWeightUp);
+  mtree->GetBranch("btag_WeightUp")->SetTitle("B-Tag Up Event Weight");
+  mtree->Branch("btag_WeightDn", &btagWeightDn);
+  mtree->GetBranch("btag_WeightDn")->SetTitle("B-Tag Down Event Weight");
+}
 
 JetAnalyzer::~JetAnalyzer()
 {
-
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
-
 }
-
 
 //
 // member functions
 //
 
 // ------------ method called for each event  ------------
+
+//Function that gets the efficiencies for B tag jets.
+//returns hard coded values from data analyzed from out root -l plotBEff.C
+
+double
+JetAnalyzer::getBtagEfficiency(double pt){
+  if(pt < 25) return 0.263407;
+  else if(pt < 50) return 0.548796;
+  else if(pt < 75) return 0.656801;
+  else if(pt < 100) return 0.689167;
+  else if(pt < 125) return 0.697911;
+  else if(pt < 150) return 0.700187;
+  else if(pt < 200) return 0.679236;
+  else if(pt < 400) return 0.625296;
+  else return 0.394916;
+}
+
+//Function that gets the efficiencies for C tag jets.
+//returns hard coded values from data analyzed from out root -l plotBEff.C
+
+double
+JetAnalyzer::getCtagEfficiency(double pt){
+  if(pt < 25) return 0.065630;
+  else if(pt < 50) return 0.161601;
+  else if(pt < 75) return 0.209222;
+  else if(pt < 100) return 0.242979;
+  else if(pt < 125) return 0.223005;
+  else if(pt < 150) return 0.210210;
+  else if(pt < 200) return 0.225191;
+  else if(pt < 400) return 0.227437;
+  else return 0.153846;
+}
+
+//Function that gets the efficiencies for LF tag jets.
+//returns hard coded values from data analyzed from out root -l plotBEff.C
+
+double
+JetAnalyzer::getLFtagEfficiency(double pt){
+  if(pt < 25) return 0.002394;
+  else if(pt < 50) return 0.012683;
+  else if(pt < 75) return 0.011459;
+  else if(pt < 100) return 0.012960;
+  else if(pt < 125) return 0.011424;
+  else if(pt < 150) return 0.011727;
+  else if(pt < 200) return 0.011302;
+  else if(pt < 400) return 0.014760;
+  else return 0.011628;
+}
+
+//Function that gets the SF for B or C tag jets since there equations from the CSV.csv files are the same.
+//returns the SF of the B or C tag jet depending on the pt of the jet
+
+double
+JetAnalyzer::getBorCtagSF(double pt, double eta){
+  if (pt > 670.) pt = 670;
+  if(fabs(eta) > 2.4 or pt<20.) return 1.0;
+
+  return 0.92955*((1.+(0.0589629*pt))/(1.+(0.0568063*pt)));
+}
+
+//Function that gets the SF for lf tag jets since there equations from the CSV.csv files are the same.
+//returns the SF of the lf jet depending on the eta of the jet
+
+double
+JetAnalyzer::getLFtagSF(double pt, double eta){
+  if (pt > 1000.) pt = 1000;
+  if(fabs(eta) > 2.4 or pt<20.) return 1.0;
+  if(eta < 0.8)
+    return (((0.922288+(0.00134434*pt))+(-3.14949e-06*(pt*pt)))+(2.08253e-09*(pt*(pt*pt))));
+  else if (eta < 1.6)
+    return (((0.908178+(0.00117751*pt))+(-3.16036e-06*(pt*pt)))+(2.41646e-09*(pt*(pt*pt))));
+  else
+    return (((0.869129+(0.000791629*pt))+(-2.62216e-06*(pt*pt)))+(2.49432e-09*(pt*(pt*pt))));
+}
+
+
+//Function that gets the uncertainty for B tag jets.
+//returns the uncertainty from the CSV.csv file depending on the pt of the jet.
+//This will also be used to find the uncertainty of C tag jets but will be multiplied by 2 since the uncertainty of C tag jets are 2 times that of B tag jets
+
+double
+JetAnalyzer::uncertaintyForBTagSF( double pt, double eta){
+  if(fabs(eta) > 2.4 or pt<20.) return 0;
+  if(pt < 30) return 0.0466655;
+  else if(pt < 40) return 0.0203547;
+  else if(pt < 50) return 0.0187707;
+  else if(pt < 60) return 0.0250719;
+  else if(pt < 70) return 0.023081;
+  else if(pt < 80) return 0.0183273;
+  else if(pt < 100) return 0.0256502;
+  else if(pt < 120) return 0.0189555;
+  else if(pt < 160) return 0.0236561;
+  else if(pt < 210) return 0.0307624;
+  else if(pt < 260) return 0.0387889;
+  else if(pt < 320) return 0.0443912;
+  else if(pt < 400) return 0.0693573;
+  else if(pt < 500) return 0.0650147;
+  else return 0.066886;
+}
+
+
+//Function that gets the uncertainty for LF tag jets.
+//returns the uncertainty from the CSV.csv file depending on the eta of the jet.
+
+double
+JetAnalyzer::uncertaintyForLFTagSF( double pt, double eta){
+  if (pt > 1000.)  pt = 1000;
+  if(fabs(eta) > 2.4 or pt<20.)  return 0;
+  if(eta < 0.8)
+    return ((((1.01835+(0.0018277*pt))+(-4.37801e-06*(pt*pt)))+(2.90957e-09*(pt*(pt*pt))))-(((0.826257+(0.000858843*pt))+(-1.91563e-06*(pt*pt)))+(1.25331e-09*(pt*(pt*pt)))))/2.0;
+  else if (eta < 1.6)
+    return ((((1.00329+(0.00152898*pt))+(-4.21068e-06*(pt*pt)))+(3.23445e-09*(pt*(pt*pt))))-(((0.813077+(0.000824155*pt))+(-2.10494e-06*(pt*pt)))+(1.59692e-09*(pt*(pt*pt)))))/2.0;
+  else
+    return  ((((0.953682+(0.00104827*pt))+(-3.71967e-06*(pt*pt)))+(3.73067e-09*(pt*(pt*pt))))-(((0.784552+(0.000534202*pt))+(-1.52298e-06*(pt*pt)))+(1.26036e-09*(pt*(pt*pt)))))/2.0;
+}
+
+
 void
 JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   using namespace edm;
 
-   Handle<pat::JetCollection> jets;
-   iEvent.getByToken(jetToken_, jets);
+  using namespace edm;
+  using namespace std;
 
-   numjet = 0;
-   jet_e.clear();
-   jet_pt.clear();
-   jet_px.clear();
-   jet_py.clear();
-   jet_pz.clear();
-   jet_eta.clear();
-   jet_phi.clear();
-   jet_ch.clear();
-   jet_mass.clear();
-   jet_btag.clear();
-   jet_pt_uncorr.clear();
+  Handle<pat::JetCollection> jets;
+  iEvent.getByToken(jetToken_, jets);
 
-     for (const pat::Jet &jet : *jets)
-    {
-    jet_e.push_back(jet.energy());
-	   jet_pt.push_back(jet.pt());
-	   jet_px.push_back(jet.px());
-	   jet_py.push_back(jet.py());
-	   jet_pz.push_back(jet.pz());
-	   jet_eta.push_back(jet.eta());
-	   jet_phi.push_back(jet.phi());
-	   jet_ch.push_back(jet.charge());
-	   jet_mass.push_back(jet.mass());
-     jet_btag.push_back(std::max(0.f,jet.bDiscriminator("combinedSecondaryVertexBJetTags")));
-     jet_pt_uncorr.push_back(jet.pt()*jet.jecFactor(0));
-	   numjet++;
-    } 
+  Handle<double> rhoHandle;
+  iEvent.getByToken(rhoToken_, rhoHandle);
+  Handle<reco::VertexCollection> vertices;
+  iEvent.getByToken(pvToken_, vertices);
 
+  numjet = 0;
+  jet_pt.clear();
+  jet_eta.clear();
+  jet_phi.clear();
+  jet_ch.clear();
+  jet_mass.clear();
+  jet_btag.clear();
+  jet_hflav.clear();
+  corr_jet_pt.clear();
+  corr_jet_ptUp.clear();
+  corr_jet_ptDown.clear();
+  corr_jet_ptSmearUp.clear();
+  corr_jet_ptSmearDown.clear();
+  corr_jet_mass.clear();
+  corr_jet_e.clear();
+  corr_jet_px.clear();
+  corr_jet_py.clear();
+  corr_jet_pz.clear();
+
+  int hadronFlavour;
+  double SF, SFu, SFd, eff, corrpt;
+  double corrUp, corrDown, corr;
+  float ptscale, ptscale_down, ptscale_up;
+  double MC = 1;
+  btagWeight = 1;
+  btagWeightUp = 1;
+  btagWeightDn = 1;
+  int min_pt = 20;
+  
+  if(jets.isValid()){
+
+    for (const pat::Jet &jet : *jets){
+      pat::Jet uncorrJet = jet.correctedJet(0);
+
+      corr = 1;
+      jec_->setJetEta( uncorrJet.eta() );
+      jec_->setJetPt ( uncorrJet.pt() );
+      jec_->setJetE  ( uncorrJet.energy() );
+      jec_->setJetA  ( jet.jetArea() );
+      jec_->setRho   ( *(rhoHandle.product()) );
+      jec_->setNPV   ( vertices->size() );
+      corr = jec_->getCorrection();
+
+      corrpt = corr*jet.pt();
+      corrUp = 1.0;
+      corrDown = 1.0;
+
+      if( fabs(jet.eta()) < 5) jecUnc_->setJetEta( jet.eta() );
+      else jecUnc_->setJetEta( 4.99 );
+      jecUnc_->setJetPt( corrpt );
+      corrUp = (1 + fabs(jecUnc_->getUncertainty(1)));
+
+      if( fabs(jet.eta()) < 5) jecUnc_->setJetEta( jet.eta() );
+      else jecUnc_->setJetEta( 4.99 );
+      jecUnc_->setJetPt( corrpt );
+      corrDown = (1 - fabs(jecUnc_->getUncertainty(-1)));        
+
+      ptscale = 1;
+      ptscale_down = 1;
+      ptscale_up = 1;
+
+      if(!isData) {
+
+	JME::JetParameters JERparameters = {{JME::Binning::JetPt, corrpt}, {JME::Binning::JetEta, jet.eta()}, {JME::Binning::Rho, *(rhoHandle.product())}};
+	float res = resolution.getResolution(JERparameters); 
+	float sf = resolution_sf.getScaleFactor(JERparameters);
+	float sf_up = resolution_sf.getScaleFactor(JERparameters, Variation::UP);
+	float sf_down = resolution_sf.getScaleFactor(JERparameters, Variation::DOWN);
+
+	const reco::GenJet *genJet = jet.genJet();
+	bool smeared = false;
+	if(genJet){
+	  double deltaPt = fabs(genJet->pt() - corrpt);
+	  double deltaR = reco::deltaR(genJet->p4(),jet.p4());
+	  if ((deltaR < 0.2) && deltaPt <= 3*corrpt*res){
+	    ptscale = max(0.0, 1 + (sf - 1.0)*(corrpt - genJet->pt())/corrpt);
+	    ptscale_down = max(0.0, 1 + (sf_down - 1.0)*(corrpt - genJet->pt())/corrpt);
+	    ptscale_up = max(0.0, 1 + (sf_up - 1.0)*(corrpt - genJet->pt())/corrpt);
+	    smeared = true;
+	  }
+	} 
+	if (!smeared) {
+	  TRandom3 JERrand;
+	  
+	  JERrand.SetSeed(abs(static_cast<int>(jet.phi()*1e4)));
+	  ptscale = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, sf*sf - 1.0)));
+	  
+	  JERrand.SetSeed(abs(static_cast<int>(jet.phi()*1e4)));
+	  ptscale_down = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, sf_down*sf_down - 1.0)));
+	  
+	  JERrand.SetSeed(abs(static_cast<int>(jet.phi()*1e4)));
+	  ptscale_up = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, sf_up*sf_up - 1.0)));
+	}
+
+      }
+      
+      if( ptscale*corrpt <= min_pt) continue;
+
+      pat::Jet recorrJet = uncorrJet;
+      recorrJet.scaleEnergy(ptscale*corr);
+
+      jet_pt.push_back(uncorrJet.pt());
+      jet_eta.push_back(uncorrJet.eta());
+      jet_phi.push_back(uncorrJet.phi());
+      jet_ch.push_back(uncorrJet.charge());
+      jet_mass.push_back(uncorrJet.mass());
+      jet_btag.push_back(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+      jet_btag.push_back(jet.hadronFlavour());
+      corr_jet_pt.push_back(recorrJet.pt());
+      corr_jet_ptUp.push_back(corrUp*recorrJet.pt());
+      corr_jet_ptDown.push_back(corrDown*recorrJet.pt());
+      corr_jet_ptSmearUp.push_back(ptscale_up*recorrJet.pt()/ptscale);
+      corr_jet_ptSmearDown.push_back(ptscale_down*recorrJet.pt()/ptscale); 
+      corr_jet_mass.push_back(recorrJet.mass());
+      corr_jet_e.push_back(recorrJet.energy());
+      corr_jet_px.push_back(recorrJet.px());
+      corr_jet_py.push_back(recorrJet.py());
+      corr_jet_pz.push_back(recorrJet.pz());
+	
+      if (!isData){
+	SF = 1;
+	SFu = 1;
+	SFd = 1;
+	eff = 1;
+	hadronFlavour = jet.hadronFlavour();
+	corrpt = corr_jet_pt.at(numjet);       
+	
+	if (jet_btag.at(numjet)> 0.679){
+	  if(abs(hadronFlavour) == 5){
+	    eff = getBtagEfficiency(corrpt);
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
+	    SFd = SF - uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
+	  } else if(abs(hadronFlavour) == 4){
+	    eff = getCtagEfficiency(corrpt);
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
+	  } else {
+	    eff = getLFtagEfficiency(corrpt);
+	    SF = getLFtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
+	  }
+	  MC *= eff;
+	  btagWeight *= SF * eff;
+	  btagWeightUp *= SFu * eff;
+	  btagWeightDn *= SFd * eff;
+	}
+	else {
+	  if(abs(hadronFlavour) == 5){
+	    eff = getBtagEfficiency(corrpt);
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
+	    SFd = SF - uncertaintyForBTagSF(corrpt, jet_eta.at(numjet));
+	  } else if(abs(hadronFlavour) == 4){
+	    eff = getCtagEfficiency(corrpt);
+	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - (2 * uncertaintyForBTagSF(corrpt, jet_eta.at(numjet)));
+	  } else {
+	    eff = getLFtagEfficiency(corrpt);
+	    SF = getLFtagSF(corrpt, jet_eta.at(numjet));
+	    SFu = SF + ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
+	    SFd = SF - ( uncertaintyForLFTagSF(corrpt, jet_eta.at(numjet)));
+	  }
+	  MC *= (1 - eff);
+	  btagWeight *= (1 - ( SF * eff));
+	  btagWeightUp *= (1 - (SFu * eff));
+	  btagWeightDn *= (1 -  (SFd * eff));
+	}
+      }
+      ++numjet;
+    }
+    btagWeight = (btagWeight/MC);
+    btagWeightUp = (btagWeightUp/MC);
+    btagWeightDn = (btagWeightDn/MC);   
+  }
+  
   mtree->Fill();
-  return;      
-          
- 
+  return;
+  
 }
-
 
 // ------------ method called once each job just before starting event loop  ------------
 void
 JetAnalyzer::beginJob()
-{
-}
+{}
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 JetAnalyzer::endJob()
+{}
+
+// ------------ method called when starting to processes a run  ------------
+void
+JetAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
+{}
+
+// ------------ method called when ending the processing of a run  ------------
+void
+JetAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
+{}
+// ------------ method called when starting to processes a luminosity block  ------------
+void
+JetAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+{}
+
+// ------------ method called when ending the processing of a luminosity block  ------------
+void
+JetAnalyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 JetAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
+ //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
   desc.setUnknown();
   descriptions.addDefault(desc);
-
 }
 
 //define this as a plug-in
