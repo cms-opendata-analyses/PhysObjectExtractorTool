@@ -216,23 +216,22 @@ JetAnalyzer::~JetAnalyzer()
 //
 // member functions
 //
-
-// ------------ method called for each event  ------------
-
 //Function that gets the efficiencies for B tag jets.
 //returns hard coded values from data analyzed from out root -l plotBEff.C
 
 double
 JetAnalyzer::getBtagEfficiency(double pt){
-  if(pt < 25) return 0.263407;
-  else if(pt < 50) return 0.548796;
-  else if(pt < 75) return 0.656801;
-  else if(pt < 100) return 0.689167;
-  else if(pt < 125) return 0.697911;
-  else if(pt < 150) return 0.700187;
-  else if(pt < 200) return 0.679236;
-  else if(pt < 400) return 0.625296;
-  else return 0.394916;
+  // Efficiencies from TTJets madgraph sample miniAODv2
+  // ******* REPLACE ME BY USING THE BTAGGING MODULE!!! ***********
+  if(pt < 20) return 0.228679;
+  else if(pt < 40) return 0.472444;
+  else if(pt < 60) return 0.572408;
+  else if(pt < 80) return 0.608838;
+  else if(pt < 100) return 0.629398;
+  else if(pt < 120) return 0.634980;
+  else if(pt < 140) return 0.645666;
+  else if(pt < 2150) return 0.706965 - 0.000328*pt;
+  else return 0;
 }
 
 //Function that gets the efficiencies for C tag jets.
@@ -240,15 +239,11 @@ JetAnalyzer::getBtagEfficiency(double pt){
 
 double
 JetAnalyzer::getCtagEfficiency(double pt){
-  if(pt < 25) return 0.065630;
-  else if(pt < 50) return 0.161601;
-  else if(pt < 75) return 0.209222;
-  else if(pt < 100) return 0.242979;
-  else if(pt < 125) return 0.223005;
-  else if(pt < 150) return 0.210210;
-  else if(pt < 200) return 0.225191;
-  else if(pt < 400) return 0.227437;
-  else return 0.153846;
+  // Hand-waving assumption that C efficiency is 20% of the B efficiency
+  // ******* REPLACE ME BY USING THE BTAGGING MODULE!!! ***********
+
+  return 0.2*getBtagEfficiency(pt);
+
 }
 
 //Function that gets the efficiencies for LF tag jets.
@@ -256,15 +251,16 @@ JetAnalyzer::getCtagEfficiency(double pt){
 
 double
 JetAnalyzer::getLFtagEfficiency(double pt){
-  if(pt < 25) return 0.002394;
-  else if(pt < 50) return 0.012683;
-  else if(pt < 75) return 0.011459;
-  else if(pt < 100) return 0.012960;
-  else if(pt < 125) return 0.011424;
-  else if(pt < 150) return 0.011727;
-  else if(pt < 200) return 0.011302;
-  else if(pt < 400) return 0.014760;
-  else return 0.011628;
+  // Mistag rates from TTJets madgraph sample miniAODv2.
+  // ******* REPLACE ME BY USING THE BTAGGING MODULE!!! ***********
+  if(pt < 20) return 0.003402;
+  else if(pt < 40) return 0.008067;
+  else if(pt < 60) return 0.006980;
+  else if(pt < 80) return 0.006316;
+  else if(pt < 100) return 0.006713;
+  else if(pt < 115) return 0.006598;
+  else if(pt < 400) return -0.00242504 + 9.15452e-05*pt - 9.63553e-08*pt*pt; // functional form is overkill, but oh well.
+  else return 0.0134038 + 1.24358e-05*pt; // same here, you can just use a binned value
 }
 
 //Function that gets the SF for B or C tag jets since there equations from the CSV.csv files are the same.
@@ -272,10 +268,10 @@ JetAnalyzer::getLFtagEfficiency(double pt){
 
 double
 JetAnalyzer::getBorCtagSF(double pt, double eta){
-  if (pt > 670.) pt = 670;
-  if(fabs(eta) > 2.4 or pt<20.) return 1.0;
+  if(pt > 670) pt = 670;
+  if(fabs(eta) > 2.4 or pt < 30.) return 1.0;
 
-  return 0.92955*((1.+(0.0589629*pt))/(1.+(0.0568063*pt)));
+  return 0.934588*((1.+(0.00678184*pt))/(1.+(0.00627144*pt)));
 }
 
 //Function that gets the SF for lf tag jets since there equations from the CSV.csv files are the same.
@@ -284,57 +280,48 @@ JetAnalyzer::getBorCtagSF(double pt, double eta){
 double
 JetAnalyzer::getLFtagSF(double pt, double eta){
   if (pt > 1000.) pt = 1000;
-  if(fabs(eta) > 2.4 or pt<20.) return 1.0;
-  if(eta < 0.8)
-    return (((0.922288+(0.00134434*pt))+(-3.14949e-06*(pt*pt)))+(2.08253e-09*(pt*(pt*pt))));
-  else if (eta < 1.6)
-    return (((0.908178+(0.00117751*pt))+(-3.16036e-06*(pt*pt)))+(2.41646e-09*(pt*(pt*pt))));
-  else
-    return (((0.869129+(0.000791629*pt))+(-2.62216e-06*(pt*pt)))+(2.49432e-09*(pt*(pt*pt))));
+  if(fabs(eta) > 2.4 or pt < 20.) return 1.0;
+
+  if(fabs(eta) < 0.8) return ((0.994351+(0.000250077*pt))+(9.24801e-07*(pt*pt)))+(-8.73293e-10*(pt*(pt*pt)));
+  else if(fabs(eta) < 1.6) return ((1.00939+(0.000461283*pt))+(-6.30306e-07*(pt*pt)))+(3.53075e-10*(pt*(pt*pt)));
+  else return ((0.955798+(0.00146058*pt))+(-3.76689e-06*(pt*pt)))+(2.39196e-09*(pt*(pt*pt)));
 }
 
 
 //Function that gets the uncertainty for B tag jets.
-//returns the uncertainty from the CSV.csv file depending on the pt of the jet.
+//returns the uncertainty from the CSVV2.csv file depending on the pt of the jet.
 //This will also be used to find the uncertainty of C tag jets but will be multiplied by 2 since the uncertainty of C tag jets are 2 times that of B tag jets
 
 double
 JetAnalyzer::uncertaintyForBTagSF( double pt, double eta){
   if(fabs(eta) > 2.4 or pt<20.) return 0;
-  if(pt < 30) return 0.0466655;
-  else if(pt < 40) return 0.0203547;
-  else if(pt < 50) return 0.0187707;
-  else if(pt < 60) return 0.0250719;
-  else if(pt < 70) return 0.023081;
-  else if(pt < 80) return 0.0183273;
-  else if(pt < 100) return 0.0256502;
-  else if(pt < 120) return 0.0189555;
-  else if(pt < 160) return 0.0236561;
-  else if(pt < 210) return 0.0307624;
-  else if(pt < 260) return 0.0387889;
-  else if(pt < 320) return 0.0443912;
-  else if(pt < 400) return 0.0693573;
-  else if(pt < 500) return 0.0650147;
-  else return 0.066886;
+
+  if(pt < 30) return 0.018076473847031593;
+  else if(pt < 50) return 0.024799736216664314;
+  else if(pt < 70) return 0.024073265492916107;
+  else if(pt < 100) return 0.020040607079863548;
+  else if(pt < 140) return 0.016540588811039925;
+  else if(pt < 200) return 0.025977084413170815;
+  else return 0.027120551094412804;
 }
 
 
 //Function that gets the uncertainty for LF tag jets.
-//returns the uncertainty from the CSV.csv file depending on the eta of the jet.
+//returns the uncertainty from the CSVV2.csv file depending on the eta of the jet.
 
 double
 JetAnalyzer::uncertaintyForLFTagSF( double pt, double eta){
-  if (pt > 1000.)  pt = 1000;
+  if(pt > 1000.)  pt = 1000;
   if(fabs(eta) > 2.4 or pt<20.)  return 0;
-  if(eta < 0.8)
-    return ((((1.01835+(0.0018277*pt))+(-4.37801e-06*(pt*pt)))+(2.90957e-09*(pt*(pt*pt))))-(((0.826257+(0.000858843*pt))+(-1.91563e-06*(pt*pt)))+(1.25331e-09*(pt*(pt*pt)))))/2.0;
-  else if (eta < 1.6)
-    return ((((1.00329+(0.00152898*pt))+(-4.21068e-06*(pt*pt)))+(3.23445e-09*(pt*(pt*pt))))-(((0.813077+(0.000824155*pt))+(-2.10494e-06*(pt*pt)))+(1.59692e-09*(pt*(pt*pt)))))/2.0;
+  if(fabs(eta) < 0.8)
+    return 0.5*((((1.03928+(0.000857422*pt))+(-4.02756e-07*(pt*pt)))+(-8.45836e-11*(pt*(pt*pt)))) - (((0.949401+(-0.000356232*pt))+(2.24887e-06*(pt*pt)))+(-1.66011e-09*(pt*(pt*pt)))));  
+  else if (fabs(eta) < 1.6)
+    return 0.5*((((1.05392+(0.000944135*pt))+(-1.73386e-06*(pt*pt)))+(1.04242e-09*(pt*(pt*pt)))) - (((0.964857+(-2.19898e-05*pt))+(4.74117e-07*(pt*pt)))+(-3.36548e-10*(pt*(pt*pt)))));
   else
-    return  ((((0.953682+(0.00104827*pt))+(-3.71967e-06*(pt*pt)))+(3.73067e-09*(pt*(pt*pt))))-(((0.784552+(0.000534202*pt))+(-1.52298e-06*(pt*pt)))+(1.26036e-09*(pt*(pt*pt)))))/2.0;
+    return 0.5*((((1.00151+(0.00175547*pt))+(-4.50251e-06*(pt*pt)))+(2.91473e-09*(pt*(pt*pt)))) - (((0.910086+(0.00116371*pt))+(-3.02747e-06*(pt*pt)))+(1.86906e-09*(pt*(pt*pt)))));
 }
 
-
+// ------------ method called for each event  ------------
 void
 JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
@@ -477,7 +464,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	hadronFlavour = jet.hadronFlavour();
 	corrpt = corr_jet_pt.at(numjet);       
 	
-	if (jet_btag.at(numjet)> 0.679){
+	if (jet_btag.at(numjet)> 0.800){ // MEDIUM working point
 	  if(abs(hadronFlavour) == 5){
 	    eff = getBtagEfficiency(corrpt);
 	    SF = getBorCtagSF(corrpt, jet_eta.at(numjet));
