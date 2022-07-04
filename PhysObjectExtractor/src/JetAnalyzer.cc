@@ -3,7 +3,6 @@
 // Package:    JetAnalyzer
 // Class:      JetAnalyzer
 //
-
 // system include files
 #include <memory>
 #include <TMath.h>
