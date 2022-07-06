@@ -67,20 +67,13 @@ private:
   //declare the input tag for PFJetCollection
   edm::EDGetTokenT<pat::JetCollection> jetToken_;
   edm::EDGetTokenT<double> rhoToken_;
-  edm::EDGetTokenT<reco::VertexCollection> pvToken_;
   
   // ----------member data ---------------------------    
   // jec variables
-  std::vector<std::string> jecPayloadNames_;
-  std::string              jecL1_;
-  std::string              jecL2_;
-  std::string              jecL3_;
-  std::string              jecRes_;
   std::string              jetJECUncName_;
   std::string              jetResName_;
   std::string              sfName_;
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
-  boost::shared_ptr<FactorizedJetCorrector> jec_;
   bool isData;
 
   JME::JetResolution resolution;
@@ -125,42 +118,21 @@ private:
 
 JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig):
   jetToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets"))),
-  jecL1_(iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath()), // JEC level payloads for test                  
-  jecL2_(iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath()), // JEC level payloads for test            
-  jecL3_(iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath()), // JEC level payloads for test            
-  jecRes_(iConfig.getParameter<edm::FileInPath>("jecResName").fullPath()),
   jetJECUncName_(iConfig.getParameter<edm::FileInPath>("jetJECUncName").fullPath()), // JEC uncertainties
   jetResName_(iConfig.getParameter<edm::FileInPath>("jerResName").fullPath()), // JER Resolutions
   sfName_(iConfig.getParameter<edm::FileInPath>("jerSFName").fullPath()), // JER Resolutions
   isData(iConfig.getParameter<bool>("isData"))
 {
-//now do what ever initialization is needed
+  //now do what ever initialization is needed
   edm::Service<TFileService> fs;
   mtree = fs->make<TTree>("Events", "Events");
 
-  //Get the factorized jet corrector parameters.
-  jecPayloadNames_.push_back(jecL1_);
-  jecPayloadNames_.push_back(jecL2_);
-  jecPayloadNames_.push_back(jecL3_);
-  if( isData == true ) jecPayloadNames_.push_back(jecRes_);
-  std::vector<JetCorrectorParameters> vPar;
-  for ( std::vector<std::string>::const_iterator payloadBegin = jecPayloadNames_.begin(),
-	  payloadEnd = jecPayloadNames_.end(), ipayload = payloadBegin; ipayload != payloadEnd; ++ipayload ) {
-    JetCorrectorParameters pars(*ipayload);
-    vPar.push_back(pars);
-  }
-
-  // Make the FactorizedJetCorrector and Uncertainty                                                                                              
-  jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jetJECUncName_) );
-
   resolution = JME::JetResolution(jetResName_);
   resolution_sf = JME::JetResolutionScaleFactor(sfName_);
 
   edm::InputTag rhotag("fixedGridRhoFastjetAll");
   rhoToken_ = consumes<double>(rhotag);
-  edm::InputTag pvtag("offlineSlimmedPrimaryVertices");
-  pvToken_ = consumes<reco::VertexCollection>(pvtag);
 	
   mtree->Branch("numberjet",&numjet);
   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
@@ -330,11 +302,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   Handle<pat::JetCollection> jets;
   iEvent.getByToken(jetToken_, jets);
-
   Handle<double> rhoHandle;
   iEvent.getByToken(rhoToken_, rhoHandle);
-  Handle<reco::VertexCollection> vertices;
-  iEvent.getByToken(pvToken_, vertices);
 
   numjet = 0;
   jet_pt.clear();
@@ -357,7 +326,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   int hadronFlavour;
   double SF, SFu, SFd, eff, corrpt;
-  double corrUp, corrDown, corr;
+  double corrUp, corrDown;
   float ptscale, ptscale_down, ptscale_up;
   double MC = 1;
   btagWeight = 1;
@@ -370,16 +339,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     for (const pat::Jet &jet : *jets){
       pat::Jet uncorrJet = jet.correctedJet(0);
 
-      corr = 1;
-      jec_->setJetEta( uncorrJet.eta() );
-      jec_->setJetPt ( uncorrJet.pt() );
-      jec_->setJetE  ( uncorrJet.energy() );
-      jec_->setJetA  ( jet.jetArea() );
-      jec_->setRho   ( *(rhoHandle.product()) );
-      jec_->setNPV   ( vertices->size() );
-      corr = jec_->getCorrection();
-
-      corrpt = corr*jet.pt();
+      corrpt = jet.pt();
       corrUp = 1.0;
       corrDown = 1.0;
 
@@ -434,33 +394,33 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       if( ptscale*corrpt <= min_pt) continue;
 
-      pat::Jet recorrJet = uncorrJet;
-      recorrJet.scaleEnergy(ptscale*corr);
+      pat::Jet smearedjet = jet;
+      smearedjet.scaleEnergy(ptscale);
 
       jet_pt.push_back(uncorrJet.pt());
       jet_eta.push_back(uncorrJet.eta());
       jet_phi.push_back(uncorrJet.phi());
       jet_ch.push_back(uncorrJet.charge());
       jet_mass.push_back(uncorrJet.mass());
-      jet_btag.push_back(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-      jet_btag.push_back(jet.hadronFlavour());
-      corr_jet_pt.push_back(recorrJet.pt());
-      corr_jet_ptUp.push_back(corrUp*recorrJet.pt());
-      corr_jet_ptDown.push_back(corrDown*recorrJet.pt());
-      corr_jet_ptSmearUp.push_back(ptscale_up*recorrJet.pt()/ptscale);
-      corr_jet_ptSmearDown.push_back(ptscale_down*recorrJet.pt()/ptscale); 
-      corr_jet_mass.push_back(recorrJet.mass());
-      corr_jet_e.push_back(recorrJet.energy());
-      corr_jet_px.push_back(recorrJet.px());
-      corr_jet_py.push_back(recorrJet.py());
-      corr_jet_pz.push_back(recorrJet.pz());
+      jet_btag.push_back(smearedjet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+      jet_btag.push_back(smearedjet.hadronFlavour());
+      corr_jet_pt.push_back(smearedjet.pt());
+      corr_jet_ptUp.push_back(corrUp*smearedjet.pt());
+      corr_jet_ptDown.push_back(corrDown*smearedjet.pt());
+      corr_jet_ptSmearUp.push_back(ptscale_up*smearedjet.pt()/ptscale);
+      corr_jet_ptSmearDown.push_back(ptscale_down*smearedjet.pt()/ptscale); 
+      corr_jet_mass.push_back(smearedjet.mass());
+      corr_jet_e.push_back(smearedjet.energy());
+      corr_jet_px.push_back(smearedjet.px());
+      corr_jet_py.push_back(smearedjet.py());
+      corr_jet_pz.push_back(smearedjet.pz());
 	
       if (!isData){
 	SF = 1;
 	SFu = 1;
 	SFd = 1;
 	eff = 1;
-	hadronFlavour = jet.hadronFlavour();
+	hadronFlavour = smearedjet.hadronFlavour();
 	corrpt = corr_jet_pt.at(numjet);       
 	
 	if (jet_btag.at(numjet)> 0.800){ // MEDIUM working point
