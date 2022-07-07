@@ -66,7 +66,6 @@ private:
   // ----------member data ---------------------------    
   // jec variables
   std::vector<std::string> jecPayloadNames_;
-  std::string              jecL1_;
   std::string              jecL2_;
   std::string              jecL3_;
   std::string              jecRes_;
@@ -74,7 +73,6 @@ private:
   std::string              jetResName_;
   std::string              sfName_;
   boost::shared_ptr<JetCorrectionUncertainty> jecUnc_;
-  boost::shared_ptr<FactorizedJetCorrector> jec_;
   boost::shared_ptr<FactorizedJetCorrector> jecL2L3_;
   bool isData;
 
@@ -124,7 +122,6 @@ private:
 
 FatjetAnalyzer::FatjetAnalyzer(const edm::ParameterSet& iConfig):
   fatjetToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjets"))),
-  jecL1_(iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath()), // JEC level payloads for test                  
   jecL2_(iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath()), // JEC level payloads for test            
   jecL3_(iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath()), // JEC level payloads for test            
   jecRes_(iConfig.getParameter<edm::FileInPath>("jecResName").fullPath()),
@@ -138,21 +135,17 @@ FatjetAnalyzer::FatjetAnalyzer(const edm::ParameterSet& iConfig):
   mtree = fs->make<TTree>("Events", "Events");
 
   //Get the factorized jet corrector parameters.
-  jecPayloadNames_.push_back(jecL1_);
   jecPayloadNames_.push_back(jecL2_);
   jecPayloadNames_.push_back(jecL3_);
   if( isData == true ) jecPayloadNames_.push_back(jecRes_);
-  std::vector<JetCorrectorParameters> vPar;
   std::vector<JetCorrectorParameters> vParL2L3;
   for ( std::vector<std::string>::const_iterator payloadBegin = jecPayloadNames_.begin(),
 	  payloadEnd = jecPayloadNames_.end(), ipayload = payloadBegin; ipayload != payloadEnd; ++ipayload ) {
     JetCorrectorParameters pars(*ipayload);
-    vPar.push_back(pars);
-    if ((*ipayload).find("L1FastJet") == std::string::npos) vParL2L3.push_back(pars);
+    vParL2L3.push_back(pars);
   }
 
   // Make the FactorizedJetCorrector and Uncertainty                                                                                              
-  jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
   jecL2L3_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vParL2L3) );
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jetJECUncName_) );
 
@@ -269,7 +262,7 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   fatjet_subjet2_hflav.clear();
 
   double corrpt;
-  double corrUp, corrDown, corr;
+  double corrUp, corrDown;
   float ptscale, ptscale_down, ptscale_up;
   int min_pt = 200;
   
@@ -278,16 +271,7 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     for (const pat::Jet &fatjet : *fatjets){
       pat::Jet uncorrFatjet = fatjet.correctedJet(0);
 
-      corr = 1;
-      jec_->setJetEta( uncorrFatjet.eta() );
-      jec_->setJetPt ( uncorrFatjet.pt() );
-      jec_->setJetE  ( uncorrFatjet.energy() );
-      jec_->setJetA  ( fatjet.jetArea() );
-      jec_->setRho   ( *(rhoHandle.product()) );
-      jec_->setNPV   ( vertices->size() );
-      corr = jec_->getCorrection();
-
-      corrpt = corr*fatjet.pt();
+      corrpt = fatjet.pt();
       corrUp = 1.0;
       corrDown = 1.0;
 
@@ -342,8 +326,8 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       if( ptscale*corrpt <= min_pt) continue;
 
-      pat::Jet recorrFatjet = uncorrFatjet;
-      recorrFatjet.scaleEnergy(ptscale*corr);
+      pat::Jet smearedFatjet = fatjet;
+      smearedFatjet.scaleEnergy(ptscale);
 
       fatjet_pt.push_back(uncorrFatjet.pt());
       fatjet_eta.push_back(uncorrFatjet.eta());
@@ -351,33 +335,33 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       fatjet_ch.push_back(uncorrFatjet.charge());
       fatjet_mass.push_back(uncorrFatjet.mass());
 
-      corr_fatjet_pt.push_back(recorrFatjet.pt());
-      corr_fatjet_ptUp.push_back(corrUp*recorrFatjet.pt());
-      corr_fatjet_ptDown.push_back(corrDown*recorrFatjet.pt());
-      corr_fatjet_ptSmearUp.push_back(ptscale_up*recorrFatjet.pt()/ptscale);
-      corr_fatjet_ptSmearDown.push_back(ptscale_down*recorrFatjet.pt()/ptscale); 
-      corr_fatjet_mass.push_back(recorrFatjet.mass());
-      corr_fatjet_e.push_back(recorrFatjet.energy());
-      corr_fatjet_px.push_back(recorrFatjet.px());
-      corr_fatjet_py.push_back(recorrFatjet.py());
-      corr_fatjet_pz.push_back(recorrFatjet.pz());
+      corr_fatjet_pt.push_back(smearedFatjet.pt());
+      corr_fatjet_ptUp.push_back(corrUp*smearedFatjet.pt());
+      corr_fatjet_ptDown.push_back(corrDown*smearedFatjet.pt());
+      corr_fatjet_ptSmearUp.push_back(ptscale_up*smearedFatjet.pt()/ptscale);
+      corr_fatjet_ptSmearDown.push_back(ptscale_down*smearedFatjet.pt()/ptscale); 
+      corr_fatjet_mass.push_back(smearedFatjet.mass());
+      corr_fatjet_e.push_back(smearedFatjet.energy());
+      corr_fatjet_px.push_back(smearedFatjet.px());
+      corr_fatjet_py.push_back(smearedFatjet.py());
+      corr_fatjet_pz.push_back(smearedFatjet.pz());
 
       double corrL2L3 = 1;
       jecL2L3_->setJetEta( uncorrFatjet.eta() );
       jecL2L3_->setJetPt ( uncorrFatjet.pt() );
       jecL2L3_->setJetE  ( uncorrFatjet.energy() );
-      jecL2L3_->setJetA  ( fatjet.jetArea() );
+      jecL2L3_->setJetA  ( smearedFatjet.jetArea() );
       jecL2L3_->setRho   ( *(rhoHandle.product()) );
       jecL2L3_->setNPV   ( vertices->size() );
       corrL2L3 = jecL2L3_->getCorrection();
 
-      fatjet_prunedmass.push_back(corrL2L3*(double)recorrFatjet.userFloat("ak8PFJetsCHSPrunedMass"));
-      fatjet_softdropmass.push_back(corrL2L3*(double)recorrFatjet.userFloat("ak8PFJetsCHSSoftDropMass"));
-      fatjet_tau1.push_back((double)recorrFatjet.userFloat("NjettinessAK8:tau1"));
-      fatjet_tau2.push_back((double)recorrFatjet.userFloat("NjettinessAK8:tau2"));
-      fatjet_tau3.push_back((double)recorrFatjet.userFloat("NjettinessAK8:tau3"));
+      fatjet_prunedmass.push_back(corrL2L3*(double)smearedFatjet.userFloat("ak8PFJetsCHSPrunedMass"));
+      fatjet_softdropmass.push_back(corrL2L3*(double)smearedFatjet.userFloat("ak8PFJetsCHSSoftDropMass"));
+      fatjet_tau1.push_back((double)smearedFatjet.userFloat("NjettinessAK8:tau1"));
+      fatjet_tau2.push_back((double)smearedFatjet.userFloat("NjettinessAK8:tau2"));
+      fatjet_tau3.push_back((double)smearedFatjet.userFloat("NjettinessAK8:tau3"));
 
-      auto const & sdSubjets = recorrFatjet.subjets("SoftDrop");
+      auto const & sdSubjets = smearedFatjet.subjets("SoftDrop");
       int nSDSubJets = sdSubjets.size();
       if(nSDSubJets > 0){
 	pat::Jet subjet1 = sdSubjets.at(0);

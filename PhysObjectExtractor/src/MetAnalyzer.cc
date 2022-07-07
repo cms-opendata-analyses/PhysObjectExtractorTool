@@ -52,6 +52,7 @@ class MetAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       virtual void endJob() override;
 
       edm::EDGetTokenT<pat::METCollection> metToken_;
+      edm::EDGetTokenT<pat::METCollection> rawToken_;
 
       // ----------member data ---------------------------
       
@@ -80,8 +81,8 @@ class MetAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 // constructors and destructor
 //
 MetAnalyzer::MetAnalyzer(const edm::ParameterSet& iConfig): 
- metToken_(consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
-   
+  metToken_(consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets"))),
+  rawToken_(consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("rawmets")))
 {
    //now do what ever initialization is needed
    
@@ -132,23 +133,26 @@ MetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<pat::METCollection> mets;
    iEvent.getByToken(metToken_, mets);
 
-    
-    const pat::MET &met = mets->front();
+   const pat::MET &met = mets->front();
 
-       met_e = met.sumEt();
-       met_pt = met.pt();
-       met_px = met.px();
-       met_py = met.py();
-       met_phi = met.phi();
-       met_significance = met.significance();
+   met_e = met.sumEt();
+   met_pt = met.pt();
+   met_px = met.px();
+   met_py = met.py();
+   met_phi = met.phi();
+   met_significance = met.significance();
 
-       met_rawe = met.uncorSumEt();
-       met_rawpt = met.uncorPt();
-       met_rawphi = met.uncorPhi();
-     
+   Handle<pat::METCollection> rawmets;
+   iEvent.getByToken(rawToken_, rawmets);
 
-  mtree->Fill();
-  return;      
+   const pat::MET &rawmet = rawmets->front();
+   
+   met_rawe = rawmet.sumEt();
+   met_rawpt = rawmet.pt();
+   met_rawphi = rawmet.phi();
+
+   mtree->Fill();
+   return;      
           
  
 }
@@ -179,3 +183,4 @@ MetAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(MetAnalyzer);
+
