@@ -73,7 +73,7 @@ process.mypvertex = cms.EDAnalyzer('VertexAnalyzer',
 
 process.mygenparticle = cms.EDAnalyzer('GenParticleAnalyzer', 
                                        pruned=cms.InputTag("prunedGenParticles"),
-                                       #---- Collect particles with specific "pdgid:status"
+                                       #---- Collect particles with specific "status:pdgid"
                                        #---- if 0:0, collect them all 
                                        input_particle = cms.vstring("1:11","1:13","1:22","2:15"))
 
@@ -159,7 +159,15 @@ process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJ
 #----- RUN THE JOB! -----#
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
-process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+
+if isData:
+	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+
+                     process.mytriggers+process.mypvertex+
+                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
+                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+                     )
+else:
+	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+
                      process.mytriggers+process.mypvertex+process.mygenparticle+
                      process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
