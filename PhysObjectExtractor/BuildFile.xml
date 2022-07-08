@@ -6,5 +6,7 @@
 <use name="FWCore/ServiceRegistry"/>
 <use name="JetMETCorrections/Modules"/>
 <use name="CondFormats/JetMETObjects"/>
+<use name="TrackingTools/TransientTrack"/>
+<use name="TrackingTools/IPTools"/>
 <flags EDM_PLUGIN="1"/>
 
