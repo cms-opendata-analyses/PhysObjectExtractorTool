@@ -84,6 +84,15 @@ process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimm
 #------Module to store trigger objects (functional but not fully developed yet) -------#
 #process.mytrigobjs = cms.EDAnalyzer('TriggObjectAnalyzer', objects = cms.InputTag("selectedPatTrigger"))
 
+process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
+                              processName = cms.string("HLT"),
+                              #---- These are example of OR of triggers for 2015
+                              #---- Wildcards * and ? are accepted (with usual meanings)
+                              #---- If left empty, all triggers will run              
+                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
+                              triggerResults = cms.InputTag("TriggerResults","","HLT")
+                              )
+
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer',
                                    vertices=cms.InputTag("offlineSlimmedPrimaryVertices"), 
                                    beams=cms.InputTag("offlineBeamSpot"))
@@ -177,14 +186,14 @@ process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJ
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
 if isData:
-	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
+	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mytriggers+
                      process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
                      process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
                      )
 else:
 	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
-                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+                     process.mytriggers+process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
                      process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
                      )

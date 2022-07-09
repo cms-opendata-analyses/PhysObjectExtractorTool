@@ -8,5 +8,6 @@
 <use name="CondFormats/JetMETObjects"/>
 <use name="TrackingTools/TransientTrack"/>
 <use name="TrackingTools/IPTools"/>
+<use name="HLTrigger/HLTcore"/>
 <flags EDM_PLUGIN="1"/>
 
