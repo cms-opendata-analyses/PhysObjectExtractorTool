@@ -81,17 +81,21 @@ process.mytaus = cms.EDAnalyzer('TauAnalyzer', taus=cms.InputTag("slimmedTaus"))
 
 process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimmedPhotons"))
 
-#------Module to store trigger objects (functional but not fully developed yet) -------#
+#---- Module to store trigger objects (functional but not fully developed yet) -------#
 #process.mytrigobjs = cms.EDAnalyzer('TriggObjectAnalyzer', objects = cms.InputTag("selectedPatTrigger"))
 
-process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
-                              processName = cms.string("HLT"),
-                              #---- These are example of OR of triggers for 2015
-                              #---- Wildcards * and ? are accepted (with usual meanings)
-                              #---- If left empty, all triggers will run              
-                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
-                              triggerResults = cms.InputTag("TriggerResults","","HLT")
-                              )
+#---- Example on how to add trigger information
+#---- To include it, uncomment the lines below and include the
+#---- module in the final path
+#process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
+#                              processName = cms.string("HLT"),
+#                              #---- These are example of OR of triggers for 2015
+#                              #---- Wildcards * and ? are accepted (with usual meanings)
+#                              #---- If left empty, all triggers will run              
+#                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
+#                              triggerResults = cms.InputTag("TriggerResults","","HLT")
+#                              )
+
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer',
                                    vertices=cms.InputTag("offlineSlimmedPrimaryVertices"), 
@@ -186,14 +190,14 @@ process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJ
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
 if isData:
-	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mytriggers+
+	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
                      process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
                      process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
                      )
 else:
 	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
-                     process.mytriggers+process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
                      process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
                      )
