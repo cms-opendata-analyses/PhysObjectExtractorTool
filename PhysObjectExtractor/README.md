@@ -1,7 +1,7 @@
 # Physics Objects Extractor (PhysObjectExtractor) for 2015MiniAOD data
 
 ## Description
-The `PhysObjectExtractor` package is the heart of the POET repository.  It contains a collection of [EDAnalyzers](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswanalyzers/) that extract information of different physics objects into a [ROOT](https://cms-opendata-guide.web.cern.ch/tools/root/) file called `myoutput.root`.  They have been written separately for clarity and can be executed modularly using a single configuration file called `poet_cfg.py`.
+The `PhysObjectExtractor` package is the heart of the POET repository.  It contains a collection of [EDAnalyzers](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswanalyzers/) that extract information from different physics objects into a [ROOT](https://cms-opendata-guide.web.cern.ch/tools/root/) file called `myoutput.root`.  They have been written separately for clarity and can be executed modularly using a single configuration file called `poet_cfg.py`.
 
 The package is meant to resemble a [CMSSW](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswoverview/) package.  It installs and runs in a similar way.
 
@@ -9,9 +9,9 @@ The `data` directory is reserved for files with information about the location o
 
 The `python` directory hosts the configuration file `poet_cfg.py` and possibly special versions of it.
 
-The `src` directory hosts the C++ source code of all the different `EDAnalyzers` that can be configured using `python/poet_cfg.py`.  In the code, there are several comments explaining the logic.  Some links to appropiate references were added to expand the knowledge on the subject.
+The `src` directory hosts the C++ source code of all the different `EDAnalyzers` (and possibly some example filters) that can be configured using `python/poet_cfg.py`.  In the code, there are several comments explaining the logic.  Some links to appropiate references were added to expand the knowledge on the subject.
 
-The `test` directory contains `ROOT` analysis templates/examples that can be used to analyze the resulting `myoutput.root` files if needed.
+The `test` will contain analysis examples
 
 ## Usage instrucctions
 
@@ -32,17 +32,15 @@ cd PhysObjectExtractor
 scram b
 ```
 
-4. For convenience, make a soft link to the python configuration file
+4. Run the CMSSW job with the configuration file:
 ```
-ln -s python/poet_cfg.py .
-```
-
-5. Run the job:
-```
-cmsRun poet_cfg.py
+cmsRun poet_cfg.py <isData>
 ```
 
-6. As a result you will get myoutput.root file with simple variables.  If using the Windows OS, to check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
+`<isData>` (to run on Data or not) is an optional boolean argument (default is False, i.e., runs over MC simulations)
+
+5. As a result you will get myoutput.root file with simple variables.  If using the Windows OS, to check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
+
 ```
 start_vnc
 //When prompted enter a password
