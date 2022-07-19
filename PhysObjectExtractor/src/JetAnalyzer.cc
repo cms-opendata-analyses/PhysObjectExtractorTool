@@ -403,7 +403,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       jet_ch.push_back(uncorrJet.charge());
       jet_mass.push_back(uncorrJet.mass());
       jet_btag.push_back(smearedjet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-      jet_btag.push_back(smearedjet.hadronFlavour());
+      jet_hflav.push_back(smearedjet.hadronFlavour());
       corr_jet_pt.push_back(smearedjet.pt());
       corr_jet_ptUp.push_back(corrUp*smearedjet.pt());
       corr_jet_ptDown.push_back(corrDown*smearedjet.pt());
