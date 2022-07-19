@@ -28,7 +28,7 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 #---- Select the maximum number of events to process (if -1, run over all events)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
 
 #---- Needed configuration for dealing with transient tracks if required
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
@@ -43,8 +43,8 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 )
 if isData:
     process.source.fileNames = cms.untracked.vstring(
-        #'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/000913F7-E9A7-E511-A286-003048FFD79C.root'
-	'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/001A703B-B52E-E611-BA13-0025905A60B6.root'
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/00006301-CAA8-E511-AD39-549F35AD8BC9.root'
+#	'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/001A703B-B52E-E611-BA13-0025905A60B6.root'
         )
 
     #---- Apply the data quality JSON file filter. This example is for 2015 data
@@ -95,6 +95,25 @@ process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimm
 #                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
 #                              triggerResults = cms.InputTag("TriggerResults","","HLT")
 #                              )
+
+
+#------------Example of simple trigger module with parameters by hand-------------------#
+process.mysimpletrig = cms.EDAnalyzer('SimpleTriggerAnalyzer',
+                              processName = cms.string("HLT"),
+                              triggerResults = cms.InputTag("TriggerResults","","HLT")
+                              )
+
+
+
+#----------- Turn on a trigger filter by adding this module to the the final path below -------#
+process.hltHighLevel = cms.EDFilter("HLTHighLevel",
+    TriggerResultsTag = cms.InputTag("TriggerResults","","HLT"),
+    HLTPaths = cms.vstring('HLT_Ele22_eta2p1_WPLoose_Gsf_v*','HLT_IsoMu20_v*','HLT_IsoTkMu20_v*'),           # provide list of HLT paths (or patterns) you want
+    eventSetupPathsKey = cms.string(''), # not empty => use read paths from AlCaRecoTriggerBitsRcd via this key
+    andOr = cms.bool(True),             # how to deal with multiple triggers: True (OR) accept if ANY is true, False (AND) accept if ALL are true
+    throw = cms.bool(True)    # throw exception on unknown path names
+)
+
 
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer',
@@ -186,19 +205,17 @@ process.slimmedMETsNewJEC = cms.EDProducer('CorrectedPATMETProducer',
 #----- Configure the POET MET analyzer -----#
 process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJEC"),rawmets=cms.InputTag("uncorrectedPatMet"))
 
-
 #---- Example of a very basic home-made filter to select only events of interest
-#---- The filter can be added to the running path below if needed 
-#---- by uncommenting the lines below, but it is not applied by default
-#process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
-#                                   electrons = cms.InputTag("slimmedElectrons"),
-#                                   muons = cms.InputTag("slimmedMuons"),
-#                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"),
-#                                   mu_minpt = cms.double(26),
-#                                   mu_etacut = cms.double(2.1),
-#                                   ele_minpt = cms.double(26),
-#                                   ele_etacut = cms.double(2.1)
-#                                   )
+#---- The filter can be added to the running path below if needed but is not applied by default
+process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
+                                   electrons = cms.InputTag("slimmedElectrons"),
+                                   muons = cms.InputTag("slimmedMuons"),
+                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"),
+                                   mu_minpt = cms.double(26),
+                                   mu_etacut = cms.double(2.1),
+                                   ele_minpt = cms.double(26),
+                                   ele_etacut = cms.double(2.1)
+                                   )
 
 
 
@@ -206,15 +223,16 @@ process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJ
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
 if isData:
-	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
-                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
-                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
-                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
-                     )
+	process.p = cms.Path(process.hltHighLevel+process.elemufilter+process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mysimpletrig+
+                             process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+                             process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
+                             process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+                             )
 else:
-	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
-                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
-                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
-                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
-                     )
+	process.p = cms.Path(process.hltHighLevel+process.elemufilter+process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mysimpletrig+
+                             process.mygenparticle+process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+
+                             process.slimmedJetsNewJEC+process.myjets+process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+
+                             process.slimmedJetsAK8NewJEC+process.myfatjets+process.uncorrectedMet+process.uncorrectedPatMet+
+                             process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+                             )
 
