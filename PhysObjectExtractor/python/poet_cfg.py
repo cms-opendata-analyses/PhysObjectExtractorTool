@@ -186,6 +186,22 @@ process.slimmedMETsNewJEC = cms.EDProducer('CorrectedPATMETProducer',
 #----- Configure the POET MET analyzer -----#
 process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJEC"),rawmets=cms.InputTag("uncorrectedPatMet"))
 
+
+#---- Example of a very basic home-made filter to select only events of interest
+#---- The filter can be added to the running path below if needed 
+#---- by uncommenting the lines below, but it is not applied by default
+#process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
+#                                   electrons = cms.InputTag("slimmedElectrons"),
+#                                   muons = cms.InputTag("slimmedMuons"),
+#                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"),
+#                                   mu_minpt = cms.double(26),
+#                                   mu_etacut = cms.double(2.1),
+#                                   ele_minpt = cms.double(26),
+#                                   ele_etacut = cms.double(2.1)
+#                                   )
+
+
+
 #----- RUN THE JOB! -----#
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
