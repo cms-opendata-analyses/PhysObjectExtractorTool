@@ -28,7 +28,7 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 #---- Select the maximum number of events to process (if -1, run over all events)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 #---- Needed configuration for dealing with transient tracks if required
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
