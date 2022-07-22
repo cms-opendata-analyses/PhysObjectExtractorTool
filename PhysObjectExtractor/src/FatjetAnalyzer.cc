@@ -81,30 +81,31 @@ private:
 
   int numfatjet; //number of jets in the event
   TTree *mtree;
+  std::vector<float> fatjet_e;
   std::vector<float> fatjet_pt;
   std::vector<float> fatjet_eta;
   std::vector<float> fatjet_phi;
   std::vector<float> fatjet_ch;
   std::vector<float> fatjet_mass;
-  std::vector<float> corr_fatjet_pt;
-  std::vector<float> corr_fatjet_ptUp;
-  std::vector<float> corr_fatjet_ptDown;
-  std::vector<float> corr_fatjet_ptSmearUp;
-  std::vector<float> corr_fatjet_ptSmearDown;
-  std::vector<float> corr_fatjet_mass;
-  std::vector<float> corr_fatjet_e;
-  std::vector<float> corr_fatjet_px;
-  std::vector<float> corr_fatjet_py;
-  std::vector<float> corr_fatjet_pz;
+  std::vector<float> fatjet_corrpt;
+  std::vector<float> fatjet_corrptUp;
+  std::vector<float> fatjet_corrptDown;
+  std::vector<float> fatjet_corrptSmearUp;
+  std::vector<float> fatjet_corrptSmearDown;
+  std::vector<float> fatjet_corrmass;
+  std::vector<float> fatjet_corre;
+  std::vector<float> fatjet_corrpx;
+  std::vector<float> fatjet_corrpy;
+  std::vector<float> fatjet_corrpz;
   std::vector<float> fatjet_prunedmass;
   std::vector<float> fatjet_softdropmass;
   std::vector<float> fatjet_tau1;
   std::vector<float> fatjet_tau2;
   std::vector<float> fatjet_tau3;
-  std::vector<float> fatjet_subjet1_btag;
-  std::vector<float> fatjet_subjet2_btag;
-  std::vector<float> fatjet_subjet1_hflav;
-  std::vector<float> fatjet_subjet2_hflav;
+  std::vector<float> fatjet_subjet1btag;
+  std::vector<float> fatjet_subjet2btag;
+  std::vector<float> fatjet_subjet1hflav;
+  std::vector<float> fatjet_subjet2hflav;
 
 };
 
@@ -159,6 +160,8 @@ FatjetAnalyzer::FatjetAnalyzer(const edm::ParameterSet& iConfig):
 	
   mtree->Branch("numberfatjet",&numfatjet);
   mtree->GetBranch("numberfatjet")->SetTitle("Number of Fatjets");
+  mtree->Branch("fatjet_e",&fatjet_e);
+  mtree->GetBranch("fatjet_e")->SetTitle("Uncorrected Fatjet energy");
   mtree->Branch("fatjet_pt",&fatjet_pt);
   mtree->GetBranch("fatjet_pt")->SetTitle("Uncorrected Transverse Fatjet Momentum");
   mtree->Branch("fatjet_eta",&fatjet_eta);
@@ -169,26 +172,26 @@ FatjetAnalyzer::FatjetAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("fatjet_ch")->SetTitle("Fatjet Charge");
   mtree->Branch("fatjet_mass",&fatjet_mass);
   mtree->GetBranch("fatjet_mass")->SetTitle("Fatjet Mass");
-  mtree->Branch("corr_fatjet_pt",&corr_fatjet_pt);
-  mtree->GetBranch("corr_fatjet_pt")->SetTitle("Corrected Transverse Fatjet Momentum");
-  mtree->Branch("corr_fatjet_ptUp",&corr_fatjet_ptUp);
-  mtree->GetBranch("corr_fatjet_ptUp")->SetTitle("Corrected Transverse Fatjet Momentum (JEC Shifted Up)");
-  mtree->Branch("corr_fatjet_ptDown",&corr_fatjet_ptDown);
-  mtree->GetBranch("corr_fatjet_ptDown")->SetTitle("Corrected Transverse Fatjet Momentum (JEC Shifted Down)");
-  mtree->Branch("corr_fatjet_ptSmearUp",&corr_fatjet_ptSmearUp);
-  mtree->GetBranch("corr_fatjet_ptSmearUp")->SetTitle("Corrected Transverse Fatjet Momentum (JER Shifted Up)");
-  mtree->Branch("corr_fatjet_ptSmearDown",&corr_fatjet_ptSmearDown);	
-  mtree->GetBranch("corr_fatjet_ptSmearDown")->SetTitle("Corrected Transverse Fatjet Momentum (JER Shifted Down)");
-  mtree->Branch("corr_fatjet_mass",&corr_fatjet_mass);  
-  mtree->GetBranch("corr_fatjet_mass")->SetTitle("Corrected Fatjet Mass");
-  mtree->Branch("corr_fatjet_e",&corr_fatjet_e);
-  mtree->GetBranch("corr_fatjet_e")->SetTitle("Corrected Fatjet Energy");
-  mtree->Branch("corr_fatjet_px",&corr_fatjet_px);
-  mtree->GetBranch("corr_fatjet_px")->SetTitle("Corrected X-Component of Fatjet Momentum");
-  mtree->Branch("corr_fatjet_py",&corr_fatjet_py);
-  mtree->GetBranch("corr_fatjet_py")->SetTitle("Corrected Y-Component of Fatjet Momentum");
-  mtree->Branch("corr_fatjet_pz",&corr_fatjet_pz);
-  mtree->GetBranch("corr_fatjet_pz")->SetTitle("Corrected Z-Component of Fatjet Momentum");
+  mtree->Branch("fatjet_corrpt",&fatjet_corrpt);
+  mtree->GetBranch("fatjet_corrpt")->SetTitle("Corrected Transverse Fatjet Momentum");
+  mtree->Branch("fatjet_corrptUp",&fatjet_corrptUp);
+  mtree->GetBranch("fatjet_corrptUp")->SetTitle("Corrected Transverse Fatjet Momentum (JEC Shifted Up)");
+  mtree->Branch("fatjet_corrptDown",&fatjet_corrptDown);
+  mtree->GetBranch("fatjet_corrptDown")->SetTitle("Corrected Transverse Fatjet Momentum (JEC Shifted Down)");
+  mtree->Branch("fatjet_corrptSmearUp",&fatjet_corrptSmearUp);
+  mtree->GetBranch("fatjet_corrptSmearUp")->SetTitle("Corrected Transverse Fatjet Momentum (JER Shifted Up)");
+  mtree->Branch("fatjet_corrptSmearDown",&fatjet_corrptSmearDown);	
+  mtree->GetBranch("fatjet_corrptSmearDown")->SetTitle("Corrected Transverse Fatjet Momentum (JER Shifted Down)");
+  mtree->Branch("fatjet_corrmass",&fatjet_corrmass);  
+  mtree->GetBranch("fatjet_corrmass")->SetTitle("Corrected Fatjet Mass");
+  mtree->Branch("fatjet_corre",&fatjet_corre);
+  mtree->GetBranch("fatjet_corre")->SetTitle("Corrected Fatjet Energy");
+  mtree->Branch("fatjet_corrpx",&fatjet_corrpx);
+  mtree->GetBranch("fatjet_corrpx")->SetTitle("Corrected X-Component of Fatjet Momentum");
+  mtree->Branch("fatjet_corrpy",&fatjet_corrpy);
+  mtree->GetBranch("fatjet_corrpy")->SetTitle("Corrected Y-Component of Fatjet Momentum");
+  mtree->Branch("fatjet_corrpz",&fatjet_corrpz);
+  mtree->GetBranch("fatjet_corrpz")->SetTitle("Corrected Z-Component of Fatjet Momentum");
   mtree->Branch("fatjet_prunedmass",&fatjet_prunedmass);
   mtree->GetBranch("fatjet_prunedmass")->SetTitle("L2+L3-corrected pruned mass of Fatjet");
   mtree->Branch("fatjet_softdropmass",&fatjet_softdropmass);
@@ -199,14 +202,14 @@ FatjetAnalyzer::FatjetAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("fatjet_tau2")->SetTitle("N-subjettiness tau_2 of Fatjet");
   mtree->Branch("fatjet_tau3",&fatjet_tau3);
   mtree->GetBranch("fatjet_tau3")->SetTitle("N-subjettiness tau_3 of Fatjet");
-  mtree->Branch("fatjet_subjet1_btag",&fatjet_subjet1_btag);
-  mtree->GetBranch("fatjet_subjet1_btag")->SetTitle("Leading softdrop subjet 1 b discriminant");
-  mtree->Branch("fatjet_subjet2_btag",&fatjet_subjet2_btag);
-  mtree->GetBranch("fatjet_subjet2_btag")->SetTitle("Leading softdrop subjet 2 b discriminant");
-  mtree->Branch("fatjet_subjet1_hflav",&fatjet_subjet1_hflav);
-  mtree->GetBranch("fatjet_subjet1_hflav")->SetTitle("Leading softdrop subjet 1 hadron flavour");
-  mtree->Branch("fatjet_subjet2_hflav",&fatjet_subjet2_hflav);
-  mtree->GetBranch("fatjet_subjet2_hflav")->SetTitle("Leading softdrop subjet 2 hadron flavour");
+  mtree->Branch("fatjet_subjet1btag",&fatjet_subjet1btag);
+  mtree->GetBranch("fatjet_subjet1btag")->SetTitle("Leading softdrop subjet 1 b discriminant");
+  mtree->Branch("fatjet_subjet2btag",&fatjet_subjet2btag);
+  mtree->GetBranch("fatjet_subjet2btag")->SetTitle("Leading softdrop subjet 2 b discriminant");
+  mtree->Branch("fatjet_subjet1hflav",&fatjet_subjet1hflav);
+  mtree->GetBranch("fatjet_subjet1hflav")->SetTitle("Leading softdrop subjet 1 hadron flavour");
+  mtree->Branch("fatjet_subjet2hflav",&fatjet_subjet2hflav);
+  mtree->GetBranch("fatjet_subjet2hflav")->SetTitle("Leading softdrop subjet 2 hadron flavour");
 }
 
 FatjetAnalyzer::~FatjetAnalyzer()
@@ -236,30 +239,31 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(pvToken_, vertices);
 
   numfatjet = 0;
+  fatjet_e.clear();
   fatjet_pt.clear();
   fatjet_eta.clear();
   fatjet_phi.clear();
   fatjet_ch.clear();
   fatjet_mass.clear();
-  corr_fatjet_pt.clear();
-  corr_fatjet_ptUp.clear();
-  corr_fatjet_ptDown.clear();
-  corr_fatjet_ptSmearUp.clear();
-  corr_fatjet_ptSmearDown.clear();
-  corr_fatjet_mass.clear();
-  corr_fatjet_e.clear();
-  corr_fatjet_px.clear();
-  corr_fatjet_py.clear();
-  corr_fatjet_pz.clear();
+  fatjet_corrpt.clear();
+  fatjet_corrptUp.clear();
+  fatjet_corrptDown.clear();
+  fatjet_corrptSmearUp.clear();
+  fatjet_corrptSmearDown.clear();
+  fatjet_corrmass.clear();
+  fatjet_corre.clear();
+  fatjet_corrpx.clear();
+  fatjet_corrpy.clear();
+  fatjet_corrpz.clear();
   fatjet_prunedmass.clear();
   fatjet_softdropmass.clear();
   fatjet_tau1.clear();
   fatjet_tau2.clear();
   fatjet_tau3.clear();
-  fatjet_subjet1_btag.clear();
-  fatjet_subjet2_btag.clear();
-  fatjet_subjet1_hflav.clear();
-  fatjet_subjet2_hflav.clear();
+  fatjet_subjet1btag.clear();
+  fatjet_subjet2btag.clear();
+  fatjet_subjet1hflav.clear();
+  fatjet_subjet2hflav.clear();
 
   double corrpt;
   double corrUp, corrDown;
@@ -329,22 +333,23 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       pat::Jet smearedFatjet = fatjet;
       smearedFatjet.scaleEnergy(ptscale);
 
+      fatjet_e.push_back(uncorrFatjet.energy());
       fatjet_pt.push_back(uncorrFatjet.pt());
       fatjet_eta.push_back(uncorrFatjet.eta());
       fatjet_phi.push_back(uncorrFatjet.phi());
       fatjet_ch.push_back(uncorrFatjet.charge());
       fatjet_mass.push_back(uncorrFatjet.mass());
 
-      corr_fatjet_pt.push_back(smearedFatjet.pt());
-      corr_fatjet_ptUp.push_back(corrUp*smearedFatjet.pt());
-      corr_fatjet_ptDown.push_back(corrDown*smearedFatjet.pt());
-      corr_fatjet_ptSmearUp.push_back(ptscale_up*smearedFatjet.pt()/ptscale);
-      corr_fatjet_ptSmearDown.push_back(ptscale_down*smearedFatjet.pt()/ptscale); 
-      corr_fatjet_mass.push_back(smearedFatjet.mass());
-      corr_fatjet_e.push_back(smearedFatjet.energy());
-      corr_fatjet_px.push_back(smearedFatjet.px());
-      corr_fatjet_py.push_back(smearedFatjet.py());
-      corr_fatjet_pz.push_back(smearedFatjet.pz());
+      fatjet_corrpt.push_back(smearedFatjet.pt());
+      fatjet_corrptUp.push_back(corrUp*smearedFatjet.pt());
+      fatjet_corrptDown.push_back(corrDown*smearedFatjet.pt());
+      fatjet_corrptSmearUp.push_back(ptscale_up*smearedFatjet.pt()/ptscale);
+      fatjet_corrptSmearDown.push_back(ptscale_down*smearedFatjet.pt()/ptscale); 
+      fatjet_corrmass.push_back(smearedFatjet.mass());
+      fatjet_corre.push_back(smearedFatjet.energy());
+      fatjet_corrpx.push_back(smearedFatjet.px());
+      fatjet_corrpy.push_back(smearedFatjet.py());
+      fatjet_corrpz.push_back(smearedFatjet.pz());
 
       double corrL2L3 = 1;
       jecL2L3_->setJetEta( uncorrFatjet.eta() );
@@ -365,19 +370,19 @@ FatjetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       int nSDSubJets = sdSubjets.size();
       if(nSDSubJets > 0){
 	pat::Jet subjet1 = sdSubjets.at(0);
-	fatjet_subjet1_btag.push_back(subjet1.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-	fatjet_subjet1_hflav.push_back(subjet1.hadronFlavour());
+	fatjet_subjet1btag.push_back(subjet1.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	fatjet_subjet1hflav.push_back(subjet1.hadronFlavour());
       }else{
-	fatjet_subjet1_btag.push_back(-999);
-	fatjet_subjet1_hflav.push_back(-999);
+	fatjet_subjet1btag.push_back(-999);
+	fatjet_subjet1hflav.push_back(-999);
       }
       if(nSDSubJets > 1){
 	pat::Jet subjet2 = sdSubjets.at(1);
-	fatjet_subjet2_btag.push_back(subjet2.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-	fatjet_subjet2_hflav.push_back(subjet2.hadronFlavour());
+	fatjet_subjet2btag.push_back(subjet2.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	fatjet_subjet2hflav.push_back(subjet2.hadronFlavour());
       }else{
-	fatjet_subjet2_btag.push_back(-999);
-	fatjet_subjet2_hflav.push_back(-999);
+	fatjet_subjet2btag.push_back(-999);
+	fatjet_subjet2hflav.push_back(-999);
       }
 
       ++numfatjet;

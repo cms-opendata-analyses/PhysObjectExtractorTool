@@ -81,6 +81,7 @@ private:
 
   int numjet; //number of jets in the event
   TTree *mtree;
+  std::vector<float> jet_e;
   std::vector<float> jet_pt;
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
@@ -88,16 +89,16 @@ private:
   std::vector<float> jet_mass;
   std::vector<double> jet_btag;
   std::vector<int>   jet_hflav;
-  std::vector<float> corr_jet_pt;
-  std::vector<float> corr_jet_ptUp;
-  std::vector<float> corr_jet_ptDown;
-  std::vector<float> corr_jet_ptSmearUp;
-  std::vector<float> corr_jet_ptSmearDown;
-  std::vector<float> corr_jet_mass;
-  std::vector<float> corr_jet_e;
-  std::vector<float> corr_jet_px;
-  std::vector<float> corr_jet_py;
-  std::vector<float> corr_jet_pz;
+  std::vector<float> jet_corrpt;
+  std::vector<float> jet_corrptUp;
+  std::vector<float> jet_corrptDown;
+  std::vector<float> jet_corrptSmearUp;
+  std::vector<float> jet_corrptSmearDown;
+  std::vector<float> jet_corrmass;
+  std::vector<float> jet_corre;
+  std::vector<float> jet_corrpx;
+  std::vector<float> jet_corrpy;
+  std::vector<float> jet_corrpz;
   float btagWeight;
   float btagWeightUp;
   float btagWeightDn;
@@ -136,6 +137,8 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig):
 	
   mtree->Branch("numberjet",&numjet);
   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
+  mtree->Branch("jet_e",&jet_e);
+  mtree->GetBranch("jet_e")->SetTitle("Uncorrected Jet energy");
   mtree->Branch("jet_pt",&jet_pt);
   mtree->GetBranch("jet_pt")->SetTitle("Uncorrected Transverse Jet Momentum");
   mtree->Branch("jet_eta",&jet_eta);
@@ -150,26 +153,26 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("jet_btag")->SetTitle("Jet Btagging Discriminant (CSV)");
   mtree->Branch("jet_hflav",&jet_hflav);
   mtree->GetBranch("jet_hflav")->SetTitle("Jet hadron-based flavour (in MC)");
-  mtree->Branch("corr_jet_pt",&corr_jet_pt);
-  mtree->GetBranch("corr_jet_pt")->SetTitle("Corrected Transverse Jet Momentum");
-  mtree->Branch("corr_jet_ptUp",&corr_jet_ptUp);
-  mtree->GetBranch("corr_jet_ptUp")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Up)");
-  mtree->Branch("corr_jet_ptDown",&corr_jet_ptDown);
-  mtree->GetBranch("corr_jet_ptDown")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Down)");
-  mtree->Branch("corr_jet_ptSmearUp",&corr_jet_ptSmearUp);
-  mtree->GetBranch("corr_jet_ptSmearUp")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Up)");
-  mtree->Branch("corr_jet_ptSmearDown",&corr_jet_ptSmearDown);	
-  mtree->GetBranch("corr_jet_ptSmearDown")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Down)");
-  mtree->Branch("corr_jet_mass",&corr_jet_mass);  
-  mtree->GetBranch("corr_jet_mass")->SetTitle("Corrected Jet Mass");
-  mtree->Branch("corr_jet_e",&corr_jet_e);
-  mtree->GetBranch("corr_jet_e")->SetTitle("Corrected Jet Energy");
-  mtree->Branch("corr_jet_px",&corr_jet_px);
-  mtree->GetBranch("corr_jet_px")->SetTitle("Corrected X-Component of Jet Momentum");
-  mtree->Branch("corr_jet_py",&corr_jet_py);
-  mtree->GetBranch("corr_jet_py")->SetTitle("Corrected Y-Component of Jet Momentum");
-  mtree->Branch("corr_jet_pz",&corr_jet_pz);
-  mtree->GetBranch("corr_jet_pz")->SetTitle("Corrected Z-Component of Jet Momentum");
+  mtree->Branch("jet_corrpt",&jet_corrpt);
+  mtree->GetBranch("jet_corrpt")->SetTitle("Corrected Transverse Jet Momentum");
+  mtree->Branch("jet_corrptUp",&jet_corrptUp);
+  mtree->GetBranch("jet_corrptUp")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Up)");
+  mtree->Branch("jet_corrptDown",&jet_corrptDown);
+  mtree->GetBranch("jet_corrptDown")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Down)");
+  mtree->Branch("jet_corrptSmearUp",&jet_corrptSmearUp);
+  mtree->GetBranch("jet_corrptSmearUp")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Up)");
+  mtree->Branch("jet_corrptSmearDown",&jet_corrptSmearDown);	
+  mtree->GetBranch("jet_corrptSmearDown")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Down)");
+  mtree->Branch("jet_corrmass",&jet_corrmass);  
+  mtree->GetBranch("jet_corrmass")->SetTitle("Corrected Jet Mass");
+  mtree->Branch("jet_corre",&jet_corre);
+  mtree->GetBranch("jet_corre")->SetTitle("Corrected Jet Energy");
+  mtree->Branch("jet_corrpx",&jet_corrpx);
+  mtree->GetBranch("jet_corrpx")->SetTitle("Corrected X-Component of Jet Momentum");
+  mtree->Branch("jet_corrpy",&jet_corrpy);
+  mtree->GetBranch("jet_corrpy")->SetTitle("Corrected Y-Component of Jet Momentum");
+  mtree->Branch("jet_corrpz",&jet_corrpz);
+  mtree->GetBranch("jet_corrpz")->SetTitle("Corrected Z-Component of Jet Momentum");
   mtree->Branch("btag_Weight", &btagWeight);
   mtree->GetBranch("btag_Weight")->SetTitle("B-Tag Event Weight");
   mtree->Branch("btag_WeightUp", &btagWeightUp);
@@ -306,6 +309,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(rhoToken_, rhoHandle);
 
   numjet = 0;
+  jet_e.clear();
   jet_pt.clear();
   jet_eta.clear();
   jet_phi.clear();
@@ -313,16 +317,16 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   jet_mass.clear();
   jet_btag.clear();
   jet_hflav.clear();
-  corr_jet_pt.clear();
-  corr_jet_ptUp.clear();
-  corr_jet_ptDown.clear();
-  corr_jet_ptSmearUp.clear();
-  corr_jet_ptSmearDown.clear();
-  corr_jet_mass.clear();
-  corr_jet_e.clear();
-  corr_jet_px.clear();
-  corr_jet_py.clear();
-  corr_jet_pz.clear();
+  jet_corrpt.clear();
+  jet_corrptUp.clear();
+  jet_corrptDown.clear();
+  jet_corrptSmearUp.clear();
+  jet_corrptSmearDown.clear();
+  jet_corrmass.clear();
+  jet_corre.clear();
+  jet_corrpx.clear();
+  jet_corrpy.clear();
+  jet_corrpz.clear();
 
   int hadronFlavour;
   double SF, SFu, SFd, eff, corrpt;
@@ -397,6 +401,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       pat::Jet smearedjet = jet;
       smearedjet.scaleEnergy(ptscale);
 
+      jet_e.push_back(uncorrJet.energy());
       jet_pt.push_back(uncorrJet.pt());
       jet_eta.push_back(uncorrJet.eta());
       jet_phi.push_back(uncorrJet.phi());
@@ -404,16 +409,16 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       jet_mass.push_back(uncorrJet.mass());
       jet_btag.push_back(smearedjet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
       jet_hflav.push_back(smearedjet.hadronFlavour());
-      corr_jet_pt.push_back(smearedjet.pt());
-      corr_jet_ptUp.push_back(corrUp*smearedjet.pt());
-      corr_jet_ptDown.push_back(corrDown*smearedjet.pt());
-      corr_jet_ptSmearUp.push_back(ptscale_up*smearedjet.pt()/ptscale);
-      corr_jet_ptSmearDown.push_back(ptscale_down*smearedjet.pt()/ptscale); 
-      corr_jet_mass.push_back(smearedjet.mass());
-      corr_jet_e.push_back(smearedjet.energy());
-      corr_jet_px.push_back(smearedjet.px());
-      corr_jet_py.push_back(smearedjet.py());
-      corr_jet_pz.push_back(smearedjet.pz());
+      jet_corrpt.push_back(smearedjet.pt());
+      jet_corrptUp.push_back(corrUp*smearedjet.pt());
+      jet_corrptDown.push_back(corrDown*smearedjet.pt());
+      jet_corrptSmearUp.push_back(ptscale_up*smearedjet.pt()/ptscale);
+      jet_corrptSmearDown.push_back(ptscale_down*smearedjet.pt()/ptscale); 
+      jet_corrmass.push_back(smearedjet.mass());
+      jet_corre.push_back(smearedjet.energy());
+      jet_corrpx.push_back(smearedjet.px());
+      jet_corrpy.push_back(smearedjet.py());
+      jet_corrpz.push_back(smearedjet.pz());
 	
       if (!isData){
 	SF = 1;
@@ -421,7 +426,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	SFd = 1;
 	eff = 1;
 	hadronFlavour = smearedjet.hadronFlavour();
-	corrpt = corr_jet_pt.at(numjet);       
+	corrpt = jet_corrpt.at(numjet);       
 	
 	if (jet_btag.at(numjet)> 0.800){ // MEDIUM working point
 	  if(abs(hadronFlavour) == 5){
