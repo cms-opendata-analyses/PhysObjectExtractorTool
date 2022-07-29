@@ -25,10 +25,10 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
 //TransientTrack and IPTools for impact parameter
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/IPTools/interface/IPTools.h"
+//#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+//#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+//#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+//#include "TrackingTools/IPTools/interface/IPTools.h"
 
 //classes to save data
 #include "TTree.h"
@@ -89,8 +89,8 @@ class MuonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       std::vector<float> muon_TkIso03;
       std::vector<float> muon_genpartidx;
       std::vector<float> muon_jetidx;
-      std::vector<float> muon_ip3d;
-      std::vector<float> muon_sip3d;
+  //    std::vector<float> muon_ip3d;
+  //    std::vector<float> muon_sip3d;
 };
 
 //
@@ -163,10 +163,10 @@ MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("muon_jetidx")->SetTitle("index of the associated jet");
   mtree->Branch("muon_genpartidx",&muon_genpartidx);
   mtree->GetBranch("muon_genpartidx")->SetTitle("index into genParticle list for MC matching to status==1 muons");
-  mtree->Branch("muon_ip3d",&muon_ip3d);
-  mtree->GetBranch("muon_ip3d")->SetTitle("muon impact parameter in 3d");
-  mtree->Branch("muon_sip3d",&muon_sip3d);
-  mtree->GetBranch("muon_sip3d")->SetTitle("muon significance on impact parameter in 3d");
+  //mtree->Branch("muon_ip3d",&muon_ip3d);
+  //mtree->GetBranch("muon_ip3d")->SetTitle("muon impact parameter in 3d");
+  //mtree->Branch("muon_sip3d",&muon_sip3d);
+  //mtree->GetBranch("muon_sip3d")->SetTitle("muon significance on impact parameter in 3d");
 }
 
 
@@ -222,8 +222,8 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    muon_TkIso03.clear();
    muon_jetidx.clear();
    muon_genpartidx.clear();
-   muon_ip3d.clear();
-   muon_sip3d.clear();
+   //muon_ip3d.clear();
+   //muon_sip3d.clear();
 
     for (const pat::Muon &mu : *muons)
     {
@@ -257,12 +257,12 @@ MuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //get impact parameter in 3D
       // https://github.com/cms-sw/cmssw/blob/CMSSW_7_6_X/PhysicsTools/PatAlgos/plugins/PATElectronProducer.cc
       // This is needed by the IPTools methods from the tracking group
-      edm::ESHandle<TransientTrackBuilder> trackBuilder;
-      iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder);
-      reco::TransientTrack tt = trackBuilder->build(mu.muonBestTrack());
-      std::pair<bool,Measurement1D> ip3dpv = IPTools::absoluteImpactParameter3D(tt, PV);
-      muon_ip3d.push_back(ip3dpv.second.value());
-      muon_sip3d.push_back(ip3dpv.second.significance());
+      //edm::ESHandle<TransientTrackBuilder> trackBuilder;
+      //iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder);
+      //reco::TransientTrack tt = trackBuilder->build(mu.muonBestTrack());
+      //std::pair<bool,Measurement1D> ip3dpv = IPTools::absoluteImpactParameter3D(tt, PV);
+      //muon_ip3d.push_back(ip3dpv.second.value());
+      //muon_sip3d.push_back(ip3dpv.second.significance());
       //std::cout<<"ip3d vanilla = "<<el.ip3d()<<"\t ip3d from iptools = "<<ip3dpv.second.value()<<std::endl;
 
       nummuon++;

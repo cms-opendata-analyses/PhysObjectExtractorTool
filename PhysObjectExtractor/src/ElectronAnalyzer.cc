@@ -27,11 +27,6 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-//Transient track for impact parameter
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/IPTools/interface/IPTools.h"
 
 //classes to save data
 #include "TTree.h"
@@ -88,8 +83,6 @@ class ElectronAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources> 
       std::vector<float> electron_dzError;
       std::vector<int> electron_ismvaLoose;
       std::vector<int> electron_ismvaTight;
-      std::vector<double> electron_ip3d;	
-      std::vector<double> electron_sip3d;
 };
 
 //
@@ -152,10 +145,6 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
   mtree->GetBranch("electron_ismvaLoose")->SetTitle("electron mva Loose");
   mtree->Branch("electron_ismvaTight",&electron_ismvaTight);
   mtree->GetBranch("electron_ismvaTight")->SetTitle("electron mva Tight");
-  mtree->Branch("electron_ip3d",&electron_ip3d);
-  mtree->GetBranch("electron_ip3d")->SetTitle("electron impact parameter in 3d");
-  mtree->Branch("electron_sip3d",&electron_sip3d);
-  mtree->GetBranch("electron_sip3d")->SetTitle("electron significance on impact parameter in 3d");
 }
 
 //Destructor
@@ -183,7 +172,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
    Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
-   const reco::Vertex &primaryVertex = vertices->front();
    math::XYZPoint pv(vertices->begin()->position());
 
    numelectron = 0;
@@ -206,8 +194,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    electron_dzError.clear();
    electron_ismvaLoose.clear();
    electron_ismvaTight.clear();
-   electron_ip3d.clear();
-   electron_sip3d.clear();
 
     for (const pat::Electron &el : *electrons)
     {
@@ -230,18 +216,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_dzError.push_back(el.gsfTrack()->dzError());
       electron_ismvaLoose.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
       electron_ismvaTight.push_back(el.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"));
-
-      //get impact parameter in 3D
-      // https://github.com/cms-sw/cmssw/blob/CMSSW_7_6_X/PhysicsTools/PatAlgos/plugins/PATElectronProducer.cc
-      // This is needed by the IPTools methods from the tracking group
-      edm::ESHandle<TransientTrackBuilder> trackBuilder;
-      iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder);      
-      reco::TransientTrack tt = trackBuilder->build(el.gsfTrack());
-      std::pair<bool,Measurement1D> ip3dpv = IPTools::absoluteImpactParameter3D(tt, primaryVertex);
-      electron_ip3d.push_back(ip3dpv.second.value());
-      electron_sip3d.push_back(ip3dpv.second.significance());
-      //std::cout<<"ip3d vanilla = "<<el.ip3d()<<"\t ip3d from iptools = "<<ip3dpv.second.value()<<std::endl;
-
       numelectron++;
     }
 
