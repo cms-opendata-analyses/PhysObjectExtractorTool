@@ -1,0 +1,13 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="FWCore/ServiceRegistry"/>
+<use name="JetMETCorrections/Modules"/>
+<use name="CondFormats/JetMETObjects"/>
+<use name="TrackingTools/TransientTrack"/>
+<use name="TrackingTools/IPTools"/>
+<use name="HLTrigger/HLTcore"/>
+<flags EDM_PLUGIN="1"/>
+
