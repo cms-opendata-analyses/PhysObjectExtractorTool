@@ -88,14 +88,14 @@ process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimm
 #---- Example on how to add trigger information
 #---- To include it, uncomment the lines below and include the
 #---- module in the final path
-#process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
-#                              processName = cms.string("HLT"),
-#                              #---- These are example of OR of triggers for 2015
-#                              #---- Wildcards * and ? are accepted (with usual meanings)
-#                              #---- If left empty, all triggers will run              
-#                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
-#                              triggerResults = cms.InputTag("TriggerResults","","HLT")
-#                              )
+process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
+                              processName = cms.string("HLT"),
+                              #---- These are example of OR of triggers for 2015
+                              #---- Wildcards * and ? are accepted (with usual meanings)
+                              #---- If left empty, all triggers will run              
+                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
+                              triggerResults = cms.InputTag("TriggerResults","","HLT")
+                              )
 
 #---- test to see if we get trigger info ----
 process.myminiaodtrig = cms.EDAnalyzer("MiniAODTriggerAnalyzer",
@@ -230,13 +230,13 @@ process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
 if isData:
-	process.p = cms.Path(process.myminiaodtrig+process.hltHighLevel+process.elemufilter+process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mysimpletrig+
+	process.p = cms.Path(process.mytriggers+process.hltHighLevel+process.elemufilter+process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mysimpletrig+
                              process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                              process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
                              process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
                              )
 else:
-	process.p = cms.Path(process.myninioaodtrig+process.hltHighLevel+process.elemufilter+process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mysimpletrig+
+	process.p = cms.Path(process.mytriggers+process.hltHighLevel+process.elemufilter+process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mysimpletrig+
                              process.mygenparticle+process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+
                              process.slimmedJetsNewJEC+process.myjets+process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+
                              process.slimmedJetsAK8NewJEC+process.myfatjets+process.uncorrectedMet+process.uncorrectedPatMet+

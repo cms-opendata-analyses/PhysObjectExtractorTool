@@ -174,8 +174,7 @@ void TriggerAnalyzer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSet
     hltPrescaleProvider_.init(iRun,iSetup,processName_,changed);
     if (changed){
       cout<<"HLTConfig has changed for this Run. . . "<<endl;
-      hltPrescaleProvider_.hltConfigProvider().dump("Datasets");    
-
+      hltPrescaleProvider_.hltConfigProvider().dump("Datasets");
    }
 } //------------------- beginRun()
 
@@ -228,7 +227,6 @@ TriggerAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
    //Loop over all triggers in the pattern
    for (unsigned int i=0; i!=n; ++i) {
-        cout<<"Analyzing trigger: "<<HLTPathsByName_[i]<<endl;
        analyzeSimplePrescales(iEvent,iSetup,HLTPathsByName_[i]);
    }
 
@@ -291,9 +289,6 @@ void TriggerAnalyzer::analyzeSimplePrescales(const edm::Event& iEvent, const edm
   L1_ps = prescales.first;
   HLT_ps = prescales.second;
 
-  cout<<"L1_ps = "<<L1_ps<<endl;
-  cout<<"HLT_ps = "<<HLT_ps<<endl;
-
   // Find out if the trigger was active, accepted, or in error.
   // We could also find out whether the trigger was active (wasrun),
   // if it accepted the event (accept) or if it gave an error (error).
@@ -301,9 +296,9 @@ void TriggerAnalyzer::analyzeSimplePrescales(const edm::Event& iEvent, const edm
   int wr = triggerResultsHandle_->wasrun(triggerIndex);
   int acc = triggerResultsHandle_->accept(triggerIndex);
   int err = triggerResultsHandle_->error(triggerIndex);
-  cout<<"wr = "<<wr<<endl;
-  cout<<"acc = "<<acc<<endl;
-  cout<<"err = "<<err<<endl;
+  //cout<<"wr = "<<wr<<endl;
+  //cout<<"acc = "<<acc<<endl;
+  //cout<<"err = "<<err<<endl;
 
   //just interested on whether the trigger was fired
   if (wr == 1 && acc == 1 && err == 0){
