@@ -44,19 +44,20 @@ if isData:
 	'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/001A703B-B52E-E611-BA13-0025905A60B6.root'
         )
 
-
-#---- Apply the data quality JSON file filter. This example is for 2015 data
-#---- It needs to be done after the process.source definition
-#---- Make sure the location of the file agrees with your setup
-goodJSON = "data/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_v2.txt"
-myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
-process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-process.source.lumisToProcess.extend(myLumis) 
+if isData:
+    #---- Apply the data quality JSON file filter. This example is for 2015 data
+    #---- It needs to be done after the process.source definition
+    #---- Make sure the location of the file agrees with your setup
+    goodJSON = "data/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_v2.txt"
+    myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
+    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+    process.source.lumisToProcess.extend(myLumis) 
 
 #---- Needed configuration for dealing with transient tracks if required
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
+
 
 #---- These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
 process.load('Configuration.StandardSequences.Services_cff')
