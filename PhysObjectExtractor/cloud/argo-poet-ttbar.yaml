@@ -7,7 +7,7 @@ spec:
   volumes:
     - name: task-pv-storage
       persistentVolumeClaim:
-        claimName: nfs-2
+        claimName: nfs-<NUMBER>
   arguments:
     parameters:
       - name: nFiles
@@ -177,7 +177,7 @@ spec:
         image: gitlab-registry.cern.ch/cms-cloud/python-vnc:latest
         command: [bash]
         source: |
-          wget https://github.com/cms-opendata-analyses/PhysObjectExtractorTool/blob/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/merge_trees.py
+          wget https://raw.githubusercontent.com/cms-opendata-analyses/PhysObjectExtractorTool/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/merge_trees.py
           python merge_trees.py /mnt/vol/output/{{inputs.parameters.recid}}/myoutput.root
         volumeMounts:
           - name: task-pv-storage
@@ -193,7 +193,7 @@ spec:
         image: gitlab-registry.cern.ch/cms-cloud/python-vnc:latest
         command: [bash]
         source: |
-          wget https://github.com/cms-opendata-analyses/PhysObjectExtractorTool/blob/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/ntuple-gen.py
+          wget https://raw.githubusercontent.com/cms-opendata-analyses/PhysObjectExtractorTool/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/ntuple-gen.py
           cp /mnt/vol/nevents/nevts_recid.txt .
           python ntuples-gen.py
           cat ntuples.json
