@@ -1,0 +1,212 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: poet-ttbar-
+spec:
+  entrypoint: argo-poet
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+        claimName: nfs-2
+  arguments:
+    parameters:
+      - name: nFiles
+        value: 2
+      - name: recid
+        value: |
+          [
+            {"recid": 24119},
+            {"recid": 24120},
+            {"recid": 19980},
+            {"recid": 19983},
+            {"recid": 19985},
+            {"recid": 19949},
+            {"recid": 19999},
+            {"recid": 19397},
+            {"recid": 19407},
+            {"recid": 19419},
+            {"recid": 19412},
+            {"recid": 20548}
+          ] 
+      - name: nJobs
+        value: 1       
+  templates:
+    - name: argo-poet
+      inputs:
+        parameters:
+          - name: nFiles
+          - name: nJobs
+          - name: recid
+      dag:
+        tasks:
+          - name: prepare
+            template: prepare-template
+
+          - name: filelist
+            dependencies: [prepare]
+            template: filelist-template
+            arguments:
+              parameters:
+                - name: recid
+                  value: "{{item.recid}}"
+            withParam: "{{inputs.parameters.recid}}"
+
+          - name: runpoet
+            dependencies: [filelist]
+            template: runpoet-template
+            arguments:
+              parameters:
+                - name: nFiles
+                  value: "{{inputs.parameters.nFiles}}"
+                - name: nJobs
+                  value: "{{inputs.parameters.nJobs}}"
+                - name: recid
+                  value: "{{item.recid}}"
+            withParam: "{{inputs.parameters.recid}}"   
+
+          - name: flattentrees
+            dependencies: [runpoet]
+            template: flattentrees-template
+            arguments:
+              parameters: 
+                - name: recid
+                  value: "{{item.recid}}"
+            withParam: "{{inputs.parameters.recid}}" 
+
+          - name: preparecoffea
+            dependencies: [flattentrees]
+            template: preparecoffea-template
+            arguments:
+              parameters: 
+                - name: recid
+                  value: "{{inputs.parameters.recid}}"
+
+          - name: runcoffea
+            dependencies: [preparecoffea]
+            template: runcoffea-template
+                               
+
+    # prepare the data directories needed in the workflow steps and the command file for the final step
+    - name: prepare-template
+      script:
+        image: ubuntu:latest
+        command: [bash]
+        source: |
+          mkdir -p /mnt/vol/data
+          mkdir -p /mnt/vol/code
+          mkdir -p /mnt/vol/output
+          mkdir -p /mnt/vol/nevents
+          rm -f /mnt/vol/nevents/*
+          chmod -R 777 /mnt/vol
+          echo "pip install vector hist mplhep coffea" > /mnt/vol/code/commands.sh
+          echo "git clone https://github.com/cms-opendata-workshop/workshop2022-lesson-ttbarljetsanalysis-payload.git" >> /mnt/vol/code/commands.sh
+          echo "cd workshop2022-lesson-ttbarljetsanalysis-payload" >> /mnt/vol/code/commands.sh
+          echo "cp /mnt/vol/code/ntuples.json ." >> /mnt/vol/code/commands.sh
+          echo "python coffeaAnalysis_ttbarljets.py" >> /mnt/vol/code/commands.sh
+          echo "mv *root /mnt/vol" >> /mnt/vol/code/commands.sh
+          cat /mnt/vol/code/commands.sh
+        volumeMounts:
+          - name: task-pv-storage
+            mountPath: /mnt/vol  
+
+    # get the full list of files 
+    - name: filelist-template
+      inputs:
+        parameters:
+          - name: recid
+      script:
+        image: cernopendata/cernopendata-client
+        command: [bash]
+        source: |
+          cernopendata-client get-file-locations --recid "{{inputs.parameters.recid}}" --protocol xrootd > /mnt/vol/files_{{inputs.parameters.recid}}.txt;
+        volumeMounts:
+          - name: task-pv-storage
+            mountPath: /mnt/vol
+
+    # run poet for a recid and n files as input, count the events
+    - name: runpoet-template
+      inputs:
+        parameters:
+        - name: nFiles
+        - name: nJobs
+        - name: recid
+      script:
+        image: cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493
+        command: [bash]
+        source: |
+          sudo chown $USER /mnt/vol
+          source /opt/cms/entrypoint.sh
+          git clone -b odws2022-ttbaljets-prod https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
+          cd PhysObjectExtractorTool/PhysObjectExtractor
+          scram b
+          echo "{{inputs.parameters.nFiles}}"
+          recid="{{inputs.parameters.recid}}"
+          isData=False
+          if [[ $recid -eq 24119 ]] || [[ $recid -eq 24120 ]]; then isData=True; fi
+          itJobs=$(( {{inputs.parameters.nJobs}} -1 ))
+          firstFile=$(( {{inputs.parameters.nFiles}}*$itJobs ))
+          lastFile=$(( firstFile + {{inputs.parameters.nFiles}} ))
+          cmsRun python/poet_cfg_cloud.py $isData $lastFile $firstFile '"/mnt/vol/files_{{inputs.parameters.recid}}.txt"'
+          tot=0
+          firstFile=$(( $firstFile + 1 ))
+          for ((i = $firstFile ; i <= $lastFile ; i++));
+          do
+            file=$(sed "${i}q;d" /mnt/vol/files_{{inputs.parameters.recid}}.txt);
+            nevents=$(edmEventSize -v $file | grep Events |  awk '{print $NF}')
+            echo $nevents
+            tot=$(( tot + nevents ))
+            echo $tot
+          done
+          echo $recid $tot /mnt/vol/output/$recid/myoutput_merged.root >> /mnt/vol/nevents/nevts_recid.txt 
+          mkdir -p /mnt/vol/output/{{inputs.parameters.recid}}            
+          mv myoutput.root /mnt/vol/output/{{inputs.parameters.recid}}/   # to be modified for nJobs > 1
+        volumeMounts:
+        - name: task-pv-storage
+          mountPath: /mnt/vol
+        resources:
+          requests:
+            memory: 1.7Gi
+            cpu: 750m
+
+    # flatten trees
+    - name: flattentrees-template
+      inputs:
+        parameters:
+          - name: recid
+      script:
+        image: gitlab-registry.cern.ch/cms-cloud/python-vnc:latest
+        command: [bash]
+        source: |
+          wget https://github.com/cms-opendata-analyses/PhysObjectExtractorTool/blob/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/merge_trees.py
+          python merge_trees.py /mnt/vol/output/{{inputs.parameters.recid}}/myoutput.root
+        volumeMounts:
+          - name: task-pv-storage
+            mountPath: /mnt/vol
+
+
+    # prepare coffea input
+    - name: preparecoffea-template
+      inputs:
+        parameters:
+          - name: recid
+      script:
+        image: gitlab-registry.cern.ch/cms-cloud/python-vnc:latest
+        command: [bash]
+        source: |
+          wget https://github.com/cms-opendata-analyses/PhysObjectExtractorTool/blob/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/ntuple-gen.py
+          cp /mnt/vol/nevents/nevts_recid.txt .
+          python ntuples-gen.py
+          cat ntuples.json
+          mv ntuples.json /mnt/vol/code
+        volumeMounts:
+          - name: task-pv-storage
+            mountPath: /mnt/vol  
+
+    # run coffea on the produced files
+    - name: runcoffea-template
+      script:
+        image: gitlab-registry.cern.ch/cms-cloud/python-vnc:latest
+        command: [bash, /mnt/vol/code/commands.sh]
+        volumeMounts:
+        - name: task-pv-storage
+          mountPath: /mnt/vol    
