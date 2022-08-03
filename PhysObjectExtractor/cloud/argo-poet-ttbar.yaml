@@ -193,7 +193,7 @@ spec:
         image: gitlab-registry.cern.ch/cms-cloud/python-vnc:latest
         command: [bash]
         source: |
-          wget https://raw.githubusercontent.com/cms-opendata-analyses/PhysObjectExtractorTool/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/ntuple-gen.py
+          wget https://raw.githubusercontent.com/cms-opendata-analyses/PhysObjectExtractorTool/odws2022-ttbaljets-prod/PhysObjectExtractor/scripts/ntuples-gen.py
           cp /mnt/vol/nevents/nevts_recid.txt .
           python ntuples-gen.py
           cat ntuples.json
