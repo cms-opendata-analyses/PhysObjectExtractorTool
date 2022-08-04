@@ -115,7 +115,7 @@ spec:
         parameters:
           - name: recid
       script:
-        image: cernopendata/cernopendata-client
+        image: cernopendata/cernopendata-client:0.3.0
         command: [bash]
         source: |
           cernopendata-client get-file-locations --recid "{{inputs.parameters.recid}}" --protocol xrootd > /mnt/vol/files_{{inputs.parameters.recid}}.txt;
