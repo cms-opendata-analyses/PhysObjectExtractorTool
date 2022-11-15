@@ -1,8 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-isData = False
-#if len(sys.argv) > 1: isData = bool(eval(sys.argv[1]))
-#print 'Writing JEC text files. isData = ',isData
+import sys
+
+if len(sys.argv) > 2: isData = bool(eval(sys.argv[2]))
+print 'Writing JEC text files. isData = ',isData
 
 # CMS process initialization
 process = cms.Process('jecprocess')
@@ -11,11 +12,11 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 # connect to global tag
 if isData:
-#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db')
-    process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
+#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1.db')
+    process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 else:
-#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_V27.db')
-    process.GlobalTag.globaltag = 'START53_V27::All'
+#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_LV6A1.db')
+    process.GlobalTag.globaltag = 'START53_LV6A1::All'
 
 
 # setup JetCorrectorDBReader 
@@ -27,8 +28,8 @@ process.ak5 = cms.EDAnalyzer('JetCorrectorDBReader',
                              createTextFile=cms.untracked.bool(True))
 
 if isData:
-    process.ak5.globalTag = cms.untracked.string('FT53_V21A_AN6')
+    process.ak5.globalTag = cms.untracked.string('FT_53_LV5_AN1')
 else:
-    process.ak5.globalTag = cms.untracked.string('START53_V27')
+    process.ak5.globalTag = cms.untracked.string('START53_LV6A1')
 
 process.p = cms.Path(process.ak5)
