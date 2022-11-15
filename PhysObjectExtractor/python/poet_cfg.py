@@ -49,9 +49,9 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #---- python cernopendata-client download-files --recid 6004 --filter-range 1-1
 #---- For running over larger number of files, comment out this section and use/uncomment the FileUtils infrastructure below
 if isData: 
-	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
+	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/Run2011A/DoubleMu/AOD/12Oct2013-v1/10000/000D143E-9535-E311-B88B-002618943934.root'
 else: 
-	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
+	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/ZZTo2e2mu_mll4_7TeV-powheg-pythia6/AODSIM/PU_S13_START53_LV6-v1/00000/0A571FF3-6392-E411-AB3D-0025904B12FC.root'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
@@ -76,24 +76,23 @@ process.source = cms.Source("PoolSource",
 #---- These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
-#---- Uncomment and arrange a line like this if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db')
-#---- The global tag must correspond to the needed epoch (comment out if no conditions needed)
-if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
-else: process.GlobalTag.globaltag = "START53_V27::All"
-#---- If the container has local DB files available, uncomment lines like the ones below
+#---- Uncomment the two followingh lines if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client) 
+#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/FT_53_LV5_AN1.db')
+#else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/START53_LV6A1.db')
+#---- If the container has local DB files available, uncomment the two lines like the ones below
 #---- instead of the corresponding lines above
-#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/opt/cms-opendata-conddb/FT53_V21A_AN6_FULL_data_stripped.db')
-#else:  process.GlobalTag.connect = cms.string('sqlite_file:/opt/cms-opendata-conddb/START53_V27_MC_stripped.db')
-#if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
-#else: process.GlobalTag.globaltag = "START53_V27::All"
+#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_data_stripped.db')
+#else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/START53_LV6A1_MC_stripped.db')
+#---- The global tag must correspond to the needed epoch (comment out if no conditions needed)
+if isData: process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
+else: process.GlobalTag.globaltag = "START53_LV6A1::All"
 
 
-#---- Apply the data quality JSON file filter. This example is for 2012 data
+#---- Apply the data quality JSON file filter. This example is for 2011 data
 #---- It needs to be done after the process.source definition
 #---- Make sure the location of the file agrees with your setup
 if isData:
-	goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
+	goodJSON = "data/Cert_160404-180252_7TeV_ReRecoNov08_Collisions11_JSON.txt"
 	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
 	process.source.lumisToProcess = CfgTypes.untracked(
 	    	CfgTypes.VLuminosityBlockRange())
@@ -118,8 +117,8 @@ process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
 				   )
 
 #---- Jet correction paths -- these correspond to the Global Tag. **Run jec_cfg.py first to get .txt files!!**
-JecString = 'START53_V27_'
-if isData: JecString = 'FT53_V21A_AN6_'
+JecString = 'START53_LV6A1_'
+if isData: JecString = 'FT_53_LV5_AN1_'
 
 #---- Jets are simpler to work with in "Physics Analysis Toolkit" format. See more at https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPAT
 if doPat:
@@ -212,10 +211,11 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 
 process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
                               processName = cms.string("HLT"),
-                              #---- These are example triggers for 2012
+                              #---- These are example triggers for 2011 DoubleMu dataset
                               #---- Wildcards * and ? are accepted (with usual meanings)
                                #---- If left empty, all triggers will run              
-                              triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu12_v*", "HLT_Photon20_CaloIdVL_v*", "HLT_Ele22_CaloIdL_CaloIsoVL_v*", "HLT_Jet370_NoJetID_v*"), 
+#                              triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu13_Mu8_v*", "HLT_DoubleMu45_v*", "HLT_Mu8_Jet40_v*", "HLT_TripleMu5_v*"), 
+                              triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu13_Mu8_v*"),
                               triggerResults = cms.InputTag("TriggerResults","","HLT"),
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")                             
                               )
