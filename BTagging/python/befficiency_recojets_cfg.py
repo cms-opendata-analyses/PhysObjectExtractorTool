@@ -49,7 +49,7 @@ process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
 ################################
 process.mcweightanalyzer = cms.EDAnalyzer(
     "WeightAnalyzerBEff",
-    JetsTag = cms.InputTag("ak5PFJets"),
+    jetTag = cms.InputTag("ak5PFJets"),
     discriminator = cms.string("combinedSecondaryVertexBJetTags"),
     DiscriminatorValueTight = cms.double(0.898),
     DiscriminatorValueMedium = cms.double(0.679),
