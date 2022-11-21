@@ -81,7 +81,7 @@ process.load('Configuration.StandardSequences.Services_cff')
 #else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/START53_LV6A1.db')
 #---- If the container has local DB files available, uncomment the two lines like the ones below
 #---- instead of the corresponding lines above
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_data_stripped.db')
+#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_data_stripped.db')
 #else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/START53_LV6A1_MC_stripped.db')
 #---- The global tag must correspond to the needed epoch (comment out if no conditions needed)
 if isData: process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
