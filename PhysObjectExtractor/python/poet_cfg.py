@@ -126,6 +126,17 @@ if doPat:
 	process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
 	process.load('PhysicsTools.PatAlgos.producersLayer1.metProducer_cff')
 	process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+        from PhysicsTools.PatAlgos.producersLayer1.jetProducer_cfi import patJets
+        patJets.discriminatorSources = cms.VInputTag(
+            cms.InputTag("combinedSecondaryVertexBJetTags"),
+            cms.InputTag("combinedSecondaryVertexMVABJetTags"),
+            cms.InputTag("jetBProbabilityBJetTags"),
+            cms.InputTag("jetProbabilityBJetTags"),
+            cms.InputTag("simpleSecondaryVertexHighEffBJetTags"),
+            cms.InputTag("simpleSecondaryVertexHighPurBJetTags"),
+            cms.InputTag("trackCountingHighEffBJetTags"),
+            cms.InputTag("trackCountingHighPurBJetTags"),
+            )
 	process.patCandidates = cms.Sequence(process.makePatJets+process.makePatMETs)
 	process.selectedPatCandidates = cms.Sequence(process.selectedPatJets)
 	process.patDefaultSequence = cms.Sequence(process.patCandidates * process.selectedPatCandidates)
