@@ -30,12 +30,14 @@ process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 ##### ------- This is a test file
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/04FCA1D5-E74C-E311-92CE-002590A887F0.root'))
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/00EFA74-F1C4-E311-A9A6-00261894389F.root'))
 
 # Set global tag
 process.load('Configuration.StandardSequences.Services_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "START53_V27::All"
+# process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_LV6A1.db') # use this in the VM
+# process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_LV6A1_MC_stripped.db') # use this in the container
+process.GlobalTag.globaltag = "START53_LV6A1::All"
 
 # Load PAT configs and build some light sequences
 process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
