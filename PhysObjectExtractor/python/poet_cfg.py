@@ -83,8 +83,8 @@ if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
 else: process.GlobalTag.globaltag = "START53_V27::All"
 #---- If the container has local DB files available, uncomment lines like the ones below
 #---- instead of the corresponding lines above
-#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/FT53_V21A_AN6_FULL_data_stripped.db')
-#else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/START53_V27_MC_stripped.db')
+#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL_data_stripped.db')
+#else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_V27_MC_stripped.db')
 #if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
 #else: process.GlobalTag.globaltag = "START53_V27::All"
 
