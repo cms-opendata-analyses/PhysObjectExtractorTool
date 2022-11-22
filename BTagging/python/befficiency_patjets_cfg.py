@@ -48,7 +48,7 @@ from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
 jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
 
 # Set up the new jet collection
-process.ak5PFJets.doAreaFastjet = True
+process.ak5PFJets.doAreaFastjet = True 
 addJetCollection(process,cms.InputTag('ak5PFJets'),
                  'AK5', 'PFCorr',
                  doJTA        = True,
