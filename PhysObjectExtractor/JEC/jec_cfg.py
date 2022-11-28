@@ -9,15 +9,20 @@ process = cms.Process('jecprocess')
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-# connect to global tag
-if isData:
-#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db') # use this in the VM
-#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL_data_stripped.db') # use this in the container
-    process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
-else:
-#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_V27.db') # use this in the VM
-#    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_V27_MC_stripped.db') # use this in the container
-    process.GlobalTag.globaltag = 'START53_V27::All'
+#---- connect to global tag 
+# use "connect" lines only if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client or using VM)
+# if isData:
+##    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db') # use this in the VM
+#    process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
+# else:
+##    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_V27.db') # use this in the VM
+#    process.GlobalTag.globaltag = 'START53_V27::All'
+#---- If the container has local DB files available, uncomment the four lines below
+#---- instead of the corresponding lines above
+if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL_data_stripped.db')
+else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_V27_MC_stripped.db')
+if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
+else: process.GlobalTag.globaltag = "START53_V27::All"
 
 
 # setup JetCorrectorDBReader 
