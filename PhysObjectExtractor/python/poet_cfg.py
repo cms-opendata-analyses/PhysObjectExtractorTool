@@ -76,17 +76,17 @@ process.source = cms.Source("PoolSource",
 #---- These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
-#---- Uncomment the two followingh lines if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client) 
+#---- Uncomment the two following lines if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client or VM) 
 #if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/FT_53_LV5_AN1.db')
 #else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb/START53_LV6A1.db')
-#---- If the container has local DB files available, uncomment the two lines like the ones below
+#---- If the container has local DB files available, use the two lines below
 #---- instead of the corresponding lines above
-#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_data_stripped.db')
-#else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_LV6A1_MC_stripped.db')
+if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_data_stripped.db')
+else:  process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/START53_LV6A1_MC_stripped.db')
 #---- The global tag must correspond to the needed epoch (comment out if no conditions needed)
 if isData: process.GlobalTag.globaltag = 'FT_53_LV5_AN1::All'
 else: process.GlobalTag.globaltag = "START53_LV6A1::All"
-
+	
 
 #---- Apply the data quality JSON file filter. This example is for 2011 data
 #---- It needs to be done after the process.source definition
