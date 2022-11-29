@@ -16,37 +16,49 @@ The `test` will contain analysis examples
 ## Usage instrucctions
 
 1. Set up a [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) and start it interactively (you could also work with a [virtual machine](https://opendata.cern.ch/docs/cms-virtual-machine-2015)):
-```
-docker run -it --name my_od -P -p 5901:5901 cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493 /bin/bash
-```
+  ```
+  docker run -it --name my_od -P -p 5901:5901  -p 6080:6080 cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493 /bin/bash
+  ```
 
 2. Obtain the code from git (this repository):
-```
-git clone -b 2015MiniAOD https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
-cd PhysObjectExtractorTool
-```
+  ```
+  git clone -b 2015MiniAOD https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
+  cd PhysObjectExtractorTool
+  ```
 
 3. Compile everything:
-```
-cd PhysObjectExtractor
-scram b
-```
+  ```
+  cd PhysObjectExtractor
+  scram b
+  ```
 
 4. Run the CMSSW job with the configuration file:
-```
-cmsRun poet_cfg.py <isData>
-```
+  ```
+  cmsRun python/poet_cfg.py <isData>
+  ```
 
-`<isData>` (to run on Data or not) is an optional boolean argument (default is False, i.e., runs over MC simulations)
+  `<isData>` (to run on Data or not) is an optional boolean argument (default is False, i.e., runs over MC simulations)
 
-5. As a result you will get myoutput.root file with simple variables.  If using the Windows OS, to check the contents of the .root file graphically, install a vnc viewer (e.g TigerVNC Viewer) and run:
+5. As a result you will get myoutput.root file with simple variables. To check the contents of the .root file graphically, use ROOT. To open a graphics window, start the VNC application with:
+  ```
+  start_vnc
+  ```
 
-```
-start_vnc
-//When prompted enter a password
-root myoutpoot.root
-TBrowser t
-```
+  Open the http link given in the message in a browser window of your local computer and connect using the password `cms.cern`. Alternatively, install a VNC viewer on your local computer and connect through it.
+
+  Open the file with ROOT and start a graphics browser:
+  ```
+  root myoutpoot.root
+  TBrowser t
+  ```
+
+6. Quit ROOT by typing `.q` in the terminal or selecting `Quit ROOT` in the `Broswer`menu of the graphical window. 
+
+  Stop the VNC application before exiting the container:
+  ```
+  stop_vnc
+  ```
+
 
 
 
