@@ -1,8 +1,8 @@
-name: Test workflow on plain docker
+name: Test workflow on 2015MiniAOD branch - plain docker
 on:
   pull_request:
     branches:
-      - master
+      - 2015MiniAOD
     
 jobs:
   test_workflow:
@@ -10,7 +10,7 @@ jobs:
     name: PhysObjectExtractor test - plain docker
     steps:
       # chmod of the script before getting to the container
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Prepare
         run: |
           mkdir outputs
@@ -18,12 +18,12 @@ jobs:
       - name: Going to a container
         id: container
         run: |
-          docker run -v $(pwd):/mnt/vol -w /home/cmsusr cmsopendata/cmssw_5_3_32 /bin/bash /mnt/vol/commands.sh
+          docker run -v $(pwd):/mnt/vol -w /home/cmsusr cmsopendata/cmssw_7_5_8_patch3-slc6_amd64_gcc491 /bin/bash /mnt/vol/commands.sh github python/poet_cfg.py True
           echo ls -l  `ls -l `
           cp *.root outputs
       # upload output file
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: output
           path: outputs/
