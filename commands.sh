@@ -20,8 +20,8 @@ cd PhysObjectExtractorTool
 cd PhysObjectExtractor
 scram b
 
-echo Going to run $config with isData $isData and doPat $doPat
-cmsRun $config $isData $doPat
+echo Going to run $config with isData $isData 
+cmsRun $config $isData 
 
 if [ $runas = github ]
 then
