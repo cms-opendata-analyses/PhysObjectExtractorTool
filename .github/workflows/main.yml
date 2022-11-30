@@ -18,7 +18,7 @@ jobs:
       - name: Going to a container
         id: container
         run: |
-          docker run -v $(pwd):/mnt/vol -w /home/cmsusr cmsopendata/cmssw_7_5_8_patch3-slc6_amd64_gcc491 /bin/bash /mnt/vol/commands.sh github python/poet_cfg.py True
+          docker run -v $(pwd):/mnt/vol -w /home/cmsusr cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493 /bin/bash /mnt/vol/commands.sh github python/poet_cfg.py True
           echo ls -l  `ls -l `
           cp *.root outputs
       # upload output file
