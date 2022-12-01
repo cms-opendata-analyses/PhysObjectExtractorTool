@@ -25,7 +25,7 @@ The `condor` directory hosts scripts that are useful if an HTCondor cluster can 
 
 1. Install CERN [virtual machine](http://opendata.cern.ch/docs/cms-virtual-machine-2011) or [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) from the CMS open data website.
 
-2. Set up your enviroment
+2. In the container, the environment is already set up and you can skip this step (and **do not** run `cmsenv`). In the virtual machine, set up your enviroment
 
 * Create a project area:
 ```
@@ -41,12 +41,13 @@ cd CMSSW_5_3_32/src/
 ```
 cmsenv
 ```
-3. Obtain the code from git:
+
+3. Obtain the code from git (in the VM, git clone in the "Outer shell"):
 ```
-git clone -b 2012 git://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
+git clone -b 2012 https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
 cd PhysObjectExtractorTool
 ```
-4. Compile everything:
+4. Compile everything (in the VM, compile and run in the "CMS shell"):
 ```
 cd PhysObjectExtractor
 scram b
