@@ -42,25 +42,29 @@ cd CMSSW_5_3_32/src/
 cmsenv
 ```
 
-3. Obtain the code from git (in the VM, git clone in the "Outer shell"):
+3. Obtain the code from git (in the VM, do this in the "Outer shell" in the CMSSW_5_3_32/src/ directory):
 ```
-git clone -b 2012 https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
-cd PhysObjectExtractorTool
+git clone -b 2012 https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
 ```
 4. Compile everything (in the VM, compile and run in the "CMS shell"):
 ```
-cd PhysObjectExtractor
+cd PhysObjectExtractorTool/PhysObjectExtractor
 scram b
 ```
 5. Make a soft link to the python configuration file
 ```
 ln -s python/poet_cfg.py .
 ```
-6. **Only if your are using the VM** and not the Docker container, make symbolic links to the conditions database.  In fact if you are not extracting information about corrections (e.g., jet corrections) or the trigger, you could actually comment out all the lines that have to do with the *global tag* (conditions database).
+6. **Only if your are using the VM** and not the Docker container, make symbolic links to the [conditions databases](https://opendata.cern.ch/docs/cms-guide-for-condition-database) for data and MC. 
 ```
-ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA FT_53_LV5_AN1
-ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RUNA.db
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL FT53_V21A_AN6
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db FT53_V21A_AN6_FULL.db
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL FT53_V21A_AN6_FULL
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/START53_V27 START53_V27
+ln -sf /cvmfs/cms-opendata-conddb.cern.ch/START53_V27.db START53_V27.db
 ```
+In addition (only if you are using the VM), in the configuration file `poet_cfg.py`, remove `_data_stripped` and `MC_stripped` in the database names in the `process.GlobalTag.connect` lines, and remove `_FULL` from the GlobalTag name for data. Note that if you are not extracting information about corrections (e.g., jet corrections) or the trigger, you could actually comment out all the lines that have to do with the *global tag* (conditions database).
+
 7. Run the CMSSW configuration file:
 ```
 cmsRun poet_cfg.py <isData> <doPat>
