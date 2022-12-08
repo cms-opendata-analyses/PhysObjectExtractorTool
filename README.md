@@ -4,7 +4,7 @@
 
 The POET repository contains packages that verse instructions and examples on how to extract physics (objects) information from Run 1 (AOD format) CMS open/legacy data and methods or tools needed for processing them. These objects can be: electrons, muons, photons, jets, tracks, etc.
 
-Please check out the `README` in each package for further instructions.
+Please check out the `README` in each package  and the [physics object pages](https://cms-opendata-guide.web.cern.ch/analysis/selection/objects/objects/) in the CMS open data guide for further instructions.
 
 ## References
 
