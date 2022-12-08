@@ -217,15 +217,14 @@ JetAnalyzer::~JetAnalyzer()
 
 double
 JetAnalyzer::getBtagEfficiency(double pt){
-  if(pt < 25) return 0.263407;
-  else if(pt < 50) return 0.548796;
-  else if(pt < 75) return 0.656801;
-  else if(pt < 100) return 0.689167;
-  else if(pt < 125) return 0.697911;
-  else if(pt < 150) return 0.700187;
-  else if(pt < 200) return 0.679236;
-  else if(pt < 400) return 0.625296;
-  else return 0.394916;
+  if(pt < 30) return 0.417808;
+  else if(pt < 50) return 0.593633;
+  else if(pt < 70) return 0.669537;
+  else if(pt < 100) return 0.717675;
+  else if(pt < 150) return 0.730185;
+  else if(pt < 200) return 0.731590;
+  else if(pt < 500) return 0.622691;
+  else return 0.562500;
 }
 
 //Function that gets the efficiencies for C tag jets.
@@ -233,15 +232,14 @@ JetAnalyzer::getBtagEfficiency(double pt){
 
 double
 JetAnalyzer::getCtagEfficiency(double pt){
-  if(pt < 25) return 0.065630;
-  else if(pt < 50) return 0.161601;
-  else if(pt < 75) return 0.209222;
-  else if(pt < 100) return 0.242979;
-  else if(pt < 125) return 0.223005;
-  else if(pt < 150) return 0.210210;
-  else if(pt < 200) return 0.225191;
-  else if(pt < 400) return 0.227437;
-  else return 0.153846;
+  if(pt < 30) return 0.124469;
+  else if(pt < 50) return 0.177673;
+  else if(pt < 70) return 0.197928;
+  else if(pt < 100) return 0.205799;
+  else if(pt < 150) return 0.220142;
+  else if(pt < 200) return 0.187970;
+  else if(pt < 500) return 0.164000;
+  else return 0.164000;
 }
 
 //Function that gets the efficiencies for LF tag jets.
@@ -249,15 +247,14 @@ JetAnalyzer::getCtagEfficiency(double pt){
 
 double
 JetAnalyzer::getLFtagEfficiency(double pt){
-  if(pt < 25) return 0.002394;
-  else if(pt < 50) return 0.012683;
-  else if(pt < 75) return 0.011459;
-  else if(pt < 100) return 0.012960;
-  else if(pt < 125) return 0.011424;
-  else if(pt < 150) return 0.011727;
-  else if(pt < 200) return 0.011302;
-  else if(pt < 400) return 0.014760;
-  else return 0.011628;
+  if(pt < 30) return 0.010714;
+  else if(pt < 50) return 0.012957;
+  else if(pt < 70) return 0.011583;
+  else if(pt < 100) return 0.013022;
+  else if(pt < 150) return 0.014923;
+  else if(pt < 200) return 0.019355;
+  else if(pt < 500) return 0.016097;
+  else return 0.016097;
 }
 
 //Function that gets the SF for B or C tag jets since there equations from the CSV.csv files are the same.

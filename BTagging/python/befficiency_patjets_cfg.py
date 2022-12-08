@@ -30,7 +30,13 @@ process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 ##### ------- This is a test file
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/00EFA74-F1C4-E311-A9A6-00261894389F.root'))
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/0005D1FB-4BCF-E311-9FE4-002590A8312A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/002B0269-0DC7-E311-8AC7-002481E150DA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/002D845F-65C7-E311-96FE-001E6739689C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/002FB2D4-F6C7-E311-8D85-002590A3C95E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/00332A5F-6DC8-E311-9955-002481E154CE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2011/Summer11LegDR/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S13_START53_LV6-v1/00000/00345E78-7CC5-E311-A9C7-001E6739730A.root',
+        ))
 
 # Set global tag
 process.load('Configuration.StandardSequences.Services_cff')
@@ -41,6 +47,17 @@ process.GlobalTag.globaltag = "START53_LV6A1::All"
 
 # Load PAT configs and build some light sequences
 process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
+from PhysicsTools.PatAlgos.producersLayer1.jetProducer_cfi import patJets
+patJets.discriminatorSources = cms.VInputTag(
+    cms.InputTag("combinedSecondaryVertexBJetTags"),
+    cms.InputTag("combinedSecondaryVertexMVABJetTags"),
+    cms.InputTag("jetBProbabilityBJetTags"),
+    cms.InputTag("jetProbabilityBJetTags"),
+    cms.InputTag("simpleSecondaryVertexHighEffBJetTags"),
+    cms.InputTag("simpleSecondaryVertexHighPurBJetTags"),
+    cms.InputTag("trackCountingHighEffBJetTags"),
+    cms.InputTag("trackCountingHighPurBJetTags"),
+    )
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
 process.patDefaultSequence = cms.Sequence(process.makePatJets * process.selectedPatJets)
 process.load('RecoJets.Configuration.RecoPFJets_cff')

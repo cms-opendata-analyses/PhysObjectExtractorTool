@@ -124,7 +124,7 @@ WeightAnalyzerBEff::WeightAnalyzerBEff(const edm::ParameterSet& iConfig):
   edm::InputTag GEIPtag("generator");
 
   //Make histograms to save counts
-  double ptbinsB[10] = {0, 15, 30, 50, 70, 100, 150, 200, 500, 1000};
+  double ptbinsB[10] = {0, 20, 30, 50, 70, 100, 150, 200, 500, 1000};
   BEff_Dptbins_b    = fs->make<TH1D>("BEff_Dptbins_b   ","",9,ptbinsB); BEff_Dptbins_b->Sumw2();
   BEff_Dptbins_c    = fs->make<TH1D>("BEff_Dptbins_c   ","",9,ptbinsB); BEff_Dptbins_c->Sumw2();
   BEff_Dptbins_udsg = fs->make<TH1D>("BEff_Dptbins_udsg","",9,ptbinsB); BEff_Dptbins_udsg->Sumw2();
