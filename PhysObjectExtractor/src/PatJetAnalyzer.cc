@@ -527,13 +527,11 @@ PatJetAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 std::vector<float>
 PatJetAnalyzer::factorLookup(float eta) { //used in jet loop for JER factor value
   //eta input is > 0
-  if(eta > 3.2) return {1.056, 0.865, 1.247}; // {factor, factor_down, factor_up}
-  else if(eta > 2.8) return {1.395, 1.332, 1.468};
-  else if(eta > 2.3) return {1.254, 1.192, 1.316};
-  else if(eta > 1.7) return {1.208, 1.162, 1.254};
-  else if(eta > 1.1) return {1.121, 1.092, 1.15};
-  else if(eta > .5) return {1.099, 1.071, 1.127};
-  else return {1.079, 1.053, 1.105};
+  if(eta > 2.3) return {1.288, 1.089, 1.488}; // {factor, factor_down, factor_up}
+  else if(eta > 1.7) return {1.134, 1.042, 1.228};
+  else if(eta > 1.1) return {1.096, 1.032, 1.161};
+  else if(eta > .5) return {1.057, 1.001, 1.114};
+  else return {1.052, 0.990, 1.115};
 }
 
 //define this as a plug-in
