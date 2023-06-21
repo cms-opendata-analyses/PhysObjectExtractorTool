@@ -1,76 +1,70 @@
-# Physics Objects Extractor (PhysObjectExtractor)
+# Physics Objects Extractor (PhysObjectExtractor) for 2015MiniAOD data
 
 ## Description
-
-The `PhysObjectExtractor` package is the heart of the POET repository.  It contains a collection of [EDAnalyzers](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswanalyzers/) that extract information of different physics objects into a [ROOT](https://cms-opendata-guide.web.cern.ch/tools/root/) file called `myoutput.root`.  They have been written separately for clarity and can be executed modularly using a single configuration file called `poet_cfg.py`.
+The `PhysObjectExtractor` package is the heart of the POET repository.  It contains a collection of [EDAnalyzers](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswanalyzers/) that extract information from different physics objects into a [ROOT](https://cms-opendata-guide.web.cern.ch/tools/root/) file called `myoutput.root`.  They have been written separately for clarity and can be executed modularly using a single configuration file called `poet_cfg.py`.
 
 The package is meant to resemble a [CMSSW](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswoverview/) package.  It installs and runs in a similar way.
 
 The `data` directory is reserved for files with information about the location of datafiles, data quality files, etc.
 
-The `JEC` directory hosts text files with energy corrections for jets. These were obtained executing the `jec_cfg.py` config file that resides within.
-
 The `python` directory hosts the configuration file `poet_cfg.py` and possibly special versions of it.
 
-The `src` directory hosts the C++ source code of all the different `EDAnalyzers` that can be configured using `python/poet_cfg.py`.  In the code, there are several comments explaining the logic.  Some links to appropiate references were added to expand the knowledge on the subject.
+The `src` directory hosts the C++ source code of all the different `EDAnalyzers` (and possibly some example filters) that can be configured using `python/poet_cfg.py`.  In the code, there are several comments explaining the logic.  Some links to appropiate references were added to expand the knowledge on the subject.
 
-The `test` directory contains `ROOT` analysis templates/examples that can be used to analyze the resulting `myoutput.root` files if needed.
+The `test` will contain analysis examples
 
-The `condor` directory hosts scripts that are useful if an HTCondor cluster can be used to run containerized jobs.  These scripts work from the `PhysObjectExtractorTool/PhysObjectExtractor` level and have to be modified according to particular needs.  
+## Usage instructions
 
+1. Set up a [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) and start it interactively (you could also work with a [virtual machine](https://opendata.cern.ch/docs/cms-virtual-machine-2015)):
+    ```
+    docker run -it --name my_od -P -p 5901:5901  -p 6080:6080 cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493 /bin/bash
+    ```
 
+2. Obtain the code from git (this repository):
+    ```
+    git clone -b 2015MiniAOD https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
+    cd PhysObjectExtractorTool
+    ```
 
+3. Compile everything:
+    ```
+    cd PhysObjectExtractor
+    scram b
+    ```
 
-## Usage instrucctions
+4. Run the CMSSW job with the configuration file:
+    ```
+    cmsRun python/poet_cfg.py <isData>
+    ```
 
-1. Install CERN [virtual machine](http://opendata.cern.ch/docs/cms-virtual-machine-2011) or [Docker container](https://opendata.cern.ch/docs/cms-guide-docker) from the CMS open data website.
+    `<isData>` (to run on Data or not) is an optional boolean argument (default is False, i.e., runs over MC simulations)
 
-2. Set up your enviroment
+5. As a result you will get myoutput.root file with simple variables. To check the contents of the .root file graphically, use ROOT. To open a graphics window, start the VNC application with:
+    ```
+    start_vnc
+    ```
 
-* Create a project area:
-```
-cmsrel CMSSW_5_3_32
-```
-* Change to the CMSSW_5_3_32/src/ directory:
+    Open the http link given in the message in a browser window of your local computer and connect using the password `cms.cern`. Alternatively, install a VNC viewer on your local computer and connect through it.
 
-```
-cd CMSSW_5_3_32/src/
-```
-* Then, run the following command to create the CMS runtime variables:
+    Open the file with ROOT and start a graphics browser:
+    ```
+    root myoutpoot.root
+    TBrowser t
+    ```
 
-```
-cmsenv
-```
-3. Obtain the code from git:
-```
-git clone git://github.com/cms-legacydata-analyses/PhysObjectExtractorTool.git
-cd PhysObjectExtractorTool
-```
-4. Compile everything:
-```
-cd PhysObjectExtractor
-scram b
-```
-5. Make a soft link to the python configuration file
-```
-ln -s python/poet_cfg.py .
-```
-6. **Only if your are using the VM** and not the Docker container, make symbolic links to the conditions database.  In fact if you are not extracting information about corrections (e.g., jet corrections) or the trigger, you could actually comment out all the lines that have to do with the *global tag* (conditions database).
-```
-ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA FT_53_LV5_AN1
-ln -sf /cvmfs/cms-opendata-conddb.cern.ch/FT_53_LV5_AN1_RUNA.db FT_53_LV5_AN1_RUNA.db
-```
-7. Run the CMSSW configuration file:
-```
-cmsRun poet_cfg.py <isData> <doPat>
-```
+6. Quit ROOT by typing `.q` in the terminal or selecting `Quit ROOT` in the `Broswer`menu of the graphical window. 
 
-`<isData>` (to run on Data or not) is an optional boolean argument (default is `False`, i.e., runs over MC simulations)
-
-`<doPat>` (to run Physics Analysis Tool routines) is an optional boolean argument (default is `False`)
+    Stop the VNC application before exiting the container:
+    ```
+    stop_vnc
+    ```
 
 
-The result will be a `myoutput.root` file with simple variables.  The information in this file is organized in `ROOT` directories corresponding to each type of physics object (or kind of information).  In order to further analyze the data in these file, the analysis templates in the `test` folder may be used.
+
+
+
+
+
 
 
 

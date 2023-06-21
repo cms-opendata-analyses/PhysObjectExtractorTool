@@ -1,55 +1,46 @@
 // -*- C++ -*-
 //
-// Package:    VertexAnalyzer
+// Package:    Vertex/VertexAnalyzer
 // Class:      VertexAnalyzer
-// 
-/**\class VertexAnalyzer VertexAnalyzer.cc Vertex/VertexAnalyzer/src/VertexAnalyzer.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
-*/
 //
-// Original Author:  
-//         Created:  Sat Jun 12 11:03:58 CEST 2021
-// $Id$
-//
-//
-
-
+ 
 // system include files
 #include <memory>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
+#include "FWCore/Utilities/interface/InputTag.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
+//class to extract Vertex information
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/TrackReco/interface/HitPattern.h"
-
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
+
+//classes to save data
 #include "TTree.h"
 #include "TFile.h"
-#include <vector>
+#include<vector>
 //
 // class declaration
 //
 
-class VertexAnalyzer : public edm::EDAnalyzer {
+// If the analyzer does not use TFileService, please remove
+// the template argument to the base class so the class inherits
+// from  edm::one::EDAnalyzer<>
+// This will improve performance in multithreaded jobs.
+
+
+
+class VertexAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
       explicit VertexAnalyzer(const edm::ParameterSet&);
       ~VertexAnalyzer();
@@ -58,23 +49,20 @@ class VertexAnalyzer : public edm::EDAnalyzer {
 
 
    private:
-      virtual void beginJob() ;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
+      virtual void beginJob() override;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void endJob() override;
 
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+      edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
+      edm::EDGetTokenT<reco::BeamSpot> beamToken_;
 
       // ----------member data ---------------------------
-    
+      
     TTree *mtree; 
     std::vector<float> PV_chi2;
     std::vector<float> PV_ndof;
     int PV_npvs;
     int PV_npvsGood;
-    std::vector<float> PV_score;
     std::vector<float> PV_x;
     std::vector<float> PV_y; 
     std::vector<float> PV_z;
@@ -92,13 +80,17 @@ class VertexAnalyzer : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
-
+VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig): 
+   vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices"))),
+   beamToken_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beams")))
+   
+   
 {
    //now do what ever initialization is needed
-  
+   
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
+  
    mtree->Branch("PV_chi2",&PV_chi2);
    mtree->GetBranch("PV_chi2")->SetTitle("main primary vertex chi2");
    mtree->Branch("PV_ndof",&PV_ndof);
@@ -107,8 +99,6 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
    mtree->GetBranch("PV_npvs")->SetTitle("total number of reconstructed primary vertices");
    mtree->Branch("PV_npvsGood",&PV_npvsGood);
    mtree->GetBranch("PV_npvsGood")->SetTitle("number of good reconstructed primary vertices. selection:!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2");
-   mtree->Branch("PV_score",&PV_score);
-   mtree->GetBranch("PV_score")->SetTitle("main primary vertex score, i.e. sum pt2 of clustered objects");
    mtree->Branch("PV_x",&PV_x);
    mtree->GetBranch("PV_x")->SetTitle("main primary vertex x coordinate");
    mtree->Branch("PV_y",&PV_y);
@@ -120,7 +110,7 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
 
 VertexAnalyzer::~VertexAnalyzer()
 {
- 
+
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 
@@ -137,50 +127,40 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
 
+   Handle<reco::VertexCollection> vertices;
+   iEvent.getByToken(vtxToken_, vertices);
+   if (vertices->empty()) return; // skip the event if no PV found
+    
+
+   Handle<reco::BeamSpot> beamSpotHandle;
+   iEvent.getByToken(beamToken_, beamSpotHandle);
+   reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
+
    PV_chi2.clear();
    PV_ndof.clear();
-   PV_score.clear();
    PV_x.clear();
    PV_y.clear();
    PV_z.clear();
    PV_npvs=0;
    PV_npvsGood=0;
-
-   edm::Handle<reco::VertexCollection> Primvertex;
-   iEvent.getByLabel("offlinePrimaryVertices",Primvertex);
-
-   Handle<reco::TrackCollection> tracks;
-   iEvent.getByLabel("generalTracks", tracks);
-
-   edm::Handle<reco::BeamSpot> beamSpotHandle;
-   iEvent.getByLabel("offlineBeamSpot", beamSpotHandle);
-   reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
    
-   if(Primvertex.isValid())
-   {
-     PV_npvs=Primvertex->size();
-     Bsp_z = vertexBeamSpot.z0();
-     for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
-     {
-       float score=0;
-       PV_chi2.push_back(vite->chi2());
-       PV_ndof.push_back(vite->ndof());
-       PV_x.push_back(vite->x());
-       PV_y.push_back(vite->y());
-       PV_z.push_back(vite->z());
-       for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)
-	    {
-	     const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>();
-        float trackpt = trackRef->pt();
-        score += trackpt*trackpt;
-	    }
-      PV_score.push_back(score);
-      if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.)
-      ++PV_npvsGood;
-      }
-  }
- mtree->Fill();
+   Bsp_z = vertexBeamSpot.z0();
+     for (const reco::Vertex &vtx : *vertices)
+    {
+       PV_chi2.push_back(vtx.chi2());
+       PV_ndof.push_back(vtx.ndof());
+       PV_x.push_back(vtx.x());
+       PV_y.push_back(vtx.y());
+       PV_z.push_back(vtx.z());
+       ++PV_npvs;
+       if (!vtx.isFake() && vtx.isValid() && vtx.ndof()>4 && fabs(vtx.z()-Bsp_z)<24. && vtx.position().Rho() < 2.)
+       ++PV_npvsGood;
+    } 
 
+  mtree->Fill();
+  return;      
+          
+ 
 }
 
 
@@ -192,31 +172,7 @@ VertexAnalyzer::beginJob()
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
-VertexAnalyzer::endJob() 
-{
-}
-
-// ------------ method called when starting to processes a run  ------------
-void
-VertexAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a run  ------------
-void
-VertexAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-void
-VertexAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-void
-VertexAnalyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+VertexAnalyzer::endJob()
 {
 }
 
@@ -228,6 +184,7 @@ VertexAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.setUnknown();
   descriptions.addDefault(desc);
+
 }
 
 //define this as a plug-in

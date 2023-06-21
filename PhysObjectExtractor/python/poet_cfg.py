@@ -2,14 +2,10 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
-
-import os 
 import sys
 
-relBase = os.environ['CMSSW_BASE']
-
-#---- sys.argv takes the parameters given as input cmsRun PhysObjectExtractor/python/poet_cfg.py <isData (default=False)> <doPat (default=False)> 
-#----  e.g: cmsRun PhysObjectExtractor/python/poet_cfg.py True True
+#---- sys.argv takes the parameters given as input cmsRun PhysObjectExtractor/python/poet_cfg.py <isData (default=False)>
+#----  e.g: cmsRun PhysObjectExtractor/python/poet_cfg.py True
 #---- NB the first two parameters are always "cmsRun" and the config file name
 #---- Work with data (if False, assumed MC simulations)
 #---- This needs to be in agreement with the input files/datasets below.
@@ -17,13 +13,8 @@ if len(sys.argv) > 2:
     isData = eval(sys.argv[2])
 else:
     isData = False
-
-#---- Flag for using the Physics Analysis Toolkit for jets and MET
-if len(sys.argv) > 3:
-    doPat = eval(sys.argv[3])
-else:
-    doPat = False
-
+isMC = True
+if isData: isMC = False
 
 process = cms.Process("POET")
 
@@ -37,178 +28,163 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 #---- Select the maximum number of events to process (if -1, run over all events)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
-#---- Load needed configuration
+#---- Needed configuration for dealing with transient tracks if required
+process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
 #---- Define the test source files to be read using the xrootd protocol (root://), or local files (file:)
-#---- Several files can be comma-separated
-#---- A local file, for testing, can be downloaded using, e.g., the cern open data client (https://cernopendata-client.readthedocs.io/en/latest/):
-#---- python cernopendata-client download-files --recid 6004 --filter-range 1-1
-#---- For running over larger number of files, comment out this section and use/uncomment the FileUtils infrastructure below
-if isData: 
-	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-else: 
-	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-        #'file:/playground/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'
-	sourceFile
-    )
+process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
+        #'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0005EA25-8CB8-E511-A910-00266CF85DA0.root'   
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext3-v1/00000/02837459-03C2-E511-8EA2-002590A887AC.root'
+        )
 )
+if isData:
+    process.source.fileNames = cms.untracked.vstring(
+        #'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/000913F7-E9A7-E511-A286-003048FFD79C.root'
+	'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/001A703B-B52E-E611-BA13-0025905A60B6.root'
+        )
 
-#---- Alternatively, to run on larger scale, one could use index files as obtained from the Cern Open Data Portal
-#---- and pass them into the PoolSource.  The example is for 2012 data
-#files = FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_10000_file_index.txt")
-#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20000_file_index.txt"))
-#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20001_file_index.txt"))
-#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20002_file_index.txt"))
-#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_210000_file_index.txt"))
-#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_30000_file_index.txt"))
-#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_310000_file_index.txt"))
-#process.source = cms.Source(
-#    "PoolSource", fileNames=cms.untracked.vstring(*files))
-
+    #---- Apply the data quality JSON file filter. This example is for 2015 data
+    #---- It needs to be done after the process.source definition
+    #---- Make sure the location of the file agrees with your setup
+    goodJSON = "data/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_v2.txt"
+    myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
+    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+    process.source.lumisToProcess.extend(myLumis)
 
 
 #---- These two lines are needed if you require access to the conditions database. E.g., to get jet energy corrections, trigger prescales, etc.
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #---- Uncomment and arrange a line like this if you are getting access to the conditions database through CVMFS snapshot files (requires installing CVMFS client)
-#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/FT53_V21A_AN6_FULL.db')
+#process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_dataRun2_16Dec2015_v0.db')
+#---- If the container has local DB files available, uncomment lines like the ones below instead of the corresponding lines above
+if isData: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_dataRun2_16Dec2015_v0.db')
+else: process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_mcRun2_asymptotic_RunIIFall15DR76_v1.db')
 #---- The global tag must correspond to the needed epoch (comment out if no conditions needed)
-if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
-else: process.GlobalTag.globaltag = "START53_V27::All"
-#---- If the container has local DB files available, uncomment lines like the ones below
-#---- instead of the corresponding lines above
-#if isData: process.GlobalTag.connect = cms.string('sqlite_file:/opt/cms-opendata-conddb/FT53_V21A_AN6_FULL_data_stripped.db')
-#else:  process.GlobalTag.connect = cms.string('sqlite_file:/opt/cms-opendata-conddb/START53_V27_MC_stripped.db')
-#if isData: process.GlobalTag.globaltag = 'FT53_V21A_AN6_FULL::All'
-#else: process.GlobalTag.globaltag = "START53_V27::All"
+if isData: process.GlobalTag.globaltag = '76X_dataRun2_16Dec2015_v0'
+else: process.GlobalTag.globaltag = "76X_mcRun2_asymptotic_RunIIFall15DR76_v1"
+
+#----- Configure POET analyzers -----#
+process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer', 
+                                     electrons = cms.InputTag("slimmedElectrons"), 
+                                     vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
+
+process.mymuons = cms.EDAnalyzer('MuonAnalyzer', 
+                                 muons = cms.InputTag("slimmedMuons"), 
+                                 vertices=cms.InputTag("offlineSlimmedPrimaryVertices"))
+
+process.mytaus = cms.EDAnalyzer('TauAnalyzer', taus=cms.InputTag("slimmedTaus"))
+
+process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimmedPhotons"))
+
+#---- Module to store trigger objects (functional but not fully developed yet) -------#
+#process.mytrigobjs = cms.EDAnalyzer('TriggObjectAnalyzer', objects = cms.InputTag("selectedPatTrigger"))
+
+#---- Example on how to add trigger information
+#---- To include it, uncomment the lines below and include the
+#---- module in the final path
+#process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
+#                              processName = cms.string("HLT"),
+#                              #---- These are example of OR of triggers for 2015
+#                              #---- Wildcards * and ? are accepted (with usual meanings)
+#                              #---- If left empty, all triggers will run              
+#                              triggerPatterns = cms.vstring("HLT_IsoMu20_v*","HLT_IsoTkMu20_v*"), 
+#                              triggerResults = cms.InputTag("TriggerResults","","HLT")
+#                              )
 
 
-#---- Apply the data quality JSON file filter. This example is for 2012 data
-#---- It needs to be done after the process.source definition
-#---- Make sure the location of the file agrees with your setup
-if isData:
-	goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
-	myLumis = LumiList.LumiList(filename=goodJSON).getCMSSWString().split(",")
-	process.source.lumisToProcess = CfgTypes.untracked(
-	    	CfgTypes.VLuminosityBlockRange())
-	process.source.lumisToProcess.extend(myLumis)
+process.mypvertex = cms.EDAnalyzer('VertexAnalyzer',
+                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"), 
+                                   beams=cms.InputTag("offlineBeamSpot"))
 
+process.mygenparticle = cms.EDAnalyzer('GenParticleAnalyzer', 
+                                       pruned=cms.InputTag("prunedGenParticles"),
+                                       #---- Collect particles with specific "status:pdgid"
+                                       #---- if 0:0, collect them all 
+                                       input_particle = cms.vstring("1:11","1:13","1:22","2:15"))
 
-#---- Configure the PhysObjectExtractor modules!
+#----- Begin Jet correction setup -----#
+JecString = 'MC'
+if isData: JecString = 'DATA'
 
-#---- More information about InputCollections at https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideRecoDataTable
-process.myevents = cms.EDAnalyzer('EventAnalyzer')	                             
+from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector
+from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import updatedPatJetCorrFactors
+from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cfi import updatedPatJets
 
-process.myelectrons = cms.EDAnalyzer('ElectronAnalyzer',
-				     InputCollection = cms.InputTag("gsfElectrons")
-				     )
+#----- Apply the noise jet ID filter -----#
+process.looseAK4Jets = cms.EDFilter("PFJetIDSelectionFunctorFilter",
+                                    filterParams = pfJetIDSelector.clone(),
+                                    src = cms.InputTag("slimmedJets"))
+process.looseAK8Jets = cms.EDFilter("PFJetIDSelectionFunctorFilter",
+                                    filterParams = pfJetIDSelector.clone(),
+                                    src = cms.InputTag("slimmedJetsAK8"))
 
-process.mymuons = cms.EDAnalyzer('MuonAnalyzer',
-				 InputCollection = cms.InputTag("muons")
-				 )
+#----- Apply the final jet energy corrections for 2015 -----#
+process.patJetCorrFactorsReapplyJEC = updatedPatJetCorrFactors.clone(src = cms.InputTag("looseAK4Jets"))
+if isData: process.patJetCorrFactorsReapplyJEC.levels.append('L2L3Residual')
+process.slimmedJetsNewJEC = updatedPatJets.clone(
+    jetSource = cms.InputTag("looseAK4Jets"),
+    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC")),
+)
+process.patJetCorrFactorsReapplyJECAK8 = updatedPatJetCorrFactors.clone(
+        src = cms.InputTag("looseAK8Jets"),
+        levels = ['L1FastJet', 'L2Relative', 'L3Absolute'],
+        payload = 'AK8PFchs'
+        )
+if isData: process.patJetCorrFactorsReapplyJECAK8.levels.append('L2L3Residual')
+process.slimmedJetsAK8NewJEC = updatedPatJets.clone(
+    jetSource = cms.InputTag("looseAK8Jets"),
+    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJECAK8")),
+)
 
-process.myphotons = cms.EDAnalyzer('PhotonAnalyzer',
-                                   InputCollection = cms.InputTag("photons")
-				   )
-
-#---- Jet correction paths -- these correspond to the Global Tag. **Run jec_cfg.py first to get .txt files!!**
-JecString = 'START53_V27_'
-if isData: JecString = 'FT53_V21A_AN6_'
-
-#---- Jets are simpler to work with in "Physics Analysis Toolkit" format. See more at https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPAT
-if doPat:
-	#---- Load PAT configs and build some light sequences to process jets and MET
-	process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
-	process.load('PhysicsTools.PatAlgos.producersLayer1.metProducer_cff')
-	process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-	process.patCandidates = cms.Sequence(process.makePatJets+process.makePatMETs)
-	process.selectedPatCandidates = cms.Sequence(process.selectedPatJets)
-	process.patDefaultSequence = cms.Sequence(process.patCandidates * process.selectedPatCandidates)
-	process.load('RecoJets.Configuration.RecoPFJets_cff')
-	from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, runBTagging
-	from PhysicsTools.PatAlgos.tools.coreTools import runOnData
-
-	#---- Choose which jet correction levels to apply
-	jetcorrlabels = ['L1FastJet','L2Relative','L3Absolute']
-	if isData:
-		#---- For data we need to remove generator-level matching processes
-		runOnData(process, ['Jets','METs'], "", None, [])
-		jetcorrlabels.append('L2L3Residual')
-
-	#---- Configure the addJetCollection tool
-	#---- This process will make corrected jets with b-tagging included, and will make Type1-corrected MET
-	process.ak5PFJets.doAreaFastjet = True
-	addJetCollection(process,cms.InputTag('ak5PFJets'),
-			 'AK5', 'PFCorr',
-			 doJTA        = True,
-			 doBTagging   = True, 
-			 jetCorrLabel = ('AK5PF', cms.vstring(jetcorrlabels)),
-			 doType1MET   = True,
-			 doL1Cleaning = False,
-			 doL1Counters = False,
-			 doJetID      = True,
-			 jetIdLabel   = "ak5",
-			 ) 
- 
-	#---- Configure the POET jet analyzer
-	#---- Don't forget to run jec_cfg.py to get these .txt files!
-	process.myjets= cms.EDAnalyzer('PatJetAnalyzer',
-				       InputCollection = cms.InputTag("selectedPatJetsAK5PFCorr"),
-				       isData = cms.bool(isData),
-				       jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'), 
-				       jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')         
-				       )
-else:
-	if not isData:
-		#---- Get non-PAT access to the jet flavour information
-		from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
-		process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone()
-		from PhysicsTools.JetMCAlgos.AK5PFJetsMCFlavourInfos_cfi import ak5JetFlavourInfos
-		process.jetFlavourInfosAK5PFJets = ak5JetFlavourInfos.clone()
-
-	#---- Configure the POET jet analyzer
-	#---- Don't forget to run jec_cfg.py to get these .txt files!
-	process.myjets= cms.EDAnalyzer('JetAnalyzer',
-				       InputCollection = cms.InputTag("ak5PFJets"),
-				       isData = cms.bool(isData),
-				       jecL1Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L1FastJet_AK5PF.txt'), 
-				       jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2Relative_AK5PF.txt'),
-				       jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L3Absolute_AK5PF.txt'),
-				       jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'L2L3Residual_AK5PF.txt'),
-				       jecUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/'+JecString+'Uncertainty_AK5PF.txt'),
-				       jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/JetResolutionInputAK5PF.txt')
-				       )
-
-process.mymets= cms.EDAnalyzer('MetAnalyzer',
-                               InputCollection = cms.InputTag("pfMet"),
-			       doPat = cms.bool(doPat),
-			       )
-if doPat: process.mymets.InputCollectionPat = cms.InputTag("pfType1CorrectedMet")
-
-process.mytaus = cms.EDAnalyzer('TauAnalyzer',
-                                InputCollection = cms.InputTag("hpsPFTauProducer")
+#----- Configure the POET jet analyzers -----#
+process.myjets = cms.EDAnalyzer('JetAnalyzer', 
+				jets = cms.InputTag("slimmedJetsNewJEC"),
+				isData = cms.bool(isData),
+				jetJECUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_MC_Uncertainty_AK4PFchs.txt'), 
+                                jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_MC_PtResolution_AK4PFchs.txt'),
+                                jerSFName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_MC_SF_AK4PFchs.txt'),
+				)
+process.myfatjets = cms.EDAnalyzer('FatjetAnalyzer', 
+				fatjets = cms.InputTag("slimmedJetsAK8NewJEC"),
+				isData = cms.bool(isData),
+                                jecL2Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_'+JecString+'_L2Relative_AK8PFchs.txt'), 
+                                jecL3Name = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_'+JecString+'_L3Absolute_AK8PFchs.txt'), 
+                                jecResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_DATA_L2L3Residual_AK8PFchs.txt'), 
+				jetJECUncName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_MC_Uncertainty_AK8PFchs.txt'), 
+                                jerResName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_MC_PtResolution_AK8PFchs.txt'),
+                                jerSFName = cms.FileInPath('PhysObjectExtractorTool/PhysObjectExtractor/JEC/Fall15_25nsV2_MC_SF_AK4PFchs.txt'), # AK8 == AK4
 				)
 
-process.mytrigEvent = cms.EDAnalyzer('TriggObjectAnalyzer',
-                                     filterName = cms.string("hltL2DoubleMu23NoVertexL2PreFiltered"),
-                             )
+#----- Propagate the jet energy corrections to the MET -----#
+from PhysicsTools.PatAlgos.tools.metTools import addMETCollection
+from PhysicsTools.PatUtils.patPFMETCorrections_cff import patPFMetT1T2Corr
 
-process.mypvertex = cms.EDAnalyzer('VertexAnalyzer')
+process.uncorrectedMet = cms.EDProducer("RecoMETExtractor",
+        correctionLevel = cms.string('raw'),
+        metSource = cms.InputTag("slimmedMETs", "", "@skipCurrentProcess")
+        )
 
-process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
+addMETCollection(process, labelName="uncorrectedPatMet", metSource="uncorrectedMet")
+process.uncorrectedPatMet.addGenMET = False
 
-process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
-				      #---- Collect particles with specific "pdgid:status"
-                                      #---- Check PDG ID in the PDG.
-				      #---- if 0:0, collect them all	
-				      input_particle = cms.vstring("1:11","1:13","1:22","2:15")
-				      )
+#----- Evaluate the Type-1 correction -----#
+
+process.Type1CorrForNewJEC = patPFMetT1T2Corr.clone(
+        isMC = cms.bool(isMC),
+        src = cms.InputTag("slimmedJetsNewJEC"),
+        )
+process.slimmedMETsNewJEC = cms.EDProducer('CorrectedPATMETProducer',
+        src = cms.InputTag('uncorrectedPatMet'),
+        srcCorrections = cms.VInputTag(cms.InputTag('Type1CorrForNewJEC', 'type1'))
+        )
+
+#----- Configure the POET MET analyzer -----#
+process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJEC"),rawmets=cms.InputTag("uncorrectedPatMet"))
 
 process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
                               processName = cms.string("HLT"),
@@ -223,40 +199,35 @@ process.mypackedcandidate = cms.EDAnalyzer('PackedCandidateAnalyzer',
                                            packed=cms.InputTag("packedPFCandidates")
                                            )
 
-#---- Example of a CMSSW filter that can be used to cut on a given set of triggers
-#---- This filter, however, does know about prescales
-#---- A previous trigger study would be needed to cut hard on a given trigger or set of triggers
-#---- The filter can be added to the path below if needed but is not applied by default
-#process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-#process.hltHighLevel.HLTPaths = cms.vstring('HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v*')
-
-
-
-
 #---- Example of a very basic home-made filter to select only events of interest
-#---- The filter can be added to the running path below if needed but is not applied by default
-#process.mutaufilter = cms.EDFilter('SimpleMuTauFilter',
-#                                  InputCollectionMuons = cms.InputTag("muons"),
-#                                   InputCollectionTaus = cms.InputTag("hpsPFTauProducer"),
-#                                   mu_minpt = cms.double(17),
+#---- The filter can be added to the running path below if needed 
+#---- by uncommenting the lines below, but it is not applied by default
+#process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
+#                                   electrons = cms.InputTag("slimmedElectrons"),
+#                                   muons = cms.InputTag("slimmedMuons"),
+#                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"),
+#                                   mu_minpt = cms.double(26),
 #                                   mu_etacut = cms.double(2.1),
-#                                   tau_minpt = cms.double(20),
-#                                   tau_etacut = cms.double(2.3)
+#                                   ele_minpt = cms.double(26),
+#                                   ele_etacut = cms.double(2.1)
 #                                   )
 
 
 
+#----- RUN THE JOB! -----#
+process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
-#---- Configure the output ROOT filename
-process.TFileService = cms.Service(
-	"TFileService", fileName=cms.string("myoutput.root"))
-
-#---- Finally run everything! 
-#---- Separation by * implies that processing order is important.
-#---- separation by + implies that any order will work
-#---- One can put in or take out the needed processes
-if doPat:
-	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers+process.mypackedcandidate)
-else: 
-	if isData: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers+process.mypackedcandidate)
-	else: process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers+process.mypackedcandidate)
+if isData:
+	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
+                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
+                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets+
+                     process.mypackedcandidate
+                     )
+else:
+	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
+                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
+                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets+
+                     process.mypackedcandidate
+                     )
