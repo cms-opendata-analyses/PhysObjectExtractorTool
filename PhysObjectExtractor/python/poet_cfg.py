@@ -186,6 +186,18 @@ process.slimmedMETsNewJEC = cms.EDProducer('CorrectedPATMETProducer',
 #----- Configure the POET MET analyzer -----#
 process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJEC"),rawmets=cms.InputTag("uncorrectedPatMet"))
 
+process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
+                              processName = cms.string("HLT"),
+                              #---- These are example triggers for 2012
+                              #---- Wildcards * and ? are accepted (with usual meanings)
+                               #---- If left empty, all triggers will run              
+                              triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu12_v*", "HLT_Photon20_CaloIdVL_v*", "HLT_Ele22_CaloIdL_CaloIsoVL_v*", "HLT_Jet370_NoJetID_v*"), 
+                              triggerResults = cms.InputTag("TriggerResults","","HLT"),
+                              triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")                             
+                              )
+process.mypackedcandidate = cms.EDAnalyzer('PackedCandidateAnalyzer',
+                                           packed=cms.InputTag("packedPFCandidates")
+                                           )
 
 #---- Example of a very basic home-made filter to select only events of interest
 #---- The filter can be added to the running path below if needed 
@@ -209,12 +221,13 @@ if isData:
 	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
                      process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
-                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets+
+                     process.mypackedcandidate
                      )
 else:
 	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
                      process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
                      process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
-                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets+
+                     process.mypackedcandidate
                      )
-
