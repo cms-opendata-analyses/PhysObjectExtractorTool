@@ -1,0 +1,247 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: poet-process-
+spec:
+  entrypoint: cms-od-example
+  volumes:
+  - name: task-pv-storage
+    persistentVolumeClaim:
+      claimName: nfs-<NUMBER>
+
+  arguments:
+    parameters:
+    - name: startFile                                  
+      value: 1
+    - name: nFiles                               
+      value: 1
+    - name: nEvents                               
+      value: 1000
+    - name: recid
+      value: 24119
+    - name: nJobs
+      value: 4
+    
+
+  templates:
+  - name: cms-od-example
+    inputs:
+      parameters:
+      - name: startFile
+      - name: nFiles
+      - name: nEvents
+      - name: recid
+      - name: nJobs
+    dag:
+      tasks:
+      - name: prepare
+        template: prepare-template
+
+      - name: get-metadata
+        dependencies: [prepare]
+        template: get-metadata-template
+        arguments:
+         parameters:
+          - name: recid
+            value: "{{inputs.parameters.recid}}"
+          - name: dataType
+            value: "{{outputs.parameters.dataType}}"
+
+      - name: joblist
+        dependencies: [get-metadata]
+        template: joblist-template
+        arguments:
+         parameters:
+          - name: startFile
+            value: "{{inputs.parameters.startFile}}"
+          - name: nJobs
+            value: "{{inputs.parameters.nJobs}}"
+          - name: nFiles
+            value: "{{inputs.parameters.nFiles}}"
+          - name: totFiles
+            value: "{{tasks.get-metadata.outputs.result}}"
+
+      - name: runpoet
+        dependencies: [joblist]
+        template: runpoet-template
+        arguments:
+         parameters:
+          - name: nEvents
+            value: "{{inputs.parameters.nEvents}}"
+          - name: recid
+            value: "{{inputs.parameters.recid}}"
+          - name: dataType
+            value: "{{tasks.get-metadata.outputs.parameters.dataType}}"
+          - name: it
+            value: "{{item.it}}"
+          - name: firstFile
+            value: "{{item.firstfile}}"
+          - name: lastFile
+            value: "{{item.lastfile}}" 
+        withParam: "{{tasks.joblist.outputs.result}}"
+
+      - name: merge-step
+        dependencies: [runpoet]
+        template: merge-step-template
+          
+      - name: analysis-step
+        dependencies: [merge-step]
+        template: analysis-step-template
+        
+  # prepare the data directories needed in the workflow steps      
+  - name: prepare-template
+    script:
+      image: ubuntu:latest
+      command: [bash]
+      source: |
+        mkdir -p /mnt/vol/code
+        mkdir -p /mnt/vol/scatter
+        chmod -R 777 /mnt/vol
+      volumeMounts:
+      - name: task-pv-storage
+        mountPath: /mnt/vol
+
+  # Get the metadata of the dataset
+  # Accidentally showing three different ways of passing parameters/files btw the steps
+  # - the full list of files: write it to a file on the common disk mounted on /mnt/vol
+  # - the type of data: write it to the step's ouput parameter "{{tasks.get-metadata.outputs.parameters.dataType}}#   (through a temporary file /tmp/type.txt)
+  # - the total number of files which is the stdout output of this step and goes to {{tasks.get-metadata.outputs.result}}
+  # 
+  - name: get-metadata-template
+    inputs:
+      parameters:
+      - name: recid
+    outputs:
+      parameters:
+      - name: dataType
+        valueFrom:
+          default: "Collision"
+          path: /tmp/type.txt
+    script:
+      image: cernopendata/cernopendata-client
+      command: [bash]
+      source: |
+        cernopendata-client get-file-locations --recid "{{inputs.parameters.recid}}" --protocol xrootd > /mnt/vol/files_{{inputs.parameters.recid}}.txt;
+        cernopendata-client get-metadata --recid "{{inputs.parameters.recid}}"  --output-value type.secondary > /tmp/type.txt 
+        cernopendata-client get-metadata --recid "{{inputs.parameters.recid}}"  --output-value distribution.number_files
+
+      volumeMounts:
+      - name: task-pv-storage
+        mountPath: /mnt/vol
+
+  # Generate the iterator list for the scatter step
+  # Check that it does not go over the actual number of files
+  # Write out the list with first and last filenumbers to be taken as the input of the following steps
+  # (see {{tasks.joblist.outputs.result}} as "withParam" in runpoet-template)
+  - name: joblist-template
+    inputs:
+      parameters:
+      - name: nJobs
+      - name: nFiles
+      - name: startFile
+      - name: totFiles
+    script:
+      image: python:alpine3.6
+      command: [python]
+      source: |
+        import json
+        import sys
+        start = {{inputs.parameters.startFile}}
+        nJobs = {{inputs.parameters.nJobs}}
+        nFiles = {{inputs.parameters.nFiles}}
+        totFiles = {{inputs.parameters.totFiles}}
+        itlist = [i for i in range(1, nJobs+1)]
+        dictlist = []
+        for i in itlist:
+          first = start+(i-1)*nFiles
+          if first <= totFiles:
+            last = first + nFiles - 1
+            if last > totFiles: last = totFiles 
+            adict = { "it": i, 
+                      "firstfile": first, 
+                      "lastfile":  last }
+            dictlist.append(adict)
+        json.dump(dictlist, sys.stdout)
+        
+        
+  # Run the CMSSW step
+  # This iterates over the list that it gets as "withParam" 
+  # nEvents is number of events in each job, useful (and meaningful only) for small-scale testing
+  - name: runpoet-template
+    inputs:
+      parameters:
+      - name: nEvents
+      - name: it
+      - name: firstFile
+      - name: lastFile
+      - name: recid
+      - name: dataType
+    script:
+      image: cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493
+      command: [bash]
+      source: | 
+        
+        sudo chown $USER /mnt/vol
+        source /opt/cms/entrypoint.sh
+        git clone -b odws2013-cloud https://github.com/katilp/PhysObjectExtractorTool.git
+        cd PhysObjectExtractorTool/PhysObjectExtractor
+        scram b
+
+        echo it "{{inputs.parameters.it}}"
+        nEvents="{{inputs.parameters.nEvents}}"
+        dataType="{{inputs.parameters.dataType}}"
+        echo Datatype $dataType
+        isData=False
+        if  echo $dataType | grep Collision ; then isData=True; fi
+
+        firstFile="{{inputs.parameters.firstFile}}"
+        lastFile="{{inputs.parameters.lastFile}}"
+        echo firstFile $firstFile
+        echo lastFile $lastFile
+
+        cmsRun python/poet_cfg_cloud.py $isData $firstFile $lastFile '"/mnt/vol/files_{{inputs.parameters.recid}}.txt"' $nEvents
+        
+        mv myoutput.root /mnt/vol/scatter/poetoutput$iterator.root
+
+      volumeMounts:
+      - name: task-pv-storage
+        mountPath: /mnt/vol
+      resources:
+        requests:
+          memory: 1.7Gi
+          cpu: 750m
+  
+  # merge the files from the scatter steps to a single file
+  - name: merge-step-template
+    script:
+      image: rootproject/root:latest
+      command: [bash]
+      source: | 
+        rm -f /mnt/vol/poetoutput.root
+        hadd -f /mnt/vol/poetoutput.root /mnt/vol/scatter/poetoutput*.root
+        rm -rf /mnt/vol/scatter/ # this contains the separated output files, now merged
+        
+      volumeMounts:
+      - name: task-pv-storage
+        mountPath: /mnt/vol
+
+
+  # prepare some histograms to check the merged output file
+  - name: analysis-step-template
+    script:
+      image: rootproject/root:latest
+      command: [bash]
+      source: | 
+        
+        cp /mnt/vol/poetoutput.root .
+        curl -LO https://raw.githubusercontent.com/katilp/PhysObjectExtractorTool/odws2013-cloud/PhysObjectExtractor/cloud/analysis.C
+
+        root -l -b -q analysis.C
+        mv analysis_output.root /mnt/vol/analysis_output.root
+        mv *.png /mnt/vol
+        # rm -rf /mnt/vol/code
+        
+      volumeMounts:
+      - name: task-pv-storage
+        mountPath: /mnt/vol
+
