@@ -183,7 +183,7 @@ spec:
         
         sudo chown $USER /mnt/vol
         source /opt/cms/entrypoint.sh
-        git clone -b odws2013-cloud https://github.com/katilp/PhysObjectExtractorTool.git
+        git clone -b odws2023 https://github.com/cms-opendata-analyses/PhysObjectExtractorTool.git
         cd PhysObjectExtractorTool/PhysObjectExtractor
         scram b
 
@@ -234,7 +234,7 @@ spec:
       source: | 
         
         cp /mnt/vol/poetoutput.root .
-        curl -LO https://raw.githubusercontent.com/katilp/PhysObjectExtractorTool/odws2013-cloud/PhysObjectExtractor/cloud/analysis.C
+        curl -LO https://raw.githubusercontent.com/cms-opendata-analyses/PhysObjectExtractorTool/odws2023/PhysObjectExtractor/cloud/analysis.C
 
         root -l -b -q analysis.C
         mv analysis_output.root /mnt/vol/analysis_output.root
