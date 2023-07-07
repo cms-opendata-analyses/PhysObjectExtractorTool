@@ -94,7 +94,6 @@ spec:
       image: ubuntu:latest
       command: [bash]
       source: |
-        mkdir -p /mnt/vol/code
         mkdir -p /mnt/vol/scatter
         chmod -R 777 /mnt/vol
       volumeMounts:
@@ -115,7 +114,7 @@ spec:
       parameters:
       - name: dataType
         valueFrom:
-          default: "Collision"
+          default: "default"
           path: /tmp/type.txt
     script:
       image: cernopendata/cernopendata-client
@@ -206,11 +205,7 @@ spec:
       volumeMounts:
       - name: task-pv-storage
         mountPath: /mnt/vol
-      resources:
-        requests:
-          memory: 1.7Gi
-          cpu: 750m
-  
+ 
   # merge the files from the scatter steps to a single file
   - name: merge-step-template
     script:
@@ -239,7 +234,6 @@ spec:
         root -l -b -q analysis.C
         mv analysis_output.root /mnt/vol/analysis_output.root
         mv *.png /mnt/vol
-        # rm -rf /mnt/vol/code
         
       volumeMounts:
       - name: task-pv-storage
