@@ -13,10 +13,8 @@ spec:
     parameters:
     - name: startFile                                  
       value: 1
-    - name: nFiles                               
-      value: 1
     - name: nEvents                               
-      value: 1000
+      value: 10000
     - name: recid
       value: 24119
     - name: nJobs
@@ -28,7 +26,6 @@ spec:
     inputs:
       parameters:
       - name: startFile
-      - name: nFiles
       - name: nEvents
       - name: recid
       - name: nJobs
@@ -56,8 +53,8 @@ spec:
             value: "{{inputs.parameters.startFile}}"
           - name: nJobs
             value: "{{inputs.parameters.nJobs}}"
-          - name: nFiles
-            value: "{{inputs.parameters.nFiles}}"
+          - name: nEvents
+            value: "{{inputs.parameters.nEvents}}"
           - name: totFiles
             value: "{{tasks.get-metadata.outputs.result}}"
 
@@ -66,8 +63,6 @@ spec:
         template: runpoet-template
         arguments:
          parameters:
-          - name: nEvents
-            value: "{{inputs.parameters.nEvents}}"
           - name: recid
             value: "{{inputs.parameters.recid}}"
           - name: dataType
@@ -78,6 +73,8 @@ spec:
             value: "{{item.firstfile}}"
           - name: lastFile
             value: "{{item.lastfile}}" 
+          - name: eventsInJob
+            value: "{{item.eventsinjob}}"
         withParam: "{{tasks.joblist.outputs.result}}"
 
       - name: merge-step
@@ -129,14 +126,14 @@ spec:
         mountPath: /mnt/vol
 
   # Generate the iterator list for the scatter step
-  # Check that it does not go over the actual number of files
-  # Write out the list with first and last filenumbers to be taken as the input of the following steps
+  # Compute the number of events and files for each step
+  # Write out the list with first and last filenumbers and the numebr of events to be taken as the input of the following steps
   # (see {{tasks.joblist.outputs.result}} as "withParam" in runpoet-template)
   - name: joblist-template
     inputs:
       parameters:
       - name: nJobs
-      - name: nFiles
+      - name: nEvents
       - name: startFile
       - name: totFiles
     script:
@@ -147,34 +144,41 @@ spec:
         import sys
         start = {{inputs.parameters.startFile}}
         nJobs = {{inputs.parameters.nJobs}}
-        nFiles = {{inputs.parameters.nFiles}}
+        nEvents = {{inputs.parameters.nEvents}}
         totFiles = {{inputs.parameters.totFiles}}
+        filesInJob = int(totFiles/nJobs)
+        modFiles = totFiles % nJobs
+        eventsInJob = int(nEvents/nJobs)
+        modEvents = nEvents % nJobs
         itlist = [i for i in range(1, nJobs+1)]
         dictlist = []
         for i in itlist:
-          first = start+(i-1)*nFiles
-          if first <= totFiles:
-            last = first + nFiles - 1
-            if last > totFiles: last = totFiles 
+          first = start+(i-1)*filesInJob
+          last = first + filesInJob - 1
+          adict = { "it": i, 
+                    "firstfile": first, 
+                    "lastfile":  last,
+                    "eventsinjob": eventsInJob}
+          if i == nJobs:            
             adict = { "it": i, 
                       "firstfile": first, 
-                      "lastfile":  last }
-            dictlist.append(adict)
+                      "lastfile":  last + modFiles,
+                      "eventsinjob": eventsInJob + modEvents}
+          dictlist.append(adict)
         json.dump(dictlist, sys.stdout)
         
         
   # Run the CMSSW step
   # This iterates over the list that it gets as "withParam" 
-  # nEvents is number of events in each job, useful (and meaningful only) for small-scale testing
   - name: runpoet-template
     inputs:
       parameters:
-      - name: nEvents
       - name: it
       - name: firstFile
       - name: lastFile
       - name: recid
       - name: dataType
+      - name: eventsInJob
     script:
       image: cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493
       command: [bash]
@@ -187,7 +191,7 @@ spec:
         scram b
 
         echo it "{{inputs.parameters.it}}"
-        nEvents="{{inputs.parameters.nEvents}}"
+        eventsInJob="{{inputs.parameters.eventsInJob}}"
         dataType="{{inputs.parameters.dataType}}"
         echo Datatype $dataType
         isData=False
@@ -198,7 +202,7 @@ spec:
         echo firstFile $firstFile
         echo lastFile $lastFile
 
-        cmsRun python/poet_cfg_cloud.py $isData $firstFile $lastFile '"/mnt/vol/files_{{inputs.parameters.recid}}.txt"' $nEvents
+        cmsRun python/poet_cfg_cloud.py $isData $firstFile $lastFile '"/mnt/vol/files_{{inputs.parameters.recid}}.txt"' $eventsInJob
         
         mv myoutput.root /mnt/vol/scatter/poetoutput$iterator.root
 
