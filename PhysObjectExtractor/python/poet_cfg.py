@@ -84,9 +84,8 @@ process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimm
 #---- Module to store trigger objects (functional but not fully developed yet) -------#
 #process.mytrigobjs = cms.EDAnalyzer('TriggObjectAnalyzer', objects = cms.InputTag("selectedPatTrigger"))
 
-#---- Example on how to add trigger information
-#---- To include it, uncomment the lines below and include the
-#---- module in the final path
+#---- Example on how to add trigger information using conditions database providers
+#---- To include it, uncomment the lines below and include the module in the final path
 #process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #                              processName = cms.string("HLT"),
 #                              #---- These are example of OR of triggers for 2015
@@ -96,6 +95,20 @@ process.myphotons = cms.EDAnalyzer('PhotonAnalyzer', photons=cms.InputTag("slimm
 #                              triggerResults = cms.InputTag("TriggerResults","","HLT")
 #                              )
 
+#------------Example of simple trigger module, using conditions DB providers, with paths hardcoded-------------------#
+process.mysimpletrig = cms.EDAnalyzer('SimpleTriggerAnalyzer',
+                              processName = cms.string("HLT"),
+                              triggerResults = cms.InputTag("TriggerResults","","HLT")
+                              )
+
+#----------- Turn on a trigger filter by adding this module to the the final path below -------#
+process.hltHighLevel = cms.EDFilter("HLTHighLevel",
+    TriggerResultsTag = cms.InputTag("TriggerResults","","HLT"),
+    HLTPaths = cms.vstring('HLT_Ele22_eta2p1_WPLoose_Gsf_v*','HLT_IsoMu20_v*','HLT_IsoTkMu20_v*'),           # provide list of HLT paths (or patterns) you want
+    eventSetupPathsKey = cms.string(''), # not empty => use read paths from AlCaRecoTriggerBitsRcd via this key
+    andOr = cms.bool(True),             # how to deal with multiple triggers: True (OR) accept if ANY is true, False (AND) accept if ALL are true
+    throw = cms.bool(True)    # throw exception on unknown path names
+)
 
 process.mypvertex = cms.EDAnalyzer('VertexAnalyzer',
                                    vertices=cms.InputTag("offlineSlimmedPrimaryVertices"), 
@@ -186,15 +199,6 @@ process.slimmedMETsNewJEC = cms.EDProducer('CorrectedPATMETProducer',
 #----- Configure the POET MET analyzer -----#
 process.mymets = cms.EDAnalyzer('MetAnalyzer',mets=cms.InputTag("slimmedMETsNewJEC"),rawmets=cms.InputTag("uncorrectedPatMet"))
 
-process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
-                              processName = cms.string("HLT"),
-                              #---- These are example triggers for 2012
-                              #---- Wildcards * and ? are accepted (with usual meanings)
-                               #---- If left empty, all triggers will run              
-                              triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu12_v*", "HLT_Photon20_CaloIdVL_v*", "HLT_Ele22_CaloIdL_CaloIsoVL_v*", "HLT_Jet370_NoJetID_v*"), 
-                              triggerResults = cms.InputTag("TriggerResults","","HLT"),
-                              triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")                             
-                              )
 process.mypackedcandidate = cms.EDAnalyzer('PackedCandidateAnalyzer',
                                            packed=cms.InputTag("packedPFCandidates")
                                            )
@@ -202,15 +206,15 @@ process.mypackedcandidate = cms.EDAnalyzer('PackedCandidateAnalyzer',
 #---- Example of a very basic home-made filter to select only events of interest
 #---- The filter can be added to the running path below if needed 
 #---- by uncommenting the lines below, but it is not applied by default
-#process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
-#                                   electrons = cms.InputTag("slimmedElectrons"),
-#                                   muons = cms.InputTag("slimmedMuons"),
-#                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"),
-#                                   mu_minpt = cms.double(26),
-#                                   mu_etacut = cms.double(2.1),
-#                                   ele_minpt = cms.double(26),
-#                                   ele_etacut = cms.double(2.1)
-#                                   )
+process.elemufilter = cms.EDFilter('SimpleEleMuFilter',
+                                   electrons = cms.InputTag("slimmedElectrons"),
+                                   muons = cms.InputTag("slimmedMuons"),
+                                   vertices=cms.InputTag("offlineSlimmedPrimaryVertices"),
+                                   mu_minpt = cms.double(26),
+                                   mu_etacut = cms.double(2.1),
+                                   ele_minpt = cms.double(26),
+                                   ele_etacut = cms.double(2.1)
+                                   )
 
 
 
@@ -218,16 +222,18 @@ process.mypackedcandidate = cms.EDAnalyzer('PackedCandidateAnalyzer',
 process.TFileService = cms.Service("TFileService", fileName=cms.string("myoutput.root"))
 
 if isData:
-	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
-                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
-                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
-                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
-                     +process.mypackedcandidate
-                     )
+	process.p = cms.Path(process.hltHighLevel+process.elemufilter+process.mysimpletrig+
+			     process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+
+			     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+			     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
+			     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+			     #+process.mypackedcandidate
+	)
 else:
-	process.p = cms.Path(process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
-                     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
-                     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
-                     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
-                     +process.mypackedcandidate
-                     )
+	process.p = cms.Path(process.hltHighLevel+process.elemufilter+process.mysimpletrig+
+			     process.myelectrons+process.mymuons+process.mytaus+process.myphotons+process.mypvertex+process.mygenparticle+
+			     process.looseAK4Jets+process.patJetCorrFactorsReapplyJEC+process.slimmedJetsNewJEC+process.myjets+
+			     process.looseAK8Jets+process.patJetCorrFactorsReapplyJECAK8+process.slimmedJetsAK8NewJEC+process.myfatjets+
+			     process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
+			     #+process.mypackedcandidate
+			    )
