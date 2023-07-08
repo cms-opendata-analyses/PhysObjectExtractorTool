@@ -131,7 +131,7 @@ PackedCandidateAnalyzer::PackedCandidateAnalyzer(const edm::ParameterSet& iConfi
    mtree->Branch("packed_PuppiWeight",&packed_PuppiWeight);
    mtree->GetBranch("packed_PuppiWeight")->SetTitle("Puppi Weight");
    mtree->Branch("packed_PuppiWeightNoLep",&packed_PuppiWeightNoLep);
-   mtree->GetBranch("packed_PuppiWeightNoLep")->SetTitle("Puppi MET");
+   mtree->GetBranch("packed_PuppiWeightNoLep")->SetTitle("Puppi Weight, no leptons");
    mtree->Branch("packed_hcalFraction",&packed_hcalFraction);
    mtree->GetBranch("packed_hcalFraction")->SetTitle("Energy Measured from Hadronic Calorimeter");
    mtree->Branch("packed_pdgId",&packed_pdgId);
