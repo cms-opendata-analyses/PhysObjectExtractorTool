@@ -180,7 +180,7 @@ spec:
       - name: dataType
       - name: eventsInJob
     script:
-      image: cmsopendata/cmssw_7_6_7-slc6_amd64_gcc493
+      image: gitlab-registry.cern.ch/cms-cloud/cmssw-docker-opendata/cmssw_7_6_7-slc6_amd64_gcc493
       command: [bash]
       source: | 
         
@@ -209,6 +209,11 @@ spec:
       volumeMounts:
       - name: task-pv-storage
         mountPath: /mnt/vol
+
+      resources:
+        requests:
+          cpu: 750m
+
  
   # merge the files from the scatter steps to a single file
   - name: merge-step-template
