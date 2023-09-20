@@ -190,7 +190,7 @@ spec:
         cd PhysObjectExtractorTool/PhysObjectExtractor
         scram b
 
-        echo it "{{inputs.parameters.it}}"
+        it="{{inputs.parameters.it}}"
         eventsInJob="{{inputs.parameters.eventsInJob}}"
         dataType="{{inputs.parameters.dataType}}"
         echo Datatype $dataType
