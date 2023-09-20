@@ -204,7 +204,7 @@ spec:
 
         cmsRun python/poet_cfg_cloud.py $isData $firstFile $lastFile '"/mnt/vol/files_{{inputs.parameters.recid}}.txt"' $eventsInJob
         
-        mv myoutput.root /mnt/vol/scatter/poetoutput$iterator.root
+        mv myoutput.root /mnt/vol/scatter/poetoutput$it.root
 
       volumeMounts:
       - name: task-pv-storage
