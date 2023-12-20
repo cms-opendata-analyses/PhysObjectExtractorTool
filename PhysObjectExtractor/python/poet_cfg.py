@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
+from FWCore.ParameterSet.VarParsing import VarParsing
 import sys
 
 #---- sys.argv takes the parameters given as input cmsRun PhysObjectExtractor/python/poet_cfg.py <isData (default=False)>
@@ -9,10 +10,13 @@ import sys
 #---- NB the first two parameters are always "cmsRun" and the config file name
 #---- Work with data (if False, assumed MC simulations)
 #---- This needs to be in agreement with the input files/datasets below.
+options = VarParsing ('analysis')
+isData = False
 if len(sys.argv) > 2:
     isData = eval(sys.argv[2])
-else:
-    isData = False
+    sys.argv.pop( 2 ) 	
+
+options.parseArguments()
 isMC = True
 if isData: isMC = False
 
@@ -231,3 +235,13 @@ else:
                      process.uncorrectedMet+process.uncorrectedPatMet+process.Type1CorrForNewJEC+process.slimmedMETsNewJEC+process.mymets
 #                    +process.mypackedcandidate
                      )
+process.maxEvents.input = options.maxEvents
+process.TFileService.fileName = options.outputFile
+if len(options.inputFiles) > 0:
+    process.source.fileNames=options.inputFiles
+
+print "Processing for maxEvents =  ",process.maxEvents
+print "Processing input files "
+for fl in process.source.fileNames:
+    print "  > ",fl
+print "Output filename : ",process.TFileService.fileName
