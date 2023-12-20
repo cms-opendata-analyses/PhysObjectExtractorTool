@@ -13,9 +13,12 @@ import sys
 options = VarParsing ('analysis')
 isData = False
 if len(sys.argv) > 2:
-    isData = eval(sys.argv[2])
-    sys.argv.pop( 2 ) 	
-
+    try:
+        isData = eval(sys.argv[2])
+        sys.argv.pop( 2 )
+        print "isData is set to ",isData
+    except:
+        pass
 options.parseArguments()
 isMC = True
 if isData: isMC = False
@@ -240,7 +243,7 @@ process.TFileService.fileName = options.outputFile
 if len(options.inputFiles) > 0:
     process.source.fileNames=options.inputFiles
 
-print "Processing for maxEvents =  ",process.maxEvents
+print "Processing for maxEvents =  ",process.maxEvents.input
 print "Processing input files "
 for fl in process.source.fileNames:
     print "  > ",fl
